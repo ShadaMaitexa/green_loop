@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "appTitle": "GreenLoop",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "welcomeMessage": "Welcome to GreenLoop",
+  "@welcomeMessage": {
+    "description": "A greeting displayed on the home or login screen."
+  },
+  "loginButton": "Login",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "pickupStatusPending": "Pending",
+  "pickupStatusCompleted": "Completed",
+  "pickupStatusCancelled": "Cancelled",
+  "pickupStatusAssigned": "Assigned",
+  "pickupStatusInProgress": "In Progress"
+}

@@ -1,0 +1,13 @@
+{
+  "@@locale": "ml",
+  "appTitle": "ഗ്രീൻലൂപ്പ്",
+  "welcomeMessage": "ഗ്രീൻലൂപ്പിലേക്ക് സ്വാഗതം",
+  "loginButton": "ലോഗിൻ ചെയ്യുക",
+  "emailLabel": "ഇമെയിൽ",
+  "passwordLabel": "പാസ്സ്‌വേർഡ്",
+  "pickupStatusPending": "തീരുമാനമാകാത്ത",
+  "pickupStatusCompleted": "പൂർത്തിയായി",
+  "pickupStatusCancelled": "റദ്ദാക്കി",
+  "pickupStatusAssigned": "ചുമതലപ്പെടുത്തി",
+  "pickupStatusInProgress": "പുരോഗമിക്കുന്നു"
+}

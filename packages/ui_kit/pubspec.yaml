@@ -1,0 +1,16 @@
+name: ui_kit
+description: GreenLoop Design System (GreenLeaf Theme) and Reusable Components.
+version: 1.0.0
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

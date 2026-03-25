@@ -1,0 +1,23 @@
+name: localization
+description: GreenLoop localization package using flutter_localizations and ARB.
+version: 1.0.0
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  provider: ^6.1.2
+
+flutter:
+  generate: true
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

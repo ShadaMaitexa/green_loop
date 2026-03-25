@@ -1,0 +1,47 @@
+name: green_loop_workspace
+publish_to: 'none'
+
+environment:
+  sdk: ^3.9.2
+
+workspace:
+  - apps/resident_app
+  - apps/hks_app
+  - apps/admin_dashboard
+  - apps/recycler_app
+  - apps/widget_catalog
+  - packages/core
+  - packages/ui_kit
+  - packages/network
+  - packages/auth
+  - packages/utils
+  - packages/geo
+  - packages/notifications
+  - packages/data_models
+  - packages/localization
+
+dev_dependencies:
+  melos: ^7.5.0
+
+melos:
+  name: green_loop
+  scripts:
+    test:
+      exec: flutter test
+      description: Run all tests in all packages.
+      packageFilters:
+        dirExists: test
+
+    analyze:
+      exec: flutter analyze .
+      description: Run analyzer in all packages.
+
+    format:
+      exec: dart format .
+      description: Format all files in all packages.
+
+    build_all:
+      exec: flutter build
+      description: Build all applications.
+      packageFilters:
+        dirExists: android
