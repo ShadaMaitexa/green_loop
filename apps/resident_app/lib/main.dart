@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:auth/auth.dart';
 import 'package:core/core.dart';
+import 'package:auth/auth.dart';
 import 'package:network/network.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'features/auth/login_screen.dart';
 import 'features/profile_setup/profile_setup_screen.dart';
 import 'features/pickups/booking_screen.dart';
 import 'features/complaints/complaint_submission_screen.dart';
+import 'features/schedule/schedule_screen.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -15,6 +16,7 @@ void main() {
   final authRepository = AuthRepository(apiClient: apiClient);
   final pickupRepository = PickupRepository(apiClient: apiClient);
   final complaintRepository = ComplaintRepository(apiClient: apiClient);
+  final scheduleRepository = ScheduleRepository(apiClient: apiClient);
 
   runApp(
     MultiProvider(
@@ -24,6 +26,7 @@ void main() {
         ),
         Provider<PickupRepository>.value(value: pickupRepository),
         Provider<ComplaintRepository>.value(value: complaintRepository),
+        Provider<ScheduleRepository>.value(value: scheduleRepository),
       ],
       child: const ResidentApp(),
     ),
@@ -118,6 +121,15 @@ class HomeScreenPlaceholder extends StatelessWidget {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ComplaintSubmissionScreen()),
+                ),
+              ),
+              const SizedBox(height: GLSpacing.md),
+              GLButton(
+                text: 'Weekly Schedule',
+                variant: GLButtonVariant.outline,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ScheduleScreen()),
                 ),
               ),
             ],
