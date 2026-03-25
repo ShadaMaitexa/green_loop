@@ -5,12 +5,14 @@ class AuthUser {
   final String email;
   final String username;
   final String role;
+  final bool isProfileCompleted;
 
   const AuthUser({
     required this.id,
     required this.email,
     required this.username,
     required this.role,
+    this.isProfileCompleted = false,
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class AuthUser {
       email: json['email']?.toString() ?? '',
       username: json['username']?.toString() ?? json['email']?.toString() ?? '',
       role: json['role']?.toString() ?? 'resident',
+      isProfileCompleted: json['is_profile_completed'] as bool? ?? false,
     );
   }
 
@@ -28,6 +31,7 @@ class AuthUser {
       'email': email,
       'username': username,
       'role': role,
+      'is_profile_completed': isProfileCompleted,
     };
   }
 

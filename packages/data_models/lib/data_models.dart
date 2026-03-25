@@ -1,1 +1,6 @@
-void main() {}
+library data_models;
+
+export 'src/ward.dart';
+export 'src/resident_profile.dart';
+export 'src/pickup.dart';
+export 'src/complaint.dart';

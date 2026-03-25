@@ -26,7 +26,7 @@ class RefreshTokenInterceptor extends Interceptor {
   RefreshTokenInterceptor({
     required Dio dio,
     required TokenStorage tokenStorage,
-    String refreshPath = '/api/auth/token/refresh/',
+    String refreshPath = '/api/v1/auth/token/refresh/',
   })  : _dio = dio,
         _tokenStorage = tokenStorage,
         _refreshPath = refreshPath;

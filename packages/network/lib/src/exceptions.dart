@@ -61,6 +61,24 @@ class NotFoundException extends ApiException {
   });
 }
 
+/// 409 — Resource conflict (e.g. slot already booked).
+class ConflictException extends ApiException {
+  const ConflictException({
+    super.message = 'The requested slot is no longer available.',
+    super.statusCode = 409,
+    super.data,
+  });
+}
+
+/// 429 — Rate limit exceeded.
+class TooManyRequestsException extends ApiException {
+  const TooManyRequestsException({
+    super.message = 'Too many requests. Please try again later.',
+    super.statusCode = 429,
+    super.data,
+  });
+}
+
 /// 422 / 400 — Validation error from DRF.
 class ValidationException extends ApiException {
   /// Field-level errors as returned by DRF, e.g. {"email": ["Enter a valid email."]}.

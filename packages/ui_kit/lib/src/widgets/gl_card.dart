@@ -11,6 +11,7 @@ class GLCard extends StatelessWidget {
   final Widget? footer;
   final GLCardVariant variant;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
   final VoidCallback? onTap;
 
   const GLCard({
@@ -20,6 +21,7 @@ class GLCard extends StatelessWidget {
     this.footer,
     this.variant = GLCardVariant.elevated,
     this.padding = const EdgeInsets.all(GLSpacing.lg),
+    this.margin = EdgeInsets.zero,
     this.onTap,
   });
 
@@ -70,7 +72,7 @@ class GLCard extends StatelessWidget {
       elevation: elevation,
       shape: shape,
       clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
+      margin: margin,
       child: onTap != null
           ? InkWell(
               onTap: onTap,

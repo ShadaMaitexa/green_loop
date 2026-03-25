@@ -10,6 +10,17 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   core: ^1.0.0
+  auth: ^1.0.0
+  network: ^1.0.0
+  localization: ^1.0.0
+  ui_kit: ^1.0.0
+  geo: ^1.0.0
+  data_models: ^1.0.0
+  geolocator: ^13.0.2
+  image_picker: ^1.1.2
+  provider: ^6.1.2
+  qr_flutter: ^4.1.0
+  flutter_secure_storage: ^9.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

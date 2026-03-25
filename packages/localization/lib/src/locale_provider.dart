@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 /// Manages language switching without requiring an app restart.
 /// It uses a ChangeNotifier so apps can wrap their MaterialApp logic in a Consumer
 /// mapping the locale over natively.

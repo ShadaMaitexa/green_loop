@@ -272,12 +272,24 @@ class ApiClient {
           data: data,
         );
 
+      case 409:
+        return ConflictException(
+          message: _extractDetail(data) ?? 'Conflict occurred.',
+          data: data,
+        );
+
       case 422:
         return ValidationException(
           message: _extractDetail(data) ?? 'Unprocessable entity.',
           statusCode: code,
           data: data,
           errors: data is Map<String, dynamic> ? data : null,
+        );
+
+      case 429:
+        return TooManyRequestsException(
+          message: _extractDetail(data) ?? 'Too many requests. Please try again later.',
+          data: data,
         );
 
       default:

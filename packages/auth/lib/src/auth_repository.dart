@@ -1,27 +1,66 @@
 import 'package:network/network.dart';
 import 'auth_user.dart';
 import 'auth_exceptions.dart';
+import 'package:data_models/data_models.dart';
 
 /// The central repository managing authentication requests and token persistence.
 class AuthRepository {
   final ApiClient _apiClient;
 
-  // The login endpoint based on usual Django+SimpleJWT+custom logic structure
-  static const String _loginPath = '/api/auth/login/';
-  // Assuming a reliable profile/me endpoint to fetch current user data
-  static const String _profilePath = '/api/auth/profile/';
+  static const String _otpSendPath = '/api/v1/auth/otp/send/';
+  static const String _otpVerifyPath = '/api/v1/auth/otp/verify/';
+  static const String _adminLoginPath = '/api/v1/auth/admin/login/';
+  static const String _logoutPath = '/api/v1/auth/logout/';
+  static const String _profilePath = '/api/v1/auth/profile/';
+  static const String _wardsPath = '/api/v1/admin/wards/';
+  static const String _completeProfilePath = '/api/v1/auth/profile/complete/';
 
   AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Authenticate with email/password and save JWT tokens.
-  /// Uses [ApiClient.postPublic] to skip attaching an existing token.
-  Future<AuthUser> loginWithEmail(String email, String password) async {
+  /// Authenticate admin with email/password to trigger OTP flow.
+  Future<void> loginAdmin(String email, String password) async {
     try {
-      final response = await _apiClient.postPublic(
-        _loginPath,
+      await _apiClient.postPublic(
+        _adminLoginPath,
         data: {
           'email': email,
           'password': password,
+        },
+      );
+    } on UnauthorizedException catch (_) {
+      throw const InvalidCredentialsException();
+    } on ApiException catch (e) {
+      if (e.message.toLowerCase().contains('disabled')) {
+        throw const AccountDisabledException();
+      }
+      throw AuthException(e.message);
+    } catch (e) {
+      throw AuthException(e.toString());
+    }
+  }
+
+  /// Request OTP for a given email (User flow).
+  Future<void> requestOtp(String email) async {
+    try {
+      await _apiClient.postPublic(
+        _otpSendPath,
+        data: {'email': email},
+      );
+    } on ApiException catch (e) {
+      throw AuthException(e.message);
+    } catch (e) {
+      throw AuthException(e.toString());
+    }
+  }
+
+  /// Verify OTP and save JWT tokens (Both User and Admin verify).
+  Future<AuthUser> verifyOtp(String email, String otp) async {
+    try {
+      final response = await _apiClient.postPublic(
+        _otpVerifyPath,
+        data: {
+          'email': email,
+          'otp': otp,
         },
       );
 
@@ -30,27 +69,15 @@ class AuthRepository {
         throw const AuthException('Invalid server response format.');
       }
 
-      final access = data['access'] as String;
-      final refresh = data['refresh'] as String;
-
       await _apiClient.tokenStorage.saveTokens(
-        accessToken: access,
-        refreshToken: refresh,
+        accessToken: data['access'] as String,
+        refreshToken: data['refresh'] as String,
       );
-
-      // Return the nested user object directly if provided (Django Djoser/custom login).
-      // Otherwise, fetch it.
-      if (data['user'] != null) {
-        return AuthUser.fromJson(data['user'] as Map<String, dynamic>);
-      }
 
       return await getProfile();
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
-      if (e.message.toLowerCase().contains('disabled')) {
-        throw const AccountDisabledException();
-      }
       throw AuthException(e.message);
     } catch (e) {
       throw AuthException(e.toString());
@@ -88,8 +115,44 @@ class AuthRepository {
     }
   }
 
+  /// Fetch the list of available Municipal Wards.
+  Future<List<Ward>> getWards() async {
+    try {
+      final response = await _apiClient.get(_wardsPath);
+      final list = response.data as List;
+      return list.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
+    } on ApiException catch (e) {
+      throw AuthException(e.message);
+    }
+  }
+
+  /// Complete the resident profile with name and location.
+  Future<AuthUser> completeProfile(ResidentProfile profile) async {
+    try {
+      final response = await _apiClient.post(
+        _completeProfilePath,
+        data: profile.toJson(),
+      );
+      // The server response should reflect the updated profile/user state.
+      // Usually, it updates the user record or creates a profile object.
+      // We return the updated AuthUser to refresh the local state.
+      return AuthUser.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw AuthException(e.message);
+    }
+  }
+
   /// Wipes all tokens and effectively logs the user out.
   Future<void> logout() async {
-    await _apiClient.tokenStorage.clearAll();
+    try {
+      final refreshToken = await _apiClient.tokenStorage.getRefreshToken();
+      if (refreshToken != null) {
+        await _apiClient.post(_logoutPath, data: {'refresh': refreshToken});
+      }
+    } catch (_) {
+      // Ignore server exceptions on logout, proceed to clear local tokens
+    } finally {
+      await _apiClient.tokenStorage.clearAll();
+    }
   }
 }

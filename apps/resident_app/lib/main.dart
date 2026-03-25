@@ -1,122 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:auth/auth.dart';
+import 'package:core/core.dart';
+import 'package:network/network.dart';
+import 'package:ui_kit/ui_kit.dart';
+import 'features/auth/login_screen.dart';
+import 'features/profile_setup/profile_setup_screen.dart';
+import 'features/pickups/booking_screen.dart';
+import 'features/complaints/complaint_submission_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  final environment = Environment.dev;
+  final apiClient = ApiClient(environment: environment);
+  final authRepository = AuthRepository(apiClient: apiClient);
+  final pickupRepository = PickupRepository(apiClient: apiClient);
+  final complaintRepository = ComplaintRepository(apiClient: apiClient);
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthState(repository: authRepository)..initialize(),
+        ),
+        Provider<PickupRepository>.value(value: pickupRepository),
+        Provider<ComplaintRepository>.value(value: complaintRepository),
+      ],
+      child: const ResidentApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ResidentApp extends StatelessWidget {
+  const ResidentApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'GreenLoop Resident',
+      theme: GreenLeafTheme.light(),
+      darkTheme: GreenLeafTheme.dark(),
+      themeMode: ThemeMode.system,
+      home: const AuthWrapper(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final status = context.select<AuthState, AuthStatus>((s) => s.status);
+    final user = context.select<AuthState, AuthUser?>((s) => s.user);
+
+    switch (status) {
+      case AuthStatus.initial:
+      case AuthStatus.loading:
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      case AuthStatus.authenticated:
+        if (user != null && !user.isProfileCompleted) {
+          return const ProfileSetupScreen();
+        }
+        return const HomeScreenPlaceholder();
+      case AuthStatus.unauthenticated:
+      case AuthStatus.otpRequested:
+      case AuthStatus.error:
+        return const LoginScreen();
+    }
+  }
+}
+
+class HomeScreenPlaceholder extends StatelessWidget {
+  const HomeScreenPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = context.select<AuthState, AuthUser?>((s) => s.user);
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('GreenLoop Resident'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded),
+            onPressed: () => context.read<AuthState>().logout(),
+          ),
+        ],
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(GLSpacing.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.dashboard_outlined, size: 64, color: Colors.green),
+              const SizedBox(height: GLSpacing.lg),
+              Text(
+                'Welcome, ${user?.email ?? "Resident"}',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: GLSpacing.md),
+              const Text('Welcome to GreenLoop!'),
+              const SizedBox(height: GLSpacing.xl),
+              GLButton(
+                text: 'Book a Pickup',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BookingScreen()),
+                ),
+              ),
+              const SizedBox(height: GLSpacing.md),
+              GLButton(
+                text: 'File a Complaint',
+                variant: GLButtonVariant.outline,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ComplaintSubmissionScreen()),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
