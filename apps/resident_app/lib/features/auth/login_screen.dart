@@ -23,7 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleContinue() async {
     final email = _emailController.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
+    final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+    
+    if (email.isEmpty || !emailRegex.hasMatch(email)) {
       setState(() => _errorText = 'Please enter a valid email address');
       return;
     }
@@ -100,9 +102,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: GLSpacing.sm),
                 Text(
-                  'Enter your email to receive a login code',
+                  'Enter your email to login or register',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: GLSpacing.xs),
+                Text(
+                  'New users will be taken to profile setup',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),

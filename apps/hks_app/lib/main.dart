@@ -2,18 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auth/auth.dart';
 import 'package:network/network.dart';
+import 'package:core/core.dart';
 import 'package:ui_kit/ui_kit.dart';
+import 'features/route_map/route_map_screen.dart';
+import 'features/route_map/route_map_state.dart';
 
 void main() {
   final environment = Environment.dev;
   final apiClient = ApiClient(environment: environment);
   final authRepository = AuthRepository(apiClient: apiClient);
+  final hksRepository = HksRouteRepository(apiClient: apiClient);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
           create: (_) => AuthState(repository: authRepository)..initialize(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RouteMapState(repository: hksRepository),
         ),
       ],
       child: const HksApp(),
@@ -52,7 +59,7 @@ class AuthWrapper extends StatelessWidget {
         if (user != null && user.role != 'hks') {
            // For demo, we just show a lock screen or similar if roles don't match
         }
-        return const HksDashboardPlaceholder();
+        return const RouteMapScreen();
       case AuthStatus.unauthenticated:
       case AuthStatus.otpRequested:
       case AuthStatus.error:
@@ -89,24 +96,3 @@ class HksLoginPlaceholder extends StatelessWidget {
   }
 }
 
-class HksDashboardPlaceholder extends StatelessWidget {
-  const HksDashboardPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('HKS Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => context.read<AuthState>().logout(),
-          ),
-        ],
-      ),
-      body: const Center(
-        child: Text('Logged in as HKS Worker.'),
-      ),
-    );
-  }
-}

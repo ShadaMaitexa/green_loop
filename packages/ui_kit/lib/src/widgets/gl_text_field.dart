@@ -10,9 +10,11 @@ class GLTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final bool obscureText;
+  final int maxLines;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final void Function(String)? onChanged;
+  final String? Function(String?)? validator;
 
   const GLTextField({
     super.key,
@@ -22,9 +24,11 @@ class GLTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.obscureText = false,
+    this.maxLines = 1,
     this.controller,
     this.keyboardType,
     this.onChanged,
+    this.validator,
   });
 
   @override
@@ -60,11 +64,13 @@ class GLTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: GLSpacing.sm),
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
+          maxLines: maxLines,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          validator: validator,
           style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: hint,

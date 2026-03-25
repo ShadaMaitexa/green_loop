@@ -5,3 +5,4 @@ export 'src/resident_profile.dart';
 export 'src/pickup.dart';
 export 'src/complaint.dart';
 export 'src/schedule.dart';
+export 'src/hks_route.dart';
