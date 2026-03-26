@@ -6,7 +6,8 @@ import 'package:ui_kit/ui_kit.dart';
 import 'package:data_models/data_models.dart';
 import 'route_map_state.dart';
 import '../pickup_completion/pickup_completion_flow.dart';
-
+import '../fee_collection/fee_collection_sheet.dart';
+import '../fee_collection/fee_summary_screen.dart';
 /// Screen for HKS workers to view their assigned route, ward boundary, and pickups.
 class RouteMapScreen extends StatefulWidget {
   const RouteMapScreen({super.key});
@@ -138,6 +139,14 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             icon: Icon(_isListView ? Icons.map_rounded : Icons.list_alt_rounded),
             tooltip: _isListView ? 'Show Map' : 'Show List',
             onPressed: () => setState(() => _isListView = !_isListView),
+          ),
+          IconButton(
+            icon: const Icon(Icons.receipt_long_rounded),
+            tooltip: 'Fee Summary',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FeeSummaryScreen()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -399,6 +408,19 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                     onPressed: () {
                       Navigator.pop(context); // Close bottom sheet
                       _startPickupCompletion(pickup);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: GLButton(
+                    text: 'Collect Fee',
+                    icon: Icons.payments_rounded,
+                    variant: GLButtonVariant.outline,
+                    onPressed: () {
+                      Navigator.pop(context); // Close bottom sheet
+                      FeeCollectionSheet.show(context, pickup);
                     },
                   ),
                 ),

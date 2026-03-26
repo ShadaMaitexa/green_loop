@@ -85,4 +85,35 @@ class HksRouteRepository {
       throw Exception(e.message);
     }
   }
+
+  /// Submits fee collection info and returns the updated/created FeeCollection.
+  Future<FeeCollection> collectFee({
+    required String pickupId,
+    required double amount,
+    required PaymentMode paymentMode,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/hks/fee/',
+        data: {
+          'pickup_id': pickupId,
+          'amount': amount,
+          'payment_mode': paymentMode == PaymentMode.upi ? 'upi' : 'cash',
+        },
+      );
+      return FeeCollection.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Retrieves the daily fee collection summary for the current worker.
+  Future<DailyFeeSummary> getFeeSummary() async {
+    try {
+      final response = await _apiClient.get('/api/v1/hks/fee/summary/today/');
+      return DailyFeeSummary.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }
