@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:data_models/data_models.dart';
 import 'route_map_state.dart';
+import '../pickup_completion/pickup_completion_flow.dart';
 
 /// Screen for HKS workers to view their assigned route, ward boundary, and pickups.
 class RouteMapScreen extends StatefulWidget {
@@ -16,6 +17,9 @@ class RouteMapScreen extends StatefulWidget {
 
 class _RouteMapScreenState extends State<RouteMapScreen> {
   GoogleMapController? _mapController;
+  bool _followUser = false;
+  LatLng? _lastKnownPosition;
+  bool _isListView = false;
 
   @override
   void initState() {
@@ -26,7 +30,28 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       final state = context.read<RouteMapState>();
       state.fetchRoute();
       state.startLocationTracking();
+      
+      // Listen for position changes to follow user if enabled
+      state.addListener(_onStateChange);
     });
+  }
+
+  void _onStateChange() {
+    if (!mounted) return;
+    final state = context.read<RouteMapState>();
+    if (_followUser && state.currentPosition != null) {
+      final pos = LatLng(state.currentPosition!.latitude, state.currentPosition!.longitude);
+      if (_lastKnownPosition?.latitude != pos.latitude || _lastKnownPosition?.longitude != pos.longitude) {
+        _lastKnownPosition = pos;
+        _mapController?.animateCamera(CameraUpdate.newLatLng(pos));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    context.read<RouteMapState>().removeListener(_onStateChange);
+    super.dispose();
   }
 
   @override
@@ -110,15 +135,20 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             onPressed: () => _handleLogAttendance(),
           ),
           IconButton(
+            icon: Icon(_isListView ? Icons.map_rounded : Icons.list_alt_rounded),
+            tooltip: _isListView ? 'Show Map' : 'Show List',
+            onPressed: () => setState(() => _isListView = !_isListView),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Refresh Route',
             onPressed: () => state.fetchRoute(),
           ),
         ],
       ),
-      body: Stack(
+      body: _isListView ? _buildRouteListView(route) : Stack(
         children: [
-          GoogleMap(
+           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: route.routePath.isNotEmpty 
                   ? LatLng(route.routePath[0][0], route.routePath[0][1])
@@ -135,10 +165,49 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             polylines: polylines,
             polygons: polygons,
             myLocationEnabled: true,
-            myLocationButtonEnabled: true,
+            myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
             mapToolbarEnabled: false,
             compassEnabled: true,
+          ),
+          
+          // Camera Control Buttons
+          Positioned(
+            right: 16,
+            bottom: 120, // Above navigation button
+            child: Column(
+              children: [
+                Material(
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  color: theme.colorScheme.surface,
+                  child: IconButton(
+                    icon: Icon(
+                      _followUser ? Icons.gps_fixed_rounded : Icons.gps_not_fixed_rounded,
+                      color: _followUser ? theme.colorScheme.primary : Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _followUser = !_followUser;
+                        if (_followUser && state.currentPosition != null) {
+                          _centerOnUser();
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Material(
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  color: theme.colorScheme.surface,
+                  child: IconButton(
+                    icon: const Icon(Icons.layers_rounded),
+                    onPressed: () => _fitRouteBounds(route),
+                  ),
+                ),
+              ],
+            ),
           ),
           
           // Current Position Tracking Hint if needed
@@ -200,25 +269,42 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
           southwest: LatLng(minLat, minLng),
           northeast: LatLng(maxLat, maxLng),
         ),
-        64.0, // padding
+        80.0, // padding
       ),
     );
   }
 
-  Set<Marker> _buildMarkers(List<HksPickup> pickups) {
-    return pickups.map((p) {
-      return Marker(
-        markerId: MarkerId(p.id),
-        position: LatLng(p.latitude, p.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          p.wasteType == WasteType.wet ? BitmapDescriptor.hueGreen :
-          p.wasteType == WasteType.dry ? BitmapDescriptor.hueBlue :
-          p.wasteType == WasteType.eWaste ? BitmapDescriptor.hueViolet :
-          BitmapDescriptor.hueRed,
+  void _centerOnUser() {
+    final state = context.read<RouteMapState>();
+    if (state.currentPosition != null && _mapController != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLng(
+          LatLng(state.currentPosition!.latitude, state.currentPosition!.longitude),
         ),
-        onTap: () => _showPickupDetails(p),
       );
-    }).toSet();
+    }
+  }
+
+  Set<Marker> _buildMarkers(List<HksPickup> pickups) {
+    final Set<Marker> markers = {};
+    for (int i = 0; i < pickups.length; i++) {
+      final p = pickups[i];
+      markers.add(
+        Marker(
+          markerId: MarkerId(p.id),
+          position: LatLng(p.latitude, p.longitude),
+          infoWindow: InfoWindow(title: '${i + 1}. ${p.residentName}'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            p.wasteType == WasteType.wet ? BitmapDescriptor.hueGreen :
+            p.wasteType == WasteType.dry ? BitmapDescriptor.hueBlue :
+            p.wasteType == WasteType.eWaste ? BitmapDescriptor.hueViolet :
+            BitmapDescriptor.hueRed,
+          ),
+          onTap: () => _showPickupDetails(p),
+        ),
+      );
+    }
+    return markers;
   }
 
   void _showPickupDetails(HksPickup pickup) {
@@ -277,18 +363,46 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
               _buildDetailItem(Icons.access_time_rounded, 'Scheduled Time', pickup.bookingTime, Colors.black87),
               
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: GLButton(
-                  text: 'Navigate to Point',
-                  icon: Icons.directions_rounded,
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _launchNavigationToPoint(pickup.latitude, pickup.longitude);
-                  },
+              Row(
+                children: [
+                  if (pickup.phoneNumber != null) ...[
+                    Expanded(
+                      flex: 1,
+                      child: GLButton(
+                        text: 'Call',
+                        variant: GLButtonVariant.outline,
+                        icon: Icons.call_rounded,
+                        onPressed: () => _makeCall(pickup.phoneNumber!),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                    Expanded(
+                      flex: 2,
+                      child: GLButton(
+                        text: 'Navigate',
+                        icon: Icons.directions_rounded,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _launchNavigationToPoint(pickup.latitude, pickup.longitude);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: GLButton(
+                    text: 'Complete Pickup',
+                    icon: Icons.check_circle_rounded,
+                    onPressed: () {
+                      Navigator.pop(context); // Close bottom sheet
+                      _startPickupCompletion(pickup);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
             ],
           ),
         );
@@ -361,10 +475,70 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       await launchUrl(url);
     } else {
       // iOS / Browser fallback
-      final webUrl = Uri.parse('http://maps.apple.com/?daddr=$lat,$lng');
+      final webUrl = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
       if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl);
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
       }
+    }
+  }
+
+  Widget _buildRouteListView(HksRoute route) {
+    if (route.pickups.isEmpty) {
+      return const Center(child: Text('No pickups assigned for today.'));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: route.pickups.length,
+      itemBuilder: (context, index) {
+        final pickup = route.pickups[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                  child: Text('${index + 1}', style: TextStyle(color: pickup.wasteType.color)),
+                ),
+              ],
+            ),
+            title: Text(pickup.residentName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(pickup.address, maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
+                GLStatusBadge.custom(
+                  status: pickup.wasteType.label,
+                  backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                  textColor: pickup.wasteType.color,
+                ),
+              ],
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _showPickupDetails(pickup),
+          ),
+        );
+      },
+    );
+  }
+
+  void _startPickupCompletion(HksPickup pickup) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PickupCompletionFlow(pickup: pickup),
+      ),
+    );
+  }
+
+  Future<void> _makeCall(String phoneNumber) async {
+    final url = Uri.parse('tel:$phoneNumber');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     }
   }
 

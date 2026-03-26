@@ -40,4 +40,49 @@ class HksRouteRepository {
       throw Exception(e.message);
     }
   }
+  /// Validates a scanned QR code with backend logic.
+  Future<void> validateQr({
+    required String pickupId,
+    required String qrToken,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      await _apiClient.post('/api/v1/hks/pickups/$pickupId/validate-qr/', data: {
+        'qr_token': qrToken,
+        'latitude': latitude,
+        'longitude': longitude,
+      });
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Submits the completed pickup data to the backend.
+  Future<void> completePickup({
+    required String pickupId,
+    required String qrToken,
+    required String photoUrl,
+    required String classification,
+    required double confidence,
+    double? weight,
+    required double latitude,
+    required double longitude,
+    String? overrideNote,
+  }) async {
+    try {
+      await _apiClient.post('/api/v1/hks/pickups/$pickupId/complete/', data: {
+        'qr_token': qrToken,
+        'photo_url': photoUrl,
+        'classification': classification,
+        'confidence_score': confidence,
+        'weight': weight,
+        'latitude': latitude,
+        'longitude': longitude,
+        'override_note': overrideNote,
+      });
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }

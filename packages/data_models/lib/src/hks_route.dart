@@ -58,6 +58,7 @@ class HksPickup {
   final String bookingTime;
   final double latitude;
   final double longitude;
+  final String? phoneNumber;
 
   HksPickup({
     required this.id,
@@ -67,6 +68,7 @@ class HksPickup {
     required this.bookingTime,
     required this.latitude,
     required this.longitude,
+    this.phoneNumber,
   });
 
   factory HksPickup.fromJson(Map<String, dynamic> json) {
@@ -76,8 +78,9 @@ class HksPickup {
       address: json['address'] as String? ?? 'N/A',
       wasteType: WasteType.fromJson(json['waste_type'] as String? ?? 'dry'),
       bookingTime: json['booking_time'] as String? ?? '',
-      latitude: json['latitude'] as double? ?? 0.0,
-      longitude: json['longitude'] as double? ?? 0.0,
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      phoneNumber: json['phone_number'] as String?,
     );
   }
 }

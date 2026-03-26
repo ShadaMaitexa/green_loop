@@ -6,3 +6,4 @@ export 'src/pickup.dart';
 export 'src/complaint.dart';
 export 'src/schedule.dart';
 export 'src/hks_route.dart';
+export 'src/attendance.dart';
