@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:camera/camera.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:data_models/data_models.dart';
+import '../sync/sync_manager.dart';
 import 'package:core/core.dart';
 import 'pickup_completion_state.dart';
 import 'services/ai_classification_service.dart';
@@ -28,9 +29,11 @@ class _PickupCompletionFlowState extends State<PickupCompletionFlow> {
     final repository = context.read<HksRouteRepository>();
     final aiService = AiClassificationService();
     aiService.initialize();
+    final syncManager = context.read<SyncManager>();
     _state = PickupCompletionState(
       repository: repository,
       aiService: aiService,
+      syncManager: syncManager,
       pickup: widget.pickup,
     );
   }

@@ -2,20 +2,24 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:core/core.dart';
+import 'package:network/network.dart';
 import 'package:data_models/data_models.dart';
 import 'services/ai_classification_service.dart';
+import '../sync/sync_manager.dart';
 
 /// State management for the Pickup Completion Flow.
 class PickupCompletionState extends ChangeNotifier {
   final HksRouteRepository _repository;
   final AiClassificationService _aiService;
+  final SyncManager _syncManager;
   final HksPickup pickup;
 
   PickupCompletionState({
     required HksRouteRepository repository,
     required AiClassificationService aiService,
+    required SyncManager syncManager,
     required this.pickup,
-  }) : _repository = repository, _aiService = aiService;
+  }) : _repository = repository, _aiService = aiService, _syncManager = syncManager;
 
   int _currentStep = 0;
   int get currentStep => _currentStep;
@@ -73,6 +77,15 @@ class PickupCompletionState extends ChangeNotifier {
       final position = await Geolocator.getCurrentPosition();
       _lastValidatedPosition = position;
       
+      if (_syncManager.status == SyncStatus.offline) {
+        // Mock validation for offline mode
+        _qrToken = qrToken;
+        _lastValidatedPosition = await Geolocator.getCurrentPosition();
+        _loading = false;
+        notifyListeners();
+        return true;
+      }
+
       await _repository.validateQr(
         pickupId: pickup.id,
         qrToken: qrToken,
@@ -146,6 +159,10 @@ class PickupCompletionState extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (_syncManager.status == SyncStatus.offline) {
+        throw const NetworkException(message: 'Offline');
+      }
+
       // In a real app, upload the file first then send the URL
       // Upload task simulated here:
       final mockPhotoUrl = 'https://storage.greenloop.app/pickups/${pickup.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -166,6 +183,23 @@ class PickupCompletionState extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      if (e is NetworkException || _syncManager.status == SyncStatus.offline) {
+        // Save to offline sync queue
+        await _syncManager.enqueuePickup(
+          pickupId: pickup.id,
+          qrToken: _qrToken!,
+          photoPath: _wastePhoto!.path,
+          classification: _classification!.label,
+          confidence: _classification!.confidence,
+          weight: _weight,
+          latitude: _lastValidatedPosition!.latitude,
+          longitude: _lastValidatedPosition!.longitude,
+          overrideNote: _overrideNote,
+        );
+        _loading = false;
+        notifyListeners();
+        return true; // Return true because it's "completed" (just queued)
+      }
       _error = e.toString().replaceFirst('Exception: ', '');
       _loading = false;
       notifyListeners();

@@ -8,6 +8,7 @@ import 'features/route_map/route_map_screen.dart';
 import 'features/route_map/route_map_state.dart';
 import 'features/attendance/attendance_dashboard.dart';
 import 'features/attendance/attendance_state.dart';
+import 'features/sync/sync_manager.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -15,12 +16,20 @@ void main() {
   final authRepository = AuthRepository(apiClient: apiClient);
   final hksRepository = HksRouteRepository(apiClient: apiClient);
   final attendanceRepository = AttendanceRepository(apiClient: apiClient);
+  final complaintRepository = ComplaintRepository(apiClient: apiClient);
 
   runApp(
     MultiProvider(
       providers: [
         Provider<HksRouteRepository>.value(value: hksRepository),
         Provider<AttendanceRepository>.value(value: attendanceRepository),
+        Provider<ComplaintRepository>.value(value: complaintRepository),
+        ChangeNotifierProvider(
+          create: (_) => SyncManager()
+            ..initialize(
+              baseUrl: environment.baseUrl,
+            ),
+        ),
         ChangeNotifierProvider(
           create: (_) => AuthState(repository: authRepository)..initialize(),
         ),

@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:ui_kit/ui_kit.dart';
 import 'package:data_models/data_models.dart';
+import 'package:ui_kit/ui_kit.dart';
 import 'route_map_state.dart';
 import '../pickup_completion/pickup_completion_flow.dart';
 import '../fee_collection/fee_collection_sheet.dart';
 import '../fee_collection/fee_summary_screen.dart';
-/// Screen for HKS workers to view their assigned route, ward boundary, and pickups.
+import '../issues/hks_issue_reporting_screen.dart';
+import '../issues/hks_issue_list_screen.dart';
+import '../sync/sync_manager.dart';
+import '../sync/sync_status_badge.dart';
+
 class RouteMapScreen extends StatefulWidget {
   const RouteMapScreen({super.key});
 
@@ -35,6 +40,34 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       // Listen for position changes to follow user if enabled
       state.addListener(_onStateChange);
     });
+
+    _syncSub = context.read<SyncManager>().conflictsStream.listen((count) {
+      if (mounted) _showConflictDialog(count);
+    });
+  }
+
+  StreamSubscription? _syncSub;
+
+  void _showConflictDialog(int count) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Sync Conflict'),
+          ],
+        ),
+        content: Text('$count report(s) found conflicts during upload and require admin review.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _onStateChange() {
@@ -52,6 +85,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   @override
   void dispose() {
     context.read<RouteMapState>().removeListener(_onStateChange);
+    _syncSub?.cancel();
     super.dispose();
   }
 
@@ -127,7 +161,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Today\'s Route'),
+        title: const SyncStatusTitle(originalTitle: 'Today\'s Route'),
         elevation: 0,
         actions: [
           IconButton(
@@ -152,6 +186,38 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Refresh Route',
             onPressed: () => state.fetchRoute(),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              if (value == 'report_issue') {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HksIssueReportingScreen()));
+              } else if (value == 'my_issues') {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HksIssueListScreen()));
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'report_issue',
+                child: Row(
+                  children: [
+                    Icon(Icons.report_problem_rounded, color: Colors.orange, size: 20),
+                    SizedBox(width: 8),
+                    Text('Report Field Issue'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'my_issues',
+                child: Row(
+                  children: [
+                    Icon(Icons.list_alt_rounded, color: Colors.blue, size: 20),
+                    SizedBox(width: 8),
+                    Text('My Issues'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
