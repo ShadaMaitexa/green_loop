@@ -29,6 +29,19 @@ class RecyclerRepository {
     }
   }
 
+  /// Updates an existing material type.
+  Future<bool> updateMaterial(MaterialType type) async {
+    try {
+      await apiClient.patch(
+        '/api/v1/recycler/materials/${type.id}/',
+        data: type.toJson(),
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Records a new purchase transaction.
   Future<bool> recordPurchase(RecyclerPurchase purchase) async {
     try {

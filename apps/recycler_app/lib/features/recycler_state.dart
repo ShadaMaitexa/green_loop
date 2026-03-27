@@ -74,8 +74,43 @@ class RecyclerState extends ChangeNotifier {
     }
   }
 
+  Future<bool> addMaterial(MaterialType type) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final success = await repository.addMaterial(type);
+      if (success) await fetchMaterials();
+      return success;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateMaterial(MaterialType type) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final success = await repository.updateMaterial(type);
+      if (success) await fetchMaterials();
+      return success;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> addPurchase(RecyclerPurchase purchase) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       final success = await repository.recordPurchase(purchase);
