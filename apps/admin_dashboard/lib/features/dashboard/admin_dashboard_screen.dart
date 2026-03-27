@@ -6,6 +6,7 @@ import '../monitoring/live_map_screen.dart';
 import '../users/user_management_screen.dart';
 import '../wards/ward_management_screen.dart';
 import '../complaints/complaint_management_screen.dart';
+import 'dashboard_overview_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -95,6 +96,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildSectionContent(DashboardSection section) {
     if (section.title == 'Live Tracking') {
       return const LiveMapScreen();
+    }
+    if (section.title == 'Dashboard') {
+      return const DashboardOverviewScreen();
     }
     if (section.title == 'Users') {
       return const UserManagementScreen();

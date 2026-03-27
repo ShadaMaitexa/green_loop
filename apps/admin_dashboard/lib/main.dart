@@ -13,6 +13,8 @@ import 'features/wards/ward_service.dart';
 import 'features/wards/ward_state.dart';
 import 'features/complaints/complaint_service.dart';
 import 'features/complaints/complaint_state.dart';
+import 'features/dashboard/dashboard_service.dart';
+import 'features/dashboard/dashboard_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -48,6 +50,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => ComplaintState(
             service: context.read<ComplaintService>(),
+          ),
+        ),
+        Provider(create: (_) => DashboardService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => DashboardState(
+            service: context.read<DashboardService>(),
           ),
         ),
       ],
