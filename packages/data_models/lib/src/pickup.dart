@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 enum WasteType {
-  dry(label: 'Dry', icon: Icons.recycling_rounded, color: Colors.blue),
-  wet(label: 'Wet', icon: Icons.eco_rounded, color: Colors.green),
-  eWaste(label: 'E-Waste', icon: Icons.devices_other_rounded, color: Colors.deepPurple),
+  dry(label: 'Dry', icon: Icons.recycling_rounded, color: Colors.green),
+  wet(label: 'Wet', icon: Icons.eco_rounded, color: Colors.blue),
+  eWaste(label: 'E-Waste', icon: Icons.devices_other_rounded, color: Colors.orange),
   biomedical(label: 'Biomedical', icon: Icons.medical_services_rounded, color: Colors.red);
 
   final String label;
@@ -82,6 +82,8 @@ class PickupResponse {
   final String scheduledDate;
   final String slot;
   final WasteType wasteType;
+  final double? latitude;
+  final double? longitude;
 
   const PickupResponse({
     required this.id,
@@ -90,6 +92,8 @@ class PickupResponse {
     required this.scheduledDate,
     required this.slot,
     required this.wasteType,
+    this.latitude,
+    this.longitude,
   });
 
   factory PickupResponse.fromJson(Map<String, dynamic> json) {
@@ -100,6 +104,8 @@ class PickupResponse {
       scheduledDate: json['scheduled_date'] as String,
       slot: json['slot'] as String,
       wasteType: WasteType.fromJson(json['waste_type'] as String),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 }

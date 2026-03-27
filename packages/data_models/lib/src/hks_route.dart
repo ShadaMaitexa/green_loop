@@ -28,12 +28,18 @@ class HksRoute {
         if (coords.isEmpty) return null;
         // Polygon is [[[lng, lat], ...]]
         return (coords[0] as List)
-            .map((e) => [(e as List)[1] as double, e[0] as double])
+            .map<List<double>>((e) {
+              final list = e as List;
+              return [(list[1] as num).toDouble(), (list[0] as num).toDouble()];
+            })
             .toList();
       } else if (node['type'] == 'LineString') {
         // LineString is [[lng, lat], ...]
         return (node['coordinates'] as List)
-            .map((e) => [(e as List)[1] as double, e[0] as double])
+            .map<List<double>>((e) {
+              final list = e as List;
+              return [(list[1] as num).toDouble(), (list[0] as num).toDouble()];
+            })
             .toList();
       }
       return null;

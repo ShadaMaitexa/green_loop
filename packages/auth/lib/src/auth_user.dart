@@ -4,6 +4,7 @@ class AuthUser {
   final String id;
   final String email;
   final String username;
+  final String name;
   final String role;
   final bool isProfileCompleted;
 
@@ -11,6 +12,7 @@ class AuthUser {
     required this.id,
     required this.email,
     required this.username,
+    required this.name,
     required this.role,
     this.isProfileCompleted = false,
   });
@@ -20,6 +22,7 @@ class AuthUser {
       id: json['id']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       username: json['username']?.toString() ?? json['email']?.toString() ?? '',
+      name: json['name']?.toString() ?? json['username']?.toString() ?? json['email']?.toString() ?? '',
       role: json['role']?.toString() ?? 'resident',
       isProfileCompleted: json['is_profile_completed'] as bool? ?? false,
     );
@@ -30,6 +33,7 @@ class AuthUser {
       'id': id,
       'email': email,
       'username': username,
+      'name': name,
       'role': role,
       'is_profile_completed': isProfileCompleted,
     };
@@ -43,8 +47,9 @@ class AuthUser {
           id == other.id &&
           email == other.email &&
           username == other.username &&
+          name == other.name &&
           role == other.role;
 
   @override
-  int get hashCode => id.hashCode ^ email.hashCode ^ username.hashCode ^ role.hashCode;
+  int get hashCode => id.hashCode ^ email.hashCode ^ username.hashCode ^ name.hashCode ^ role.hashCode;
 }

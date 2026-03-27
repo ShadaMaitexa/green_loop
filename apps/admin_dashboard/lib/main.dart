@@ -4,6 +4,11 @@ import 'package:auth/auth.dart';
 import 'package:network/network.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'features/auth/admin_login_screen.dart';
+import 'features/dashboard/admin_dashboard_screen.dart';
+import 'features/monitoring/monitoring_service.dart';
+import 'features/monitoring/monitoring_state.dart';
+import 'features/users/user_management_service.dart';
+import 'features/users/user_management_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -13,8 +18,21 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        Provider.value(value: authRepository),
         ChangeNotifierProvider(
           create: (_) => AuthState(repository: authRepository)..initialize(),
+        ),
+        Provider(create: (_) => MonitoringService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => MonitoringState(
+            service: context.read<MonitoringService>(),
+          )..initializeMap(),
+        ),
+        Provider(create: (_) => UserManagementService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => UserManagementState(
+            service: context.read<UserManagementService>(),
+          ),
         ),
       ],
       child: const AdminApp(),
@@ -55,34 +73,12 @@ class AuthWrapper extends StatelessWidget {
         if (user != null && user.role != 'admin') {
            return const InvalidRolePlaceholder();
         }
-        return const AdminDashboardPlaceholder();
+        return const AdminDashboardScreen();
       case AuthStatus.unauthenticated:
       case AuthStatus.otpRequested:
       case AuthStatus.error:
         return const AdminLoginScreen();
     }
-  }
-}
-
-class AdminDashboardPlaceholder extends StatelessWidget {
-  const AdminDashboardPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => context.read<AuthState>().logout(),
-          ),
-        ],
-      ),
-      body: const Center(
-        child: Text('Welcome, Administrator.'),
-      ),
-    );
   }
 }
 
