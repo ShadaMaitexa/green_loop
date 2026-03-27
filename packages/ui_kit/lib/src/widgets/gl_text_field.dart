@@ -10,7 +10,10 @@ class GLTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final bool obscureText;
+  final bool readOnly;
   final int maxLines;
+  final String? prefixText;
+  final String? helperText;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final void Function(String)? onChanged;
@@ -24,7 +27,10 @@ class GLTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.obscureText = false,
+    this.readOnly = false,
     this.maxLines = 1,
+    this.prefixText,
+    this.helperText,
     this.controller,
     this.keyboardType,
     this.onChanged,
@@ -67,6 +73,7 @@ class GLTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           obscureText: obscureText,
+          readOnly: readOnly,
           maxLines: maxLines,
           keyboardType: keyboardType,
           onChanged: onChanged,
@@ -75,6 +82,8 @@ class GLTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             errorText: errorText,
+            prefixText: prefixText,
+            helperText: helperText,
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,

@@ -13,3 +13,4 @@ export 'src/fee.dart';
 export 'src/reward.dart';
 export 'src/reward_history.dart';
 export 'src/reward_config.dart';
+export 'src/recycler.dart';
