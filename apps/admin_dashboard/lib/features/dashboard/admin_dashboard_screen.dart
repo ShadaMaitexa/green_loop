@@ -8,6 +8,7 @@ import '../wards/ward_management_screen.dart';
 import '../complaints/complaint_management_screen.dart';
 import 'dashboard_overview_screen.dart';
 import '../rewards/reward_settings_screen.dart';
+import '../reports/reports_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -113,6 +114,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
     if (section.title == 'Reward Settings') {
       return const RewardSettingsScreen();
+    }
+    if (section.title == 'Reports') {
+      return const ReportsScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -17,6 +17,8 @@ import 'features/dashboard/dashboard_service.dart';
 import 'features/dashboard/dashboard_state.dart';
 import 'package:core/core.dart';
 import 'features/rewards/reward_settings_state.dart';
+import 'features/reports/reports_service.dart';
+import 'features/reports/reports_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -64,6 +66,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => RewardSettingsState(
             repository: context.read<RewardRepository>(),
+          ),
+        ),
+        Provider(create: (_) => ReportsService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => ReportsState(
+            service: context.read<ReportsService>(),
           ),
         ),
       ],
