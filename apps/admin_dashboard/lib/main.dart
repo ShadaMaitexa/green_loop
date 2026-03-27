@@ -11,6 +11,8 @@ import 'features/users/user_management_service.dart';
 import 'features/users/user_management_state.dart';
 import 'features/wards/ward_service.dart';
 import 'features/wards/ward_state.dart';
+import 'features/complaints/complaint_service.dart';
+import 'features/complaints/complaint_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -40,6 +42,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => WardState(
             service: context.read<WardService>(),
+          ),
+        ),
+        Provider(create: (_) => ComplaintService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => ComplaintState(
+            service: context.read<ComplaintService>(),
           ),
         ),
       ],

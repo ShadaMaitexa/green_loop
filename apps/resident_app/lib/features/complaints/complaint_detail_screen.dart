@@ -116,9 +116,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget _buildStatusHeader(ColorScheme colorScheme) {
     Color statusColor;
     switch (_complaint!.status) {
-      case ComplaintStatus.submitted: statusColor = Colors.blue; break;
+      case ComplaintStatus.submitted: statusColor = Colors.grey; break;
+      case ComplaintStatus.assigned: statusColor = Colors.blue; break;
       case ComplaintStatus.inProgress: statusColor = Colors.orange; break;
       case ComplaintStatus.resolved: statusColor = Colors.green; break;
+      case ComplaintStatus.closed: statusColor = Colors.purple; break;
     }
 
     return Container(

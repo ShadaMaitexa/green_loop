@@ -1,7 +1,9 @@
 enum ComplaintStatus {
   submitted(label: 'Submitted'),
+  assigned(label: 'Assigned'),
   inProgress(label: 'In Progress'),
-  resolved(label: 'Resolved');
+  resolved(label: 'Resolved'),
+  closed(label: 'Closed');
 
   final String label;
   const ComplaintStatus({required this.label});
@@ -12,6 +14,28 @@ enum ComplaintStatus {
       orElse: () => ComplaintStatus.submitted,
     );
   }
+
+  String toJson() => name;
+}
+
+enum ComplaintPriority {
+  low(label: 'Low', color: 'green'),
+  medium(label: 'Medium', color: 'orange'),
+  high(label: 'High', color: 'red'),
+  critical(label: 'Critical', color: 'purple');
+
+  final String label;
+  final String color;
+  const ComplaintPriority({required this.label, required this.color});
+
+  static ComplaintPriority fromJson(String json) {
+    return ComplaintPriority.values.firstWhere(
+      (e) => e.name.toLowerCase() == json.toLowerCase(),
+      orElse: () => ComplaintPriority.low,
+    );
+  }
+
+  String toJson() => name;
 }
 
 class ComplaintModel {
@@ -22,9 +46,12 @@ class ComplaintModel {
   final double latitude;
   final double longitude;
   final ComplaintStatus status;
+  final ComplaintPriority priority;
   final DateTime createdAt;
   final List<ComplaintHistory>? history;
   final int? rating;
+  final String? assignedTo; // ID of worker or admin
+  final bool isEscalated;
 
   const ComplaintModel({
     required this.id,
@@ -34,26 +61,44 @@ class ComplaintModel {
     required this.latitude,
     required this.longitude,
     required this.status,
+    required this.priority,
     required this.createdAt,
     this.history,
     this.rating,
+    this.assignedTo,
+    this.isEscalated = false,
   });
 
   factory ComplaintModel.fromJson(Map<String, dynamic> json) {
     return ComplaintModel(
       id: json['id']?.toString() ?? '',
-      type: json['type'] as String,
-      description: json['description'] as String,
+      type: json['type']?.toString() ?? 'General',
+      description: json['description']?.toString() ?? '',
       imageUrl: json['image_url'] as String?,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      status: ComplaintStatus.fromJson(json['status'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      status: ComplaintStatus.fromJson(json['status']?.toString() ?? 'submitted'),
+      priority: ComplaintPriority.fromJson(json['priority']?.toString() ?? 'low'),
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
       history: (json['history'] as List?)
           ?.map((e) => ComplaintHistory.fromJson(e as Map<String, dynamic>))
           .toList(),
       rating: json['rating'] as int?,
+      assignedTo: json['assigned_to']?.toString(),
+      isEscalated: json['is_escalated'] as bool? ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type,
+      'description': description,
+      'status': status.toJson(),
+      'priority': priority.toJson(),
+      'assigned_to': assignedTo,
+      'is_escalated': isEscalated,
+    };
   }
 }
 

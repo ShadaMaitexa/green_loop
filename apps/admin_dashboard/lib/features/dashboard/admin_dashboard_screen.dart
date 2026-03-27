@@ -5,6 +5,7 @@ import 'widgets/sidebar_drawer.dart';
 import '../monitoring/live_map_screen.dart';
 import '../users/user_management_screen.dart';
 import '../wards/ward_management_screen.dart';
+import '../complaints/complaint_management_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -100,6 +101,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
     if (section.title == 'Wards') {
       return const WardManagementScreen();
+    }
+    if (section.title == 'Complaints') {
+      return const ComplaintManagementScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

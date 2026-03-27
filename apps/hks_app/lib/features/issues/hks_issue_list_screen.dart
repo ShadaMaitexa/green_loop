@@ -133,6 +133,14 @@ class _HksIssueListScreenState extends State<HksIssueListScreen> {
         statusColor = Colors.blue;
         statusIcon = Icons.pending_actions_rounded;
         break;
+      case ComplaintStatus.assigned:
+        statusColor = Colors.indigo;
+        statusIcon = Icons.assignment_ind_rounded;
+        break;
+      case ComplaintStatus.closed:
+        statusColor = Colors.purple;
+        statusIcon = Icons.archive_rounded;
+        break;
     }
 
     return Card(

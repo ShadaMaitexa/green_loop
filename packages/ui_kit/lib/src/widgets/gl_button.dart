@@ -13,6 +13,8 @@ class GLButton extends StatelessWidget {
   final GLButtonSize size;
   final bool isLoading;
   final IconData? icon;
+  final Color? backgroundColor;
+  final Color? textColor;
 
   const GLButton({
     super.key,
@@ -22,6 +24,8 @@ class GLButton extends StatelessWidget {
     this.size = GLButtonSize.medium,
     this.isLoading = false,
     this.icon,
+    this.backgroundColor,
+    this.textColor,
   });
 
   bool get _isDisabled => onPressed == null || isLoading;
@@ -38,27 +42,27 @@ class GLButton extends StatelessWidget {
 
     switch (variant) {
       case GLButtonVariant.primary:
-        bg = colorScheme.primary;
-        fg = colorScheme.onPrimary;
+        bg = backgroundColor ?? colorScheme.primary;
+        fg = textColor ?? colorScheme.onPrimary;
         break;
       case GLButtonVariant.secondary:
-        bg = colorScheme.secondary;
-        fg = colorScheme.onSecondary;
+        bg = backgroundColor ?? colorScheme.secondary;
+        fg = textColor ?? colorScheme.onSecondary;
         break;
       case GLButtonVariant.outline:
-        bg = Colors.transparent;
-        fg = colorScheme.primary;
-        border = BorderSide(color: colorScheme.primary);
+        bg = backgroundColor ?? Colors.transparent;
+        fg = textColor ?? colorScheme.primary;
+        border = BorderSide(color: fg);
         break;
       case GLButtonVariant.ghost:
-        bg = Colors.transparent;
-        fg = colorScheme.primary;
+        bg = backgroundColor ?? Colors.transparent;
+        fg = textColor ?? colorScheme.primary;
         break;
     }
 
     if (_isDisabled) {
-      bg = isDark ? Colors.white12 : Colors.black12;
-      fg = isDark ? Colors.white38 : Colors.black38;
+      bg = (backgroundColor ?? (isDark ? Colors.white12 : Colors.black12)).withOpacity(0.5);
+      fg = (textColor ?? (isDark ? Colors.white38 : Colors.black38)).withOpacity(0.5);
       if (variant == GLButtonVariant.outline) {
         bg = Colors.transparent;
         border = BorderSide(color: fg);
