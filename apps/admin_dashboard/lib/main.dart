@@ -15,6 +15,8 @@ import 'features/complaints/complaint_service.dart';
 import 'features/complaints/complaint_state.dart';
 import 'features/dashboard/dashboard_service.dart';
 import 'features/dashboard/dashboard_state.dart';
+import 'package:core/core.dart';
+import 'features/rewards/reward_settings_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -56,6 +58,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => DashboardState(
             service: context.read<DashboardService>(),
+          ),
+        ),
+        Provider(create: (_) => RewardRepository(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => RewardSettingsState(
+            repository: context.read<RewardRepository>(),
           ),
         ),
       ],

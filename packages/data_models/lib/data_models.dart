@@ -10,3 +10,6 @@ export 'src/schedule.dart';
 export 'src/hks_route.dart';
 export 'src/attendance.dart';
 export 'src/fee.dart';
+export 'src/reward.dart';
+export 'src/reward_history.dart';
+export 'src/reward_config.dart';

@@ -5,3 +5,4 @@ export 'src/repositories/complaint_repository.dart';
 export 'src/repositories/schedule_repository.dart';
 export 'src/repositories/hks_route_repository.dart';
 export 'src/repositories/attendance_repository.dart';
+export 'src/repositories/reward_repository.dart';

@@ -9,6 +9,8 @@ class ResidentProfile {
   final double latitude;
   final double longitude;
   final bool isVerified;
+  final int pointsBalance;
+  final int streakWeeks;
 
   const ResidentProfile({
     this.id,
@@ -20,6 +22,8 @@ class ResidentProfile {
     required this.latitude,
     required this.longitude,
     this.isVerified = false,
+    this.pointsBalance = 0,
+    this.streakWeeks = 0,
   });
 
   factory ResidentProfile.fromJson(Map<String, dynamic> json) {
@@ -33,6 +37,8 @@ class ResidentProfile {
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       isVerified: json['is_verified'] as bool? ?? false,
+      pointsBalance: json['points_balance'] as int? ?? 0,
+      streakWeeks: json['streak_weeks'] as int? ?? 0,
     );
   }
 
@@ -45,6 +51,8 @@ class ResidentProfile {
       'address': address,
       'latitude': latitude,
       'longitude': longitude,
+      'points_balance': pointsBalance,
+      'streak_weeks': streakWeeks,
     };
   }
 }

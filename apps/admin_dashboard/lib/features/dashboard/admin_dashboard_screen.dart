@@ -7,6 +7,7 @@ import '../users/user_management_screen.dart';
 import '../wards/ward_management_screen.dart';
 import '../complaints/complaint_management_screen.dart';
 import 'dashboard_overview_screen.dart';
+import '../rewards/reward_settings_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -27,6 +28,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     DashboardSection(title: 'Pickups', icon: Icons.local_shipping_rounded),
     DashboardSection(title: 'Complaints', icon: Icons.report_problem_rounded),
     DashboardSection(title: 'Reports', icon: Icons.analytics_rounded),
+    DashboardSection(title: 'Reward Settings', icon: Icons.celebration_rounded),
     DashboardSection(title: 'Settings', icon: Icons.settings_rounded),
   ];
 
@@ -108,6 +110,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
     if (section.title == 'Complaints') {
       return const ComplaintManagementScreen();
+    }
+    if (section.title == 'Reward Settings') {
+      return const RewardSettingsScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

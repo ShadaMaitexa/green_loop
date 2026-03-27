@@ -9,6 +9,8 @@ import 'features/profile_setup/profile_setup_screen.dart';
 import 'features/pickups/booking_screen.dart';
 import 'features/complaints/complaint_submission_screen.dart';
 import 'features/schedule/schedule_screen.dart';
+import 'features/rewards/rewards_screen.dart';
+import 'features/rewards/rewards_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -17,6 +19,7 @@ void main() {
   final pickupRepository = PickupRepository(apiClient: apiClient);
   final complaintRepository = ComplaintRepository(apiClient: apiClient);
   final scheduleRepository = ScheduleRepository(apiClient: apiClient);
+  final rewardRepository = RewardRepository(apiClient: apiClient);
 
   runApp(
     MultiProvider(
@@ -24,9 +27,13 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => AuthState(repository: authRepository)..initialize(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => RewardsState(repository: rewardRepository),
+        ),
         Provider<PickupRepository>.value(value: pickupRepository),
         Provider<ComplaintRepository>.value(value: complaintRepository),
         Provider<ScheduleRepository>.value(value: scheduleRepository),
+        Provider<RewardRepository>.value(value: rewardRepository),
       ],
       child: const ResidentApp(),
     ),
@@ -130,6 +137,15 @@ class HomeScreenPlaceholder extends StatelessWidget {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ScheduleScreen()),
+                ),
+              ),
+              const SizedBox(height: GLSpacing.md),
+              GLButton(
+                text: 'Rewards & Points',
+                variant: GLButtonVariant.outline,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RewardsScreen()),
                 ),
               ),
             ],
