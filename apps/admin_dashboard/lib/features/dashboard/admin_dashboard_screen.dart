@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:ui_kit/ui_kit.dart';
-import 'package:auth/auth.dart';
 import 'widgets/admin_app_bar.dart';
 import 'widgets/sidebar_drawer.dart';
 import '../monitoring/live_map_screen.dart';
 import '../users/user_management_screen.dart';
+import '../wards/ward_management_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -48,7 +47,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 selectedIndex: _selectedIndex,
                 onSectionSelected: (index) {
                   setState(() => _selectedIndex = index);
-                  Navigator.pop(context); // Close drawer
+                  if (mounted && context.mounted) Navigator.pop(context); // Close drawer
                 },
               ),
         body: Row(
@@ -98,6 +97,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
     if (section.title == 'Users') {
       return const UserManagementScreen();
+    }
+    if (section.title == 'Wards') {
+      return const WardManagementScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -9,6 +9,8 @@ import 'features/monitoring/monitoring_service.dart';
 import 'features/monitoring/monitoring_state.dart';
 import 'features/users/user_management_service.dart';
 import 'features/users/user_management_state.dart';
+import 'features/wards/ward_service.dart';
+import 'features/wards/ward_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -32,6 +34,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => UserManagementState(
             service: context.read<UserManagementService>(),
+          ),
+        ),
+        Provider(create: (_) => WardService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => WardState(
+            service: context.read<WardService>(),
           ),
         ),
       ],
