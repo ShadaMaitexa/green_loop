@@ -84,15 +84,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             if (_complaint!.imageUrl != null) ...[
               Text('Evidence Photo', style: theme.textTheme.titleMedium),
               const SizedBox(height: GLSpacing.md),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(GLRadius.md),
-                child: Image.network(
-                  _complaint!.imageUrl!,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Placeholder(fallbackHeight: 200),
-                ),
+              GLImage(
+                imageUrl: _complaint!.imageUrl!,
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
               const SizedBox(height: GLSpacing.xl),
             ],

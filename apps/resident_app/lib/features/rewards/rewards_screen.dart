@@ -242,7 +242,7 @@ class _RewardItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: reward.imageUrl != null
-                  ? Image.network(reward.imageUrl!, fit: BoxFit.cover)
+                  ? GLImage(imageUrl: reward.imageUrl!, borderRadius: 8)
                   : const Icon(Icons.redeem, size: 32, color: Colors.green),
             ),
             const SizedBox(width: GLSpacing.md),

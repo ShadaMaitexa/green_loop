@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:data_models/data_models.dart';
+import 'package:ui_kit/ui_kit.dart';
 import 'attendance_state.dart';
 
 /// Monthly attendance history with a custom calendar grid and day detail sheet.
@@ -385,19 +386,11 @@ class _DayDetailSheet extends StatelessWidget {
           // Selfie preview
           if (record.selfieUrl != null) ...[
             const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                record.selfieUrl!,
-                height: 140,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 140,
-                  color: Colors.grey[100],
-                  child: const Center(child: Icon(Icons.broken_image_rounded, color: Colors.grey)),
-                ),
-              ),
+            GLImage(
+              imageUrl: record.selfieUrl!,
+              height: 140,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
           ],
           const SizedBox(height: 16),

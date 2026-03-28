@@ -12,6 +12,7 @@ export 'src/widgets/gl_button.dart';
 export 'src/widgets/gl_card.dart';
 export 'src/widgets/gl_status_badge.dart';
 export 'src/widgets/gl_text_field.dart';
+export 'src/widgets/gl_image.dart';
 
 // Responsive Utils
 export 'src/utils/responsive.dart';
