@@ -55,8 +55,10 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
     final state = context.watch<RewardsState>();
     final profile = state.profile;
 
-    if (profile != null) {
-      _updateAnimation(profile.pointsBalance);
+    if (profile != null && profile.pointsBalance != _prevPoints) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateAnimation(profile.pointsBalance);
+      });
     }
 
     return DefaultTabController(
