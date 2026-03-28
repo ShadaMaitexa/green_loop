@@ -5,7 +5,7 @@ class ScheduleRepository {
   final ApiClient _apiClient;
 
   static const String _wardSchedulePath = '/api/v1/wards/';
-  static const String _myPickupsPath = '/api/v1/pickups/my-pickups/';
+  static const String _myPickupsPath = '/api/v1/pickups/';
 
   ScheduleRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 

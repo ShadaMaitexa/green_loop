@@ -14,7 +14,7 @@ class UserManagementService {
   }) async {
     try {
       final response = await _apiClient.get(
-        '/api/v1/admin/users/',
+        '/api/v1/users/',
         queryParameters: {
           if (role != null) 'role': role,
           if (searchQuery != null) 'search': searchQuery,
@@ -28,20 +28,28 @@ class UserManagementService {
     }
   }
 
-  /// Create a new platform user.
   Future<PlatformUser> createUser(Map<String, dynamic> userData) async {
     try {
-      final response = await _apiClient.post('/api/v1/admin/users/', data: userData);
+      final response = await _apiClient.post('/api/v1/users/', data: userData);
       return PlatformUser.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Update an existing user.
+  /// Specialized worker/recycler creation with ward assignment.
+  Future<PlatformUser> createWorker(Map<String, dynamic> userData) async {
+    try {
+      final response = await _apiClient.post('/api/v1/users/create-worker/', data: userData);
+      return PlatformUser.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<PlatformUser> updateUser(String id, Map<String, dynamic> userData) async {
     try {
-      final response = await _apiClient.patch('/api/v1/admin/users/$id/', data: userData);
+      final response = await _apiClient.patch('/api/v1/users/$id/', data: userData);
       return PlatformUser.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
       rethrow;
@@ -51,7 +59,7 @@ class UserManagementService {
   /// Toggle user active status.
   Future<void> setUserStatus(String id, bool isActive) async {
     try {
-      await _apiClient.patch('/api/v1/admin/users/$id/', data: {'is_active': isActive});
+      await _apiClient.patch('/api/v1/users/$id/', data: {'is_active': isActive});
     } catch (e) {
       rethrow;
     }

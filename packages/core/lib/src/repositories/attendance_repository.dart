@@ -6,7 +6,6 @@ class AttendanceRepository {
   final ApiClient _apiClient;
 
   static const String _attendancePath = '/api/v1/hks/attendance/';
-  static const String _checkOutPath = '/api/v1/hks/attendance/checkout/';
   static const String _historyPath = '/api/v1/hks/attendance/history/';
   static const String _todayPath = '/api/v1/hks/attendance/today/';
 
@@ -32,10 +31,16 @@ class AttendanceRepository {
   }) async {
     try {
       final response = await _apiClient.post(_attendancePath, data: {
-        'selfie_url': selfieUrl,
-        'latitude': latitude,
-        'longitude': longitude,
-        'ppe_confirmed': ppeConfirmed,
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [longitude, latitude],
+        },
+        'properties': {
+          'selfie_url': selfieUrl,
+          'ppe_confirmed': ppeConfirmed,
+          'status': 'PRESENT',
+        },
       });
       return AttendanceRecord.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
@@ -52,7 +57,12 @@ class AttendanceRepository {
   /// Records end-of-day check-out.
   Future<AttendanceRecord> checkOut() async {
     try {
-      final response = await _apiClient.post(_checkOutPath, data: {});
+      final response = await _apiClient.patch(_attendancePath, data: {
+        'properties': {
+          'status': 'LOGGED_OUT',
+          'checkout_time': DateTime.now().toIso8601String(),
+        },
+      });
       return AttendanceRecord.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
       throw Exception(e.message);

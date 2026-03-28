@@ -59,7 +59,12 @@ class UserManagementState extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await _service.createUser(userData);
+      final role = userData['role']?.toString();
+      if (role == 'HKS_WORKER' || role == 'RECYCLER') {
+        await _service.createWorker(userData);
+      } else {
+        await _service.createUser(userData);
+      }
       await loadUsers();
       return true;
     } catch (e) {

@@ -7,6 +7,8 @@ class HksRouteRepository {
 
   static const String _todayRoutePath = '/api/v1/hks/routes/today/';
   static const String _attendancePath = '/api/v1/hks/attendance/';
+  static const String _paymentsPath = '/api/v1/payments/';
+  static const String _pickupsPath = '/api/v1/pickups/';
 
   HksRouteRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
@@ -61,7 +63,7 @@ class HksRouteRepository {
     required double longitude,
   }) async {
     try {
-      await _apiClient.post('/api/v1/hks/pickups/$pickupId/validate-qr/', data: {
+      await _apiClient.post('$_pickupsPath$pickupId/verify_scan/', data: {
         'type': 'Feature',
         'geometry': {
           'type': 'Point',
@@ -89,7 +91,7 @@ class HksRouteRepository {
     String? overrideNote,
   }) async {
     try {
-      await _apiClient.post('/api/v1/hks/pickups/$pickupId/complete/', data: {
+      await _apiClient.patch('$_pickupsPath$pickupId/complete/', data: {
         'type': 'Feature',
         'geometry': {
           'type': 'Point',
@@ -117,7 +119,7 @@ class HksRouteRepository {
   }) async {
     try {
       final response = await _apiClient.post(
-        '/api/v1/hks/fee/',
+        _paymentsPath,
         data: {
           'type': 'Feature',
           'geometry': null,
@@ -138,7 +140,7 @@ class HksRouteRepository {
   /// Retrieves the daily fee collection summary for the current worker.
   Future<DailyFeeSummary> getFeeSummary() async {
     try {
-      final response = await _apiClient.get('/api/v1/hks/fee/summary/today/');
+      final response = await _apiClient.get('${_paymentsPath}summary/');
       return DailyFeeSummary.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
       throw Exception(e.message);
