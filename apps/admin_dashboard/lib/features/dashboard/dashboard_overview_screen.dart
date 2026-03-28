@@ -41,6 +41,10 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
             _buildTrendChart(context, state.stats!.weeklyTrend, theme),
             const SizedBox(height: GLSpacing.xxl),
             _buildWardComparison(context, state.stats!.wardComparison, theme),
+            if (state.stats!.npsStats != null) ...[
+              const SizedBox(height: GLSpacing.xxl),
+              _buildNpsSection(context, state.stats!.npsStats!, theme),
+            ],
           ] else
             Center(child: Text(state.error ?? 'Failed to load data')),
         ],
@@ -211,5 +215,77 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
+  }
+
+  Widget _buildNpsSection(BuildContext context, NpsStats npsStats, ThemeData theme) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(GLSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('NPS & Resident Satisfaction', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: npsStats.score >= 0 ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(npsStats.score >= 0 ? Icons.sentiment_very_satisfied : Icons.sentiment_dissatisfied, 
+                           color: npsStats.score >= 0 ? Colors.green : Colors.red),
+                      const SizedBox(width: 8),
+                      Text(
+                        'NPS: ${npsStats.score.toStringAsFixed(1)}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: npsStats.score >= 0 ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: GLSpacing.md),
+            Text('Total Responses: ${npsStats.totalResponses}', style: TextStyle(color: Colors.grey[600])),
+            const SizedBox(height: GLSpacing.xl),
+            const Text('Recent Feedback', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: GLSpacing.md),
+            if (npsStats.recentFeedback.isEmpty)
+              const Text('No feedback yet.')
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: npsStats.recentFeedback.length,
+                itemBuilder: (context, index) {
+                  final feedback = npsStats.recentFeedback[index];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: _ratingColor(feedback.rating).withOpacity(0.2),
+                      child: Text('${feedback.rating}', style: TextStyle(color: _ratingColor(feedback.rating), fontWeight: FontWeight.bold)),
+                    ),
+                    title: Text(feedback.comment?.isNotEmpty == true ? feedback.comment! : 'No comment provided'),
+                    subtitle: Text(feedback.date),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _ratingColor(int rating) {
+    if (rating >= 9) return Colors.green;
+    if (rating >= 7) return Colors.orange;
+    return Colors.red;
   }
 }

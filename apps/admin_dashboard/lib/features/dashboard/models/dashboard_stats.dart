@@ -58,15 +58,55 @@ class WardComparison {
   }
 }
 
+class NpsFeedback {
+  final int rating;
+  final String? comment;
+  final String date;
+
+  const NpsFeedback({required this.rating, this.comment, required this.date});
+
+  factory NpsFeedback.fromJson(Map<String, dynamic> json) {
+    return NpsFeedback(
+      rating: json['rating'] as int,
+      comment: json['comment'] as String?,
+      date: json['date'] as String,
+    );
+  }
+}
+
+class NpsStats {
+  final double score;
+  final int totalResponses;
+  final List<NpsFeedback> recentFeedback;
+
+  const NpsStats({
+    required this.score,
+    required this.totalResponses,
+    required this.recentFeedback,
+  });
+
+  factory NpsStats.fromJson(Map<String, dynamic> json) {
+    return NpsStats(
+      score: (json['score'] as num?)?.toDouble() ?? 0.0,
+      totalResponses: json['total_responses'] as int? ?? 0,
+      recentFeedback: (json['recent_feedback'] as List? ?? [])
+          .map((e) => NpsFeedback.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 class DashboardStats {
   final DashboardKPIs kpis;
   final List<TrendPoint> weeklyTrend;
   final List<WardComparison> wardComparison;
+  final NpsStats? npsStats;
 
   const DashboardStats({
     required this.kpis,
     required this.weeklyTrend,
     required this.wardComparison,
+    this.npsStats,
   });
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
@@ -78,6 +118,9 @@ class DashboardStats {
       wardComparison: (json['ward_comparison'] as List? ?? [])
           .map((e) => WardComparison.fromJson(e as Map<String, dynamic>))
           .toList(),
+      npsStats: json['nps_stats'] != null 
+          ? NpsStats.fromJson(json['nps_stats'] as Map<String, dynamic>) 
+          : null,
     );
   }
 }

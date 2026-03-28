@@ -11,6 +11,9 @@ import 'features/complaints/complaint_submission_screen.dart';
 import 'features/schedule/schedule_screen.dart';
 import 'features/rewards/rewards_screen.dart';
 import 'features/rewards/rewards_state.dart';
+import 'features/nps/nps_service.dart';
+import 'features/nps/nps_state.dart';
+import 'features/nps/nps_bottom_sheet.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -20,6 +23,7 @@ void main() {
   final complaintRepository = ComplaintRepository(apiClient: apiClient);
   final scheduleRepository = ScheduleRepository(apiClient: apiClient);
   final rewardRepository = RewardRepository(apiClient: apiClient);
+  final npsService = NpsService(apiClient: apiClient);
 
   runApp(
     MultiProvider(
@@ -30,10 +34,14 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => RewardsState(repository: rewardRepository),
         ),
+        ChangeNotifierProvider(
+          create: (_) => NpsState(service: npsService),
+        ),
         Provider<PickupRepository>.value(value: pickupRepository),
         Provider<ComplaintRepository>.value(value: complaintRepository),
         Provider<ScheduleRepository>.value(value: scheduleRepository),
         Provider<RewardRepository>.value(value: rewardRepository),
+        Provider<NpsService>.value(value: npsService),
       ],
       child: const ResidentApp(),
     ),
@@ -82,8 +90,38 @@ class AuthWrapper extends StatelessWidget {
   }
 }
 
-class HomeScreenPlaceholder extends StatelessWidget {
+class HomeScreenPlaceholder extends StatefulWidget {
   const HomeScreenPlaceholder({super.key});
+
+  @override
+  State<HomeScreenPlaceholder> createState() => _HomeScreenPlaceholderState();
+}
+
+class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkNps();
+    });
+  }
+
+  Future<void> _checkNps() async {
+    final npsState = context.read<NpsState>();
+    await npsState.checkEligibility();
+    
+    if (npsState.isEligible && mounted) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (_) => const NpsBottomSheet(),
+      );
+      npsState.markAsShown();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
