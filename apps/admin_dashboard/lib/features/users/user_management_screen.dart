@@ -128,59 +128,108 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   Widget _buildUserTable(BuildContext context, UserManagementState state) {
-    return ListView(
-      children: [
-        DataTable(
-          columns: const [
-            DataColumn(label: Text('Name')),
-            DataColumn(label: Text('Role')),
-            DataColumn(label: Text('Ward')),
-            DataColumn(label: Text('Status')),
-            DataColumn(label: Text('Actions')),
-          ],
-          rows: state.users.map((user) {
-            return DataRow(cells: [
-              DataCell(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(user.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(user.email, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-              DataCell(
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getRoleColor(user.role).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
+    return GLResponsive(
+      mobile: ListView.builder(
+        itemCount: state.users.length,
+        itemBuilder: (context, index) {
+          final user = state.users[index];
+          return GLCard(
+            margin: const EdgeInsets.only(bottom: GLSpacing.md),
+            child: Padding(
+              padding: const EdgeInsets.all(GLSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(user.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text(user.email, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                      _buildRoleBadge(user.role),
+                    ],
                   ),
-                  child: Text(
-                    user.role.label,
-                    style: TextStyle(color: _getRoleColor(user.role), fontWeight: FontWeight.bold, fontSize: 12),
+                  const SizedBox(height: GLSpacing.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Ward: ${user.assignedWard?.nameEn ?? "-"}', style: const TextStyle(fontSize: 13)),
+                      Switch(
+                        value: user.isActive,
+                        onChanged: (value) => _confirmStatusToggle(context, user),
+                        activeThumbColor: Colors.green,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      desktop: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: DataTable(
+            columns: const [
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Role')),
+              DataColumn(label: Text('Ward')),
+              DataColumn(label: Text('Status')),
+              DataColumn(label: Text('Actions')),
+            ],
+            rows: state.users.map((user) {
+              return DataRow(cells: [
+                DataCell(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(user.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(user.email, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
                   ),
                 ),
-              ),
-              DataCell(Text(user.assignedWard?.nameEn ?? '-')),
-              DataCell(
-                Switch(
-                  value: user.isActive,
-                  onChanged: (value) => _confirmStatusToggle(context, user),
-                  activeThumbColor: Colors.green,
+                DataCell(_buildRoleBadge(user.role)),
+                DataCell(Text(user.assignedWard?.nameEn ?? '-')),
+                DataCell(
+                  Switch(
+                    value: user.isActive,
+                    onChanged: (value) => _confirmStatusToggle(context, user),
+                    activeThumbColor: Colors.green,
+                  ),
                 ),
-              ),
-              DataCell(
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () {}, // Implementation placeholder
+                DataCell(
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () {}, // Implementation placeholder
+                  ),
                 ),
-              ),
-            ]);
-          }).toList(),
+              ]);
+            }).toList(),
+          ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildRoleBadge(UserRole role) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _getRoleColor(role).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        role.label,
+        style: TextStyle(color: _getRoleColor(role), fontWeight: FontWeight.bold, fontSize: 12),
+      ),
     );
   }
 

@@ -28,28 +28,44 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<WardState>();
     final theme = Theme.of(context);
+    final isMobile = GLResponsive.isMobile(context);
 
-    return Row(
+    return Scaffold(
+      drawer: isMobile ? Drawer(child: _buildWardSidebar(context, state)) : null,
+      appBar: isMobile
+          ? AppBar(
+              title: const Text('Ward Management'),
+            )
+          : null,
+      body: GLResponsive(
+        mobile: _buildMainContent(context, state),
+        desktop: Row(
+          children: [
+            // Sidebar for Ward List
+            Container(
+              width: 350,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                border: Border(right: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+              ),
+              child: _buildWardSidebar(context, state),
+            ),
+            // Main Map Area
+            Expanded(
+              child: _buildMainContent(context, state),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(BuildContext context, WardState state) {
+    return Stack(
       children: [
-        // Sidebar for Ward List
-        Container(
-          width: 350,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            border: Border(right: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
-          ),
-          child: _buildWardSidebar(context, state),
-        ),
-        // Main Map Area
-        Expanded(
-          child: Stack(
-            children: [
-              _buildMap(context, state),
-              _buildMapControls(context, state),
-              if (state.drawMode != WardDrawMode.idle) _buildDrawOverlay(context, state),
-            ],
-          ),
-        ),
+        _buildMap(context, state),
+        _buildMapControls(context, state),
+        if (state.drawMode != WardDrawMode.idle) _buildDrawOverlay(context, state),
       ],
     );
   }
@@ -100,6 +116,9 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
                       ),
                       onTap: () {
                         state.selectWard(ward);
+                        if (GLResponsive.isMobile(context)) {
+                          Navigator.pop(context); // Close Drawer
+                        }
                         if (ward.boundary != null && ward.boundary!.isNotEmpty) {
                           _mapController?.animateCamera(
                             CameraUpdate.newLatLng(LatLng(ward.boundary![0][0], ward.boundary![0][1])),

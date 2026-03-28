@@ -70,77 +70,82 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: GLSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Spacer(flex: 1),
-                // Logo or Icon
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(GLSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: GLSpacing.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: GLSpacing.xl),
+                    // Logo or Icon
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(GLSpacing.lg),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.eco_rounded,
+                          size: 64,
+                          color: colorScheme.primary,
+                        ),
+                      ),
                     ),
-                    child: Icon(
-                      Icons.eco_rounded,
-                      size: 64,
-                      color: colorScheme.primary,
+                    const SizedBox(height: GLSpacing.xl),
+                    Text(
+                      'Welcome to GreenLoop',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
+                    const SizedBox(height: GLSpacing.sm),
+                    Text(
+                      'Enter your email to login or register',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: GLSpacing.xs),
+                    Text(
+                      'New users will be taken to profile setup',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: GLSpacing.xxl),
+                    GLTextField(
+                      label: 'Email Address',
+                      hint: 'name@example.com',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      errorText: _errorText,
+                      prefixIcon: const Icon(Icons.email_outlined),
+                    ),
+                    const SizedBox(height: GLSpacing.xl),
+                    GLButton(
+                      text: 'Continue',
+                      onPressed: _handleContinue,
+                      isLoading: authState.status == AuthStatus.loading,
+                    ),
+                    const SizedBox(height: GLSpacing.xxl),
+                    Text(
+                      'Secure OTP-based login • No password required',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: GLSpacing.xl),
+                  ],
                 ),
-                const SizedBox(height: GLSpacing.xl),
-                Text(
-                  'Welcome to GreenLoop',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: GLSpacing.sm),
-                Text(
-                  'Enter your email to login or register',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: GLSpacing.xs),
-                Text(
-                  'New users will be taken to profile setup',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.primary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: GLSpacing.xxl),
-                GLTextField(
-                  label: 'Email Address',
-                  hint: 'name@example.com',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  errorText: _errorText,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-                const SizedBox(height: GLSpacing.xl),
-                GLButton(
-                  text: 'Continue',
-                  onPressed: _handleContinue,
-                  isLoading: authState.status == AuthStatus.loading,
-                ),
-                const Spacer(flex: 2),
-                Text(
-                  'Secure OTP-based login • No password required',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: GLSpacing.lg),
-              ],
+              ),
             ),
           ),
         ),

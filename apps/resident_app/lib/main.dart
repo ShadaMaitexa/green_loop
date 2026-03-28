@@ -73,7 +73,7 @@ class AuthWrapper extends StatelessWidget {
 
     switch (status) {
       case AuthStatus.initial:
-      case AuthStatus.loading:
+      case AuthStatus.checking:
         return const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         );
@@ -82,6 +82,7 @@ class AuthWrapper extends StatelessWidget {
           return const ProfileSetupScreen();
         }
         return const HomeScreenPlaceholder();
+      case AuthStatus.loading:
       case AuthStatus.unauthenticated:
       case AuthStatus.otpRequested:
       case AuthStatus.error:
@@ -126,6 +127,7 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
   @override
   Widget build(BuildContext context) {
     final user = context.select<AuthState, AuthUser?>((s) => s.user);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -137,59 +139,87 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(GLSpacing.xl),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.dashboard_outlined, size: 64, color: Colors.green),
-              const SizedBox(height: GLSpacing.lg),
-              Text(
-                'Welcome, ${user?.email ?? "Resident"}',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: GLSpacing.md),
-              const Text('Welcome to GreenLoop!'),
-              const SizedBox(height: GLSpacing.xl),
-              GLButton(
-                text: 'Book a Pickup',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const BookingScreen()),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(GLSpacing.xl),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Column(
+              children: [
+                const SizedBox(height: GLSpacing.xl),
+                const Icon(Icons.dashboard_outlined, size: 64, color: Colors.green),
+                const SizedBox(height: GLSpacing.lg),
+                Text(
+                  'Welcome, ${user?.email ?? "Resident"}',
+                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
-              ),
-              const SizedBox(height: GLSpacing.md),
-              GLButton(
-                text: 'File a Complaint',
-                variant: GLButtonVariant.outline,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ComplaintSubmissionScreen()),
+                const SizedBox(height: GLSpacing.md),
+                const Text('What would you like to do today?'),
+                const SizedBox(height: GLSpacing.xxl),
+                
+                // Responsive Grid/List of actions
+                GLResponsive(
+                  mobile: Column(
+                    children: _buildActions(context),
+                  ),
+                  desktop: GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    mainAxisSpacing: GLSpacing.lg,
+                    crossAxisSpacing: GLSpacing.lg,
+                    childAspectRatio: 3,
+                    children: _buildActions(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: GLSpacing.md),
-              GLButton(
-                text: 'Weekly Schedule',
-                variant: GLButtonVariant.outline,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ScheduleScreen()),
-                ),
-              ),
-              const SizedBox(height: GLSpacing.md),
-              GLButton(
-                text: 'Rewards & Points',
-                variant: GLButtonVariant.outline,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RewardsScreen()),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    return [
+      GLButton(
+        text: 'Book a Pickup',
+        icon: Icons.local_shipping_rounded,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const BookingScreen()),
+        ),
+      ),
+      if (GLResponsive.isMobile(context)) const SizedBox(height: GLSpacing.md),
+      GLButton(
+        text: 'File a Complaint',
+        icon: Icons.report_problem_rounded,
+        variant: GLButtonVariant.outline,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ComplaintSubmissionScreen()),
+        ),
+      ),
+      if (GLResponsive.isMobile(context)) const SizedBox(height: GLSpacing.md),
+      GLButton(
+        text: 'Weekly Schedule',
+        icon: Icons.calendar_month_rounded,
+        variant: GLButtonVariant.outline,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ScheduleScreen()),
+        ),
+      ),
+      if (GLResponsive.isMobile(context)) const SizedBox(height: GLSpacing.md),
+      GLButton(
+        text: 'Rewards & Points',
+        icon: Icons.stars_rounded,
+        variant: GLButtonVariant.outline,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const RewardsScreen()),
+        ),
+      ),
+    ];
   }
 }

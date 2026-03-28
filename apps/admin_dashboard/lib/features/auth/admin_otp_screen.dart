@@ -44,7 +44,7 @@ class _AdminOtpScreenState extends State<AdminOtpScreen> {
     final success = await authState.verifyOtp(widget.email, otp);
 
     if (success && mounted) {
-      // Logic for dashboard navigation is handled by AuthWrapper status
+      Navigator.of(context).pop();
     } else if (mounted) {
       setState(() => _errorText = authState.errorMessage);
     }

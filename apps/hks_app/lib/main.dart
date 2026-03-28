@@ -71,13 +71,14 @@ class AuthWrapper extends StatelessWidget {
 
     switch (status) {
       case AuthStatus.initial:
-      case AuthStatus.loading:
+      case AuthStatus.checking:
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       case AuthStatus.authenticated:
         if (user != null && user.role != 'hks') {
           // For demo, we just show a lock screen or similar if roles don't match
         }
         return const HksHome();
+      case AuthStatus.loading:
       case AuthStatus.unauthenticated:
       case AuthStatus.otpRequested:
       case AuthStatus.error:

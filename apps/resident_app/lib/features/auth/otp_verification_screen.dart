@@ -44,9 +44,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final success = await authState.verifyOtp(widget.email, otp);
 
     if (success && mounted) {
-      // Logic for first-time vs returning user should be in navigation
-      // But standard logout/initial handles the state change.
-      // We will handle the navigation in child widgets or use a wrapper.
+      // Pop the verification screen. 
+      // AuthWrapper will handle switching to HomeScreen because state is now authenticated.
+      Navigator.of(context).pop();
     } else if (mounted) {
       setState(() => _errorText = authState.errorMessage);
     }

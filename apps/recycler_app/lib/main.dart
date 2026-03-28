@@ -54,7 +54,7 @@ class AuthWrapper extends StatelessWidget {
 
     switch (status) {
       case AuthStatus.initial:
-      case AuthStatus.loading:
+      case AuthStatus.checking:
         return const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         );
@@ -63,6 +63,7 @@ class AuthWrapper extends StatelessWidget {
           return const InvalidRolePlaceholder();
         }
         return const RecyclerDashboardScreen();
+      case AuthStatus.loading:
       case AuthStatus.unauthenticated:
       case AuthStatus.otpRequested:
       case AuthStatus.error:

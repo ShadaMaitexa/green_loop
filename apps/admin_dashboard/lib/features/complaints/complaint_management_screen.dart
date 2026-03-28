@@ -60,28 +60,46 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Complaints Management', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                  Text('Process and resolve platform-wide citizen complaints.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
-                ],
-              ),
-              TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabs: const [
-                  Tab(text: 'Queue'),
-                  Tab(text: 'Heatmap'),
-                ],
-              ),
-            ],
+          GLResponsive(
+            mobile: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTitle(theme),
+                const SizedBox(height: GLSpacing.md),
+                _buildTabBar(),
+              ],
+            ),
+            desktop: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTitle(theme),
+                _buildTabBar(),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTitle(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Complaints Management', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text('Process and resolve platform-wide citizen complaints.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
+      ],
+    );
+  }
+
+  Widget _buildTabBar() {
+    return TabBar(
+      controller: _tabController,
+      isScrollable: true,
+      tabs: const [
+        Tab(text: 'Queue'),
+        Tab(text: 'Heatmap'),
+      ],
     );
   }
 

@@ -5,6 +5,7 @@ import 'auth_repository.dart';
 
 enum AuthStatus {
   initial,
+  checking,
   authenticated,
   unauthenticated,
   loading,
@@ -28,7 +29,7 @@ class AuthState extends ChangeNotifier {
 
   /// Check current active session (for app cold starts).
   Future<void> initialize() async {
-    _setStatus(AuthStatus.loading);
+    _setStatus(AuthStatus.checking);
     try {
       final user = await _repository.checkAuth();
       if (user != null) {

@@ -167,11 +167,15 @@ class _BookingScreenState extends State<BookingScreen> {
 
   // --- STEP 1: WASTE TYPE ---
   Widget _stepWasteType() {
+    final isDesktop = GLResponsive.isDesktop(context);
+    final isTablet = GLResponsive.isTablet(context);
+
     return GridView.count(
-      crossAxisCount: 2,
+      crossAxisCount: isDesktop ? 6 : (isTablet ? 4 : 2),
       padding: const EdgeInsets.all(GLSpacing.xl),
       mainAxisSpacing: GLSpacing.lg,
       crossAxisSpacing: GLSpacing.lg,
+      childAspectRatio: isDesktop ? 1.0 : 1.0,
       children: WasteType.values.map((type) {
         final isSelected = _selectedWasteType == type;
         return GestureDetector(

@@ -38,16 +38,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= 1024;
-    final isTablet = MediaQuery.of(context).size.width >= 768;
+    final isDesktop = GLResponsive.isDesktop(context);
+    final isTablet = GLResponsive.isTablet(context);
 
     return Builder(
       builder: (context) => Scaffold(
         appBar: AdminAppBar(
-          showMenuButton: !isTablet,
+          showMenuButton: !isDesktop && !isTablet,
           onMenuPressed: () => Scaffold.of(context).openDrawer(),
         ),
-        drawer: isTablet
+        drawer: (isDesktop || isTablet)
             ? null
             : SidebarDrawer(
                 sections: _sections,

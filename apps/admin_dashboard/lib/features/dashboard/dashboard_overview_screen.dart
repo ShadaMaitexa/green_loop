@@ -77,22 +77,23 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
   }
 
   Widget _buildKPIs(BuildContext context, DashboardKPIs kpis, ThemeData theme) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final isDesktop = constraints.maxWidth > 800;
-      return GridView.count(
-        crossAxisCount: isDesktop ? 4 : 2,
-        crossAxisSpacing: GLSpacing.lg,
-        mainAxisSpacing: GLSpacing.lg,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          _buildKPICard('Pickups Today', '${kpis.pickupsToday}', Icons.local_shipping_rounded, Colors.blue),
-          _buildKPICard('Active Workers', '${kpis.activeWorkers}', Icons.people_rounded, Colors.green),
-          _buildKPICard('Pending Issues', '${kpis.pendingComplaints}', Icons.report_problem_rounded, Colors.orange),
-          _buildKPICard('Waste Weight', '${kpis.totalWasteKg.toStringAsFixed(1)} kg', Icons.scale_rounded, Colors.purple),
-        ],
-      );
-    });
+    final isDesktop = GLResponsive.isDesktop(context);
+    final isTablet = GLResponsive.isTablet(context);
+
+    return GridView.count(
+      crossAxisCount: isDesktop ? 4 : (isTablet ? 2 : 1),
+      childAspectRatio: isDesktop ? 1.5 : (isTablet ? 1.5 : 2.5),
+      crossAxisSpacing: GLSpacing.lg,
+      mainAxisSpacing: GLSpacing.lg,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        _buildKPICard('Pickups Today', '${kpis.pickupsToday}', Icons.local_shipping_rounded, Colors.blue),
+        _buildKPICard('Active Workers', '${kpis.activeWorkers}', Icons.people_rounded, Colors.green),
+        _buildKPICard('Pending Issues', '${kpis.pendingComplaints}', Icons.report_problem_rounded, Colors.orange),
+        _buildKPICard('Waste Weight', '${kpis.totalWasteKg.toStringAsFixed(1)} kg', Icons.scale_rounded, Colors.purple),
+      ],
+    );
   }
 
   Widget _buildKPICard(String title, String value, IconData icon, Color color) {
