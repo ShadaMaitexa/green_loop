@@ -193,113 +193,338 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildReport(BuildContext context, ComplianceReport report) {
     final theme = Theme.of(context);
     final numberFormat = NumberFormat('#,##0');
+    final currencyFormat = NumberFormat.currency(symbol: '₹');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final cardWidth = (constraints.maxWidth - (3 * GLSpacing.lg)) / 4;
-            return Wrap(
-              spacing: GLSpacing.lg,
-              runSpacing: GLSpacing.lg,
-              children: [
-                SizedBox(
-                  width: cardWidth > 200 ? cardWidth : double.infinity,
-                  child: _StatCard(
-                    title: 'Total Waste Collected',
-                    value: '${report.totalWasteCollectedKg.toStringAsFixed(1)} kg',
-                    icon: Icons.delete_outline,
-                    color: Colors.brown,
-                  ),
-                ),
-                SizedBox(
-                  width: cardWidth > 200 ? cardWidth : double.infinity,
-                  child: _StatCard(
-                    title: 'Household Coverage',
-                    value: '${report.householdCoveragePercentage.toStringAsFixed(1)}%',
-                    subtitle: '${numberFormat.format(report.coveredHouseholds)} / ${numberFormat.format(report.totalHouseholds)}',
-                    icon: Icons.home_work_outlined,
-                    color: Colors.blue,
-                  ),
-                ),
-                SizedBox(
-                  width: cardWidth > 200 ? cardWidth : double.infinity,
-                  child: _StatCard(
-                    title: 'Segregation Accuracy',
-                    value: '${report.segregationAccuracyPercentage.toStringAsFixed(1)}%',
-                    icon: Icons.check_circle_outline,
-                    color: Colors.green,
-                  ),
-                ),
-                SizedBox(
-                  width: cardWidth > 200 ? cardWidth : double.infinity,
-                  child: _StatCard(
-                    title: 'HKS Attendance',
-                    value: '${report.hksAttendancePercentage.toStringAsFixed(1)}%',
-                    subtitle: '${report.activeHKSWorkers} / ${report.totalHKSWorkers} active',
-                    icon: Icons.people_outline,
-                    color: Colors.orange,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: GLSpacing.xl),
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(GLRadius.lg),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(GLSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Waste Segregation Breakdown',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: GLSpacing.lg),
-                if (report.wasteByTypeKg.isEmpty)
-                  const Text('No waste data available for this period.')
-                else
-                  ...report.wasteByTypeKg.entries.map((entry) {
-                    final percentage = report.totalWasteCollectedKg > 0 
-                      ? (entry.value / report.totalWasteCollectedKg) * 100 
-                      : 0.0;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: GLSpacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(entry.key, style: const TextStyle(fontWeight: FontWeight.w500)),
-                              Text('${entry.value.toStringAsFixed(1)} kg (${percentage.toStringAsFixed(1)}%)'),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          LinearProgressIndicator(
-                            value: percentage / 100,
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            color: theme.colorScheme.primary,
-                            borderRadius: BorderRadius.circular(4),
-                            minHeight: 8,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-              ],
+        // Executive Summary / Key Metrics
+        _buildSectionTitle(theme, 'Executive Summary'),
+        const SizedBox(height: GLSpacing.lg),
+        _buildKeyMetricsGrid(report, numberFormat),
+        
+        const SizedBox(height: GLSpacing.xxl),
+        
+        // Detailed Metrics Row
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Waste Breakdown
+            Expanded(
+              flex: 3,
+              child: _buildWasteBreakdown(theme, report),
             ),
+            const SizedBox(width: GLSpacing.xl),
+            // Satisfaction & Reliability
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  _buildSatisfactionCard(theme, report),
+                  const SizedBox(height: GLSpacing.lg),
+                  _buildReliabilityCard(theme, report),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: GLSpacing.xxl),
+
+        // Financials & Growth Row
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Financial Summary
+            Expanded(
+              child: _buildFinancialCard(theme, report, currencyFormat),
+            ),
+            const SizedBox(width: GLSpacing.xl),
+            // Growth Projections
+            Expanded(
+              child: _buildGrowthCard(theme, report, numberFormat),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: GLSpacing.xxl),
+        const SizedBox(height: GLSpacing.xxl),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(ThemeData theme, String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Container(
+          height: 3,
+          width: 40,
+          margin: const EdgeInsets.only(top: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildKeyMetricsGrid(ComplianceReport report, NumberFormat nf) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - (3 * GLSpacing.lg)) / 4;
+        return Wrap(
+          spacing: GLSpacing.lg,
+          runSpacing: GLSpacing.lg,
+          children: [
+            SizedBox(
+              width: cardWidth > 200 ? cardWidth : double.infinity,
+              child: _StatCard(
+                title: 'Households Onboarded',
+                value: nf.format(report.coveredHouseholds),
+                subtitle: '${report.householdCoveragePercentage.toStringAsFixed(1)}% of total',
+                icon: Icons.home_work_rounded,
+                color: Colors.blue,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth > 200 ? cardWidth : double.infinity,
+              child: _StatCard(
+                title: 'Pickups Completed',
+                value: nf.format(report.totalPickupsCompleted),
+                subtitle: 'Total pilot pickups',
+                icon: Icons.local_shipping_rounded,
+                color: Colors.teal,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth > 200 ? cardWidth : double.infinity,
+              child: _StatCard(
+                title: 'Waste Diverted',
+                value: '${report.totalWasteCollectedKg.toStringAsFixed(1)} kg',
+                subtitle: 'Tonnage since launch',
+                icon: Icons.recycling_rounded,
+                color: Colors.green,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth > 200 ? cardWidth : double.infinity,
+              child: _StatCard(
+                title: 'NPS Score',
+                value: report.npsScore.toStringAsFixed(0),
+                subtitle: _getNpsLabel(report.npsScore),
+                icon: Icons.favorite_rounded,
+                color: _getNpsColor(report.npsScore),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWasteBreakdown(ThemeData theme, ComplianceReport report) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(GLRadius.lg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(GLSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Waste Segregation Breakdown', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: GLSpacing.lg),
+            if (report.wasteByTypeKg.isEmpty)
+              const Center(child: Text('No waste data for this period.'))
+            else
+              ...report.wasteByTypeKg.entries.map((entry) {
+                final percentage = report.totalWasteCollectedKg > 0 
+                  ? (entry.value / report.totalWasteCollectedKg) * 100 
+                  : 0.0;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: GLSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(entry.key, style: const TextStyle(fontWeight: FontWeight.w500)),
+                          Text('${entry.value.toStringAsFixed(1)} kg (${percentage.toStringAsFixed(1)}%)'),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: percentage / 100,
+                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(4),
+                        minHeight: 10,
+                      ),
+                    ],
+                  ),
+                );
+              }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSatisfactionCard(ThemeData theme, ComplianceReport report) {
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(GLRadius.lg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(GLSpacing.lg),
+        child: Column(
+          children: [
+            const Icon(Icons.groups_rounded, size: 32, color: Colors.blueGrey),
+            const SizedBox(height: GLSpacing.md),
+            Text('Citizen Engagement', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: GLSpacing.sm),
+            _infoRow('Onboarding Rate', '${report.householdCoveragePercentage.toStringAsFixed(1)}%'),
+            _infoRow('Accuracy Score', '${report.segregationAccuracyPercentage.toStringAsFixed(1)}%'),
+            _infoRow('Avg Response', '${report.averageResponseTimeSeconds.toStringAsFixed(1)}h'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReliabilityCard(ThemeData theme, ComplianceReport report) {
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(GLRadius.lg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(GLSpacing.lg),
+        child: Column(
+          children: [
+            const Icon(Icons.dns_rounded, size: 32, color: Colors.indigo),
+            const SizedBox(height: GLSpacing.md),
+            Text('System Reliability', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: GLSpacing.sm),
+            _infoRow('System Uptime', '${report.systemUptimePercentage.toStringAsFixed(2)}%'),
+            _infoRow('HKS Attendance', '${report.hksAttendancePercentage.toStringAsFixed(1)}%'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinancialCard(ThemeData theme, ComplianceReport report, NumberFormat cur) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(GLRadius.lg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(GLSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Financial Health', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: GLSpacing.lg),
+            _infoRowDetail('Total Collection', cur.format(report.totalFeeCollected), 'Fees from residents'),
+            const Divider(height: GLSpacing.xl),
+            _infoRowDetail('Cloud Infrastructure', cur.format(report.cloudCostUsd), 'Estimated cloud spend'),
+            const Divider(height: GLSpacing.xl),
+            _infoRowDetail('Budget Utilization', '${report.budgetUtilizationPercentage.toStringAsFixed(1)}%', 'Against pilot allocation'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGrowthCard(ThemeData theme, ComplianceReport report, NumberFormat nf) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(GLRadius.lg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(GLSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Growth & Projections', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: GLSpacing.lg),
+            _infoRowDetail('Next Month Projection', '+${nf.format(report.projectedOnboardingNextMonth)} HH', 'Estimated onboarding'),
+            const Divider(height: GLSpacing.xl),
+            _infoRowDetail('Tonnage Projection', '+${report.tonnageGrowthProjectionPercent.toStringAsFixed(1)}%', 'Expected growth in volume'),
+            const SizedBox(height: GLSpacing.xxl),
+            const Text(
+              'Scale-up Readiness: High',
+              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
+          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRowDetail(String label, String value, String description) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text(description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          ],
+        ),
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo)),
+      ],
+    );
+  }
+
+  String _getNpsLabel(double score) {
+    if (score >= 70) return 'World Class';
+    if (score >= 50) return 'Excellent';
+    if (score >= 30) return 'Good';
+    if (score >= 0) return 'Positive';
+    return 'Action Needed';
+  }
+
+  MaterialColor _getNpsColor(double score) {
+    if (score >= 50) return Colors.green;
+    if (score >= 0) return Colors.blue;
+    return Colors.red;
   }
 }
 
