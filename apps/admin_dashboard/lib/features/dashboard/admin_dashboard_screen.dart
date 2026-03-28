@@ -9,6 +9,7 @@ import '../complaints/complaint_management_screen.dart';
 import 'dashboard_overview_screen.dart';
 import '../rewards/reward_settings_screen.dart';
 import '../reports/reports_screen.dart';
+import 'pilot_readiness_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -21,6 +22,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
 
   final List<DashboardSection> _sections = [
+    DashboardSection(title: 'Pilot Launch', icon: Icons.rocket_launch_rounded),
     DashboardSection(title: 'Live Tracking', icon: Icons.live_tv_rounded),
     DashboardSection(title: 'Dashboard', icon: Icons.dashboard_rounded),
     DashboardSection(title: 'Users', icon: Icons.people_rounded),
@@ -97,6 +99,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildSectionContent(DashboardSection section) {
+    if (section.title == 'Pilot Launch') {
+      return const PilotReadinessScreen();
+    }
     if (section.title == 'Live Tracking') {
       return const LiveMapScreen();
     }

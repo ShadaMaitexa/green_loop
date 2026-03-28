@@ -1,5 +1,8 @@
 import 'ward.dart';
 
+/// Aligns with GET /api/v1/users/{id}/ response:
+/// { id (uuid), email, name, role, ward (int), is_active, created_at, points_balance }
+
 enum UserRole {
   resident,
   hksWorker,
@@ -7,14 +10,15 @@ enum UserRole {
   recycler;
 
   static UserRole fromString(String value) {
-    switch (value.toLowerCase()) {
-      case 'hks_worker':
+    switch (value.toUpperCase()) {
+      case 'HKS_WORKER':
+      case 'WORKER':
         return UserRole.hksWorker;
-      case 'admin':
+      case 'ADMIN':
         return UserRole.admin;
-      case 'recycler':
+      case 'RECYCLER':
         return UserRole.recycler;
-      case 'resident':
+      case 'RESIDENT':
       default:
         return UserRole.resident;
     }
@@ -23,13 +27,13 @@ enum UserRole {
   String toJson() {
     switch (this) {
       case UserRole.hksWorker:
-        return 'hks_worker';
+        return 'HKS_WORKER';
       case UserRole.admin:
-        return 'admin';
+        return 'ADMIN';
       case UserRole.recycler:
-        return 'recycler';
+        return 'RECYCLER';
       case UserRole.resident:
-        return 'resident';
+        return 'RESIDENT';
     }
   }
 
@@ -48,13 +52,22 @@ enum UserRole {
 }
 
 class PlatformUser {
-  final String id;
+  final String id;          // UUID
   final String email;
   final String? phone;
   final String name;
   final UserRole role;
   final bool isActive;
-  final Ward? assignedWard; // For HKS workers
+  final int? wardId;        // API returns ward as integer ID
+  final String? pointsBalance; // API returns as string e.g. "500.00"
+  final DateTime? createdAt;
+
+  /// Compatibility getter for UI components that expect a Ward object.
+  /// Note: Only contains ID and a placeholder name 'Ward X'.
+  Ward? get assignedWard => wardId != null ? Ward(id: wardId!, name: 'Ward $wardId') : null;
+
+  // Backwards compat — some screens check role as string
+  String get roleName => role.toJson();
 
   const PlatformUser({
     required this.id,
@@ -63,7 +76,9 @@ class PlatformUser {
     required this.name,
     required this.role,
     this.isActive = true,
-    this.assignedWard,
+    this.wardId,
+    this.pointsBalance,
+    this.createdAt,
   });
 
   factory PlatformUser.fromJson(Map<String, dynamic> json) {
@@ -72,9 +87,14 @@ class PlatformUser {
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString(),
       name: json['name']?.toString() ?? json['username']?.toString() ?? 'User',
-      role: UserRole.fromString(json['role']?.toString() ?? 'resident'),
+      role: UserRole.fromString(json['role']?.toString() ?? 'RESIDENT'),
       isActive: json['is_active'] as bool? ?? true,
-      assignedWard: json['ward'] != null ? Ward.fromJson(json['ward'] as Map<String, dynamic>) : null,
+      // API returns ward as int when present
+      wardId: json['ward'] is int ? json['ward'] as int : int.tryParse(json['ward']?.toString() ?? ''),
+      pointsBalance: json['points_balance']?.toString(),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
     );
   }
 
@@ -82,11 +102,11 @@ class PlatformUser {
     return {
       'id': id,
       'email': email,
-      'phone': phone,
+      if (phone != null) 'phone': phone,
       'name': name,
       'role': role.toJson(),
       'is_active': isActive,
-      if (assignedWard != null) 'ward_id': assignedWard!.id,
+      if (wardId != null) 'ward': wardId,
     };
   }
 }

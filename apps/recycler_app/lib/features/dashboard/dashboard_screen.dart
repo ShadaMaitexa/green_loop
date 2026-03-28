@@ -305,9 +305,9 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                   size: 20),
             ),
-            title: Text(p.materialName,
+            title: Text(p.materialName ?? 'Unknown',
                 style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Text('${p.weightKg.toStringAsFixed(2)} Kg  •  ${p.sourceWardName}'),
+            subtitle: Text('${p.weightKg.toStringAsFixed(2)} Kg  •  ${p.sourceWardName ?? 'Unknown'}'),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,

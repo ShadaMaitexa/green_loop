@@ -16,19 +16,29 @@ enum WasteType {
     required this.color,
   });
 
-  String toJson() => name.toLowerCase();
+  String toJson() {
+    switch (this) {
+      case WasteType.dry: return 'DRY';
+      case WasteType.wet: return 'WET';
+      case WasteType.eWaste: return 'E_WASTE';
+      case WasteType.biomedical: return 'BIOMEDICAL';
+    }
+  }
   
   static WasteType fromJson(String json) {
-    return WasteType.values.firstWhere(
-      (e) => e.name.toLowerCase() == json.toLowerCase(),
-      orElse: () => WasteType.dry,
-    );
+    switch (json.toUpperCase()) {
+      case 'DRY': return WasteType.dry;
+      case 'WET': return WasteType.wet;
+      case 'E_WASTE': return WasteType.eWaste;
+      case 'BIOMEDICAL': return WasteType.biomedical;
+      default: return WasteType.dry;
+    }
   }
 }
 
 class PickupSlot {
   final String date; // YYYY-MM-DD
-  final String slot; // Morning, Afternoon, Evening
+  final String slot; // MORNING, AFTERNOON, EVENING
   final bool isAvailable;
 
   const PickupSlot({
@@ -63,14 +73,20 @@ class PickupRequest {
     required this.longitude,
   });
 
+  /// Aligns with POST /api/v1/pickups/ Feature format
   Map<String, dynamic> toJson() {
     return {
-      'waste_type': wasteType.toJson(),
-      'scheduled_date': scheduledDate,
-      'slot': slot,
-      'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [longitude, latitude], // GeoJSON is [lng, lat]
+      },
+      'properties': {
+        'waste_type': wasteType.toJson(),
+        'scheduled_date': scheduledDate,
+        'slot': slot,
+        'address': address,
+      },
     };
   }
 }
@@ -97,15 +113,20 @@ class PickupResponse {
   });
 
   factory PickupResponse.fromJson(Map<String, dynamic> json) {
+    // Handle both flat and GeoJSON Feature responses
+    final Map<String, dynamic> properties = json['properties'] ?? json;
+    final Map<String, dynamic>? geometry = json['geometry'];
+    final List<dynamic>? coords = geometry?['coordinates'];
+
     return PickupResponse(
-      id: json['id']?.toString() ?? '',
-      qrCodeData: json['qr_code_data']?.toString() ?? '',
-      status: json['status']?.toString() ?? 'pending',
-      scheduledDate: json['scheduled_date'] as String,
-      slot: json['slot'] as String,
-      wasteType: WasteType.fromJson(json['waste_type'] as String),
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
+      id: json['id']?.toString() ?? properties['id']?.toString() ?? '',
+      qrCodeData: properties['qr_code_data']?.toString() ?? '',
+      status: properties['status']?.toString() ?? 'pending',
+      scheduledDate: properties['scheduled_date']?.toString() ?? '',
+      slot: properties['slot']?.toString() ?? 'MORNING',
+      wasteType: WasteType.fromJson(properties['waste_type']?.toString() ?? 'DRY'),
+      longitude: coords != null && coords.isNotEmpty ? (coords[0] as num).toDouble() : (json['longitude'] as num?)?.toDouble(),
+      latitude: coords != null && coords.length > 1 ? (coords[1] as num).toDouble() : (json['latitude'] as num?)?.toDouble(),
     );
   }
 }

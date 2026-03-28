@@ -115,20 +115,22 @@ class WardState extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Build closed polygon (GeoJSON requires first == last point)
+      final ring = _pendingPolygon.map((c) => [c[1], c[0]]).toList();
+      if (ring.first[0] != ring.last[0] || ring.first[1] != ring.last[1]) {
+        ring.add(ring.first);
+      }
+
+      // Send as GeoJSON Feature to match POST/PATCH /api/v1/wards/ schema
       final wardData = {
-        ...data,
-        'boundary': {
+        'type': 'Feature',
+        'geometry': {
           'type': 'Polygon',
-          'coordinates': [
-            // Closed polygon check: GeoJSON polygons MUST start and end with the same point.
-            if (_pendingPolygon.first[0] != _pendingPolygon.last[0] ||
-                _pendingPolygon.first[1] != _pendingPolygon.last[1])
-              [..._pendingPolygon, _pendingPolygon.first]
-                  .map((c) => [c[1], c[0]])
-                  .toList()
-            else
-              _pendingPolygon.map((c) => [c[1], c[0]]).toList(),
-          ],
+          'coordinates': [ring],
+        },
+        'properties': {
+          'name': data['name'] ?? data['name_en'] ?? '',
+          if (data['number'] != null) 'number': data['number'],
         },
       };
 

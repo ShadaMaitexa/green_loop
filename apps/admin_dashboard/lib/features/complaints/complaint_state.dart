@@ -22,7 +22,7 @@ class ComplaintState extends ChangeNotifier {
     final sortedList = List<ComplaintModel>.from(_complaints);
     sortedList.sort((a, b) {
       if (_currentSort == ComplaintSortBy.priority) {
-        return b.priority.index.compareTo(a.priority.index); // Critical first
+        return a.priority.value.compareTo(b.priority.value); // Lower value = more critical first
       } else if (_currentSort == ComplaintSortBy.status) {
         return a.status.index.compareTo(b.status.index);
       }

@@ -191,13 +191,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
   }
 
   Widget _buildPriorityBadge(ComplaintPriority priority) {
-    Color color;
-    switch (priority) {
-      case ComplaintPriority.low: color = Colors.green; break;
-      case ComplaintPriority.medium: color = Colors.orange; break;
-      case ComplaintPriority.high: color = Colors.red; break;
-      case ComplaintPriority.critical: color = Colors.purple; break;
-    }
+    final color = priority.flutterColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(4), border: Border.all(color: color.withOpacity(0.5))),
@@ -206,14 +200,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
   }
 
   Widget _buildStatusChip(ComplaintStatus status) {
-    Color color;
-    switch (status) {
-      case ComplaintStatus.submitted: color = Colors.grey; break;
-      case ComplaintStatus.assigned: color = Colors.blue; break;
-      case ComplaintStatus.inProgress: color = Colors.amber; break;
-      case ComplaintStatus.resolved: color = Colors.green; break;
-      case ComplaintStatus.closed: color = Colors.purple; break;
-    }
+    final color = status.color;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),

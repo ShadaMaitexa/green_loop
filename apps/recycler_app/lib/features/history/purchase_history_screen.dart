@@ -36,9 +36,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
       date: _filterDate != null
           ? DateFormat('yyyy-MM-dd').format(_filterDate!)
           : null,
-      materialId: _filterMaterial != null
-          ? int.tryParse(_filterMaterial!.id)
-          : null,
+      materialId: _filterMaterial?.id,
       wardId: _filterWard?.id,
     );
   }
@@ -373,13 +371,13 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
             Text('Purchase Details',
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: GLSpacing.lg),
-            _DetailRow(label: 'Material', value: purchase.materialName),
+            _DetailRow(label: 'Material', value: purchase.materialName ?? 'Unknown'),
             _DetailRow(
                 label: 'Weight', value: '${purchase.weightKg.toStringAsFixed(2)} Kg'),
             _DetailRow(
                 label: 'Date',
                 value: DateFormat('MMM dd, yyyy  HH:mm').format(purchase.date)),
-            _DetailRow(label: 'Source Ward', value: purchase.sourceWardName),
+            _DetailRow(label: 'Source Ward', value: purchase.sourceWardName ?? 'Unknown'),
             _DetailRow(
                 label: 'Total Amount',
                 value: '₹${purchase.totalAmount.toStringAsFixed(2)}'),
@@ -489,7 +487,7 @@ class _PurchaseCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(purchase.materialName,
+                    Text(purchase.materialName ?? 'Unknown',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 2),
                     Text(

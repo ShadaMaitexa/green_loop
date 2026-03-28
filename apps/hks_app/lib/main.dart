@@ -9,6 +9,7 @@ import 'features/route_map/route_map_state.dart';
 import 'features/attendance/attendance_dashboard.dart';
 import 'features/attendance/attendance_state.dart';
 import 'features/sync/sync_manager.dart';
+import 'features/resources/resources_screen.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -107,6 +108,11 @@ class _HksHomeState extends State<HksHome> {
       selectedIcon: Icon(Icons.badge_rounded),
       label: 'Attendance',
     ),
+    NavigationDestination(
+      icon: Icon(Icons.menu_book_outlined),
+      selectedIcon: Icon(Icons.menu_book_rounded),
+      label: 'Resources',
+    ),
   ];
 
   @override
@@ -117,6 +123,7 @@ class _HksHomeState extends State<HksHome> {
         children: const [
           RouteMapScreen(),
           AttendanceDashboard(),
+          HksResourcesScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(

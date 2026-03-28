@@ -7,9 +7,10 @@ import 'package:data_models/data_models.dart';
 class AuthRepository {
   final ApiClient _apiClient;
 
-  static const String _otpSendPath = '/api/v1/auth/otp/send/';
+  static const String _otpSendPath = '/api/v1/auth/otp/request/';
   static const String _otpVerifyPath = '/api/v1/auth/otp/verify/';
   static const String _adminLoginPath = '/api/v1/auth/admin/login/';
+  static const String _workerLoginPath = '/api/v1/auth/worker-login/';
   static const String _logoutPath = '/api/v1/auth/logout/';
   static const String _profilePath = '/api/v1/auth/profile/';
   static const String _wardsPath = '/api/v1/admin/wards/';
@@ -24,6 +25,28 @@ class AuthRepository {
         _adminLoginPath,
         data: {
           'email': email,
+          'password': password,
+        },
+      );
+    } on UnauthorizedException catch (_) {
+      throw const InvalidCredentialsException();
+    } on ApiException catch (e) {
+      if (e.message.toLowerCase().contains('disabled')) {
+        throw const AccountDisabledException();
+      }
+      throw AuthException(e.message);
+    } catch (e) {
+      throw AuthException(e.toString());
+    }
+  }
+
+  /// Authenticate recycler/HKS worker with username/password.
+  Future<void> loginWorker(String username, String password) async {
+    try {
+      await _apiClient.postPublic(
+        _workerLoginPath,
+        data: {
+          'username': username,
           'password': password,
         },
       );
@@ -60,7 +83,7 @@ class AuthRepository {
         _otpVerifyPath,
         data: {
           'email': email,
-          'otp': otp,
+          'code': otp,
         },
       );
 

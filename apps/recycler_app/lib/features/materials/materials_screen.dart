@@ -163,7 +163,7 @@ class _MaterialsScreenState extends State<MaterialsScreen> {
                 onPressed: () async {
                   if (!formKey.currentState!.validate()) return;
                   final type = MaterialType(
-                    id: existing?.id ?? '',
+                    id: existing?.id ?? 0,
                     name: nameController.text.trim(),
                     description: descController.text.trim(),
                     currentPricePerKg:

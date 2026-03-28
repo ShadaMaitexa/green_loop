@@ -24,6 +24,7 @@ class HksRouteRepository {
   }
 
   /// Logs attendance with GPS validation and PPE proof.
+  /// Backend expects GeoJSON Feature.
   Future<void> logAttendance({
     required double latitude,
     required double longitude,
@@ -31,15 +32,27 @@ class HksRouteRepository {
   }) async {
     try {
       await _apiClient.post(_attendancePath, data: {
-        'latitude': latitude,
-        'longitude': longitude,
-        'ppe_photo_url': ppePhotoUrl,
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [longitude, latitude], // GeoJSON [lng, lat]
+        },
+        'properties': {
+          'date': DateTime.now().toIso8601String().split('T')[0],
+          'ppe_photo_url': ppePhotoUrl,
+          'has_gloves': true,
+          'has_mask': true,
+          'has_vest': true,
+          'has_boots': true,
+          'status': 'PRESENT',
+        },
       });
     } on ApiException catch (e) {
       // Re-throw if validation failed (ST_Within check on backend)
       throw Exception(e.message);
     }
   }
+
   /// Validates a scanned QR code with backend logic.
   Future<void> validateQr({
     required String pickupId,
@@ -49,9 +62,14 @@ class HksRouteRepository {
   }) async {
     try {
       await _apiClient.post('/api/v1/hks/pickups/$pickupId/validate-qr/', data: {
-        'qr_token': qrToken,
-        'latitude': latitude,
-        'longitude': longitude,
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [longitude, latitude],
+        },
+        'properties': {
+          'qr_token': qrToken,
+        },
       });
     } on ApiException catch (e) {
       throw Exception(e.message);
@@ -72,14 +90,19 @@ class HksRouteRepository {
   }) async {
     try {
       await _apiClient.post('/api/v1/hks/pickups/$pickupId/complete/', data: {
-        'qr_token': qrToken,
-        'photo_url': photoUrl,
-        'classification': classification,
-        'confidence_score': confidence,
-        'weight': weight,
-        'latitude': latitude,
-        'longitude': longitude,
-        'override_note': overrideNote,
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [longitude, latitude],
+        },
+        'properties': {
+          'qr_token': qrToken,
+          'photo_url': photoUrl,
+          'classification': classification,
+          'confidence_score': confidence,
+          'weight': weight?.toString(), // Decimal string
+          'override_note': overrideNote,
+        },
       });
     } on ApiException catch (e) {
       throw Exception(e.message);
@@ -96,9 +119,14 @@ class HksRouteRepository {
       final response = await _apiClient.post(
         '/api/v1/hks/fee/',
         data: {
-          'pickup_id': pickupId,
-          'amount': amount,
-          'payment_mode': paymentMode == PaymentMode.upi ? 'upi' : 'cash',
+          'type': 'Feature',
+          'geometry': null,
+          'properties': {
+            'pickup_id': pickupId,
+            'amount': amount.toString(),
+            'payment_method': paymentMode == PaymentMode.upi ? 'UPI' : 'CASH',
+            'payment_date': DateTime.now().toIso8601String().split('T')[0],
+          },
         },
       );
       return FeeCollection.fromJson(response.data as Map<String, dynamic>);
