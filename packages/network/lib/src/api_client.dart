@@ -8,6 +8,7 @@ import 'interceptors/logging_interceptor.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio/io.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 /// The central HTTP client for all GreenLoop apps.
 ///
@@ -81,13 +82,17 @@ class ApiClient {
       RefreshTokenInterceptor(dio: dio, tokenStorage: this.tokenStorage),
     ]);
 
-    // ── Concurrency Tuning ────────────────────────────────────────────────
+    // ── Concurrency Tuning (Non-Web only) ──────────────────────────────────
     // Increase max connections for the underlying HttpClient
-    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.maxConnectionsPerHost = 100; // Increase from default of 5
-      return client;
-    };
+    if (!kIsWeb) {
+      if (dio.httpClientAdapter is IOHttpClientAdapter) {
+        (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+          final client = HttpClient();
+          client.maxConnectionsPerHost = 100; // Increase from default of 5
+          return client;
+        };
+      }
+    }
 
     return dio;
   }

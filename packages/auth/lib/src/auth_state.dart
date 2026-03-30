@@ -49,10 +49,10 @@ class AuthState extends ChangeNotifier {
   /// Perform email & password login (Admin).
   Future<bool> loginAdmin(String email, String password) async {
     _setStatus(AuthStatus.loading);
-    _fallbackOtp = null;
     try {
-      _fallbackOtp = await _repository.loginAdmin(email, password);
-      _setStatus(AuthStatus.otpRequested);
+      final user = await _repository.loginAdmin(email, password);
+      _user = user;
+      _setStatus(AuthStatus.authenticated);
       return true;
     } catch (e) {
       _errorMessage = e.toString();

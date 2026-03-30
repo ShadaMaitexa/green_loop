@@ -9,17 +9,17 @@ class AuthRepository {
 
   static const String _otpSendPath = '/api/v1/auth/otp/request/';
   static const String _otpVerifyPath = '/api/v1/auth/otp/verify/';
-  static const String _adminLoginPath = '/api/v1/auth/admin/login/';
+  static const String _adminLoginPath = '/api/v1/auth/admin-login/';
   static const String _workerLoginPath = '/api/v1/auth/worker-login/';
   static const String _logoutPath = '/api/v1/auth/logout/';
-  static const String _profilePath = '/api/v1/auth/profile/';
+  static const String _profilePath = '/api/v1/users/me/';
   static const String _wardsPath = '/api/v1/admin/wards/';
-  static const String _completeProfilePath = '/api/v1/auth/profile/complete/';
+  static const String _completeProfilePath = '/api/v1/users/me/';
 
   AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Authenticate admin with email/password to trigger OTP flow.
-  Future<String?> loginAdmin(String email, String password) async {
+  /// Authenticate admin with email/password.
+  Future<AuthUser> loginAdmin(String email, String password) async {
     try {
       final response = await _apiClient.postPublic(
         _adminLoginPath,
@@ -28,7 +28,28 @@ class AuthRepository {
           'password': password,
         },
       );
-      return response.data is Map ? response.data['otp']?.toString() : null;
+      
+      final data = response.data;
+      if (data == null || data['access'] == null || data['refresh'] == null) {
+        throw const AuthException('Invalid server response format.');
+      }
+
+      await _apiClient.tokenStorage.saveTokens(
+        accessToken: data['access'] as String,
+        refreshToken: data['refresh'] as String,
+      );
+
+      final userObj = data['user'] as Map<String, dynamic>? ?? {};
+      final bool registrationRequired = data['registration_required'] == true;
+
+      return AuthUser(
+        id: userObj['id']?.toString() ?? '',
+        email: userObj['email']?.toString() ?? email,
+        username: userObj['username']?.toString() ?? email,
+        name: userObj['name']?.toString() ?? '',
+        role: userObj['role']?.toString() ?? 'admin',
+        isProfileCompleted: !registrationRequired,
+      );
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
@@ -99,7 +120,18 @@ class AuthRepository {
         refreshToken: data['refresh'] as String,
       );
 
-      return await getProfile();
+      final userObj = data['user'] as Map<String, dynamic>? ?? {};
+      final bool registrationRequired = data['registration_required'] == true;
+
+      return AuthUser(
+        id: userObj['id']?.toString() ?? '',
+        email: userObj['email']?.toString() ?? email,
+        username: userObj['username']?.toString() ?? email,
+        name: userObj['name']?.toString() ?? '',
+        role: userObj['role']?.toString() ?? 'resident',
+        isProfileCompleted: !registrationRequired,
+      );
+
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
@@ -154,7 +186,7 @@ class AuthRepository {
   /// Complete the resident profile with name and location.
   Future<AuthUser> completeProfile(ResidentProfile profile) async {
     try {
-      final response = await _apiClient.post(
+      final response = await _apiClient.patch(
         _completeProfilePath,
         data: profile.toJson(),
       );

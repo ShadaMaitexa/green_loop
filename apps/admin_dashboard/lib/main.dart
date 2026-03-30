@@ -101,7 +101,6 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = context.select<AuthState, AuthStatus>((s) => s.status);
-    final user = context.select<AuthState, AuthUser?>((s) => s.user);
 
     switch (status) {
       case AuthStatus.initial:
@@ -110,9 +109,6 @@ class AuthWrapper extends StatelessWidget {
           body: Center(child: CircularProgressIndicator()),
         );
       case AuthStatus.authenticated:
-        if (user != null && user.role != 'admin') {
-           return const InvalidRolePlaceholder();
-        }
         return const AdminDashboardScreen();
       case AuthStatus.loading:
       case AuthStatus.unauthenticated:

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:auth/auth.dart';
-import 'admin_otp_screen.dart';
+
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -37,13 +37,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     final authState = context.read<AuthState>();
     final success = await authState.loginAdmin(email, password);
 
-    if (success && mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => AdminOtpScreen(email: email),
-        ),
-      );
-    } else if (mounted) {
+    if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authState.errorMessage ?? 'Login failed'),
@@ -125,14 +119,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   isLoading: authState.status == AuthStatus.loading,
                 ),
                 const Spacer(flex: 2),
-                Text(
-                  'Two-factor authentication is required for admin access.',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: GLSpacing.lg),
               ],
             ),
           ),
