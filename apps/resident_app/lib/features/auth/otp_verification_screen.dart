@@ -21,6 +21,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void initState() {
     super.initState();
     _otpController.addListener(_onOtpChanged);
+
+    // Development fallback: If the backend returned the OTP (e.g. because email failed),
+    // show it in a snackbar to facilitate local testing.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = context.read<AuthState>();
+      if (authState.fallbackOtp != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('DEBUG: Fallback OTP is ${authState.fallbackOtp}'),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
+    });
   }
 
   @override

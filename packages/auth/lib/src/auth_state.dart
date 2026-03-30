@@ -20,12 +20,14 @@ class AuthState extends ChangeNotifier {
   AuthStatus _status = AuthStatus.initial;
   AuthUser? _user;
   String? _errorMessage;
+  String? _fallbackOtp;
 
   AuthState({required AuthRepository repository}) : _repository = repository;
 
   AuthStatus get status => _status;
   AuthUser? get user => _user;
   String? get errorMessage => _errorMessage;
+  String? get fallbackOtp => _fallbackOtp;
 
   /// Check current active session (for app cold starts).
   Future<void> initialize() async {
@@ -47,8 +49,9 @@ class AuthState extends ChangeNotifier {
   /// Perform email & password login (Admin).
   Future<bool> loginAdmin(String email, String password) async {
     _setStatus(AuthStatus.loading);
+    _fallbackOtp = null;
     try {
-      await _repository.loginAdmin(email, password);
+      _fallbackOtp = await _repository.loginAdmin(email, password);
       _setStatus(AuthStatus.otpRequested);
       return true;
     } catch (e) {
@@ -61,8 +64,9 @@ class AuthState extends ChangeNotifier {
   /// Request OTP (User).
   Future<bool> requestOtp(String email) async {
     _setStatus(AuthStatus.loading);
+    _fallbackOtp = null;
     try {
-      await _repository.requestOtp(email);
+      _fallbackOtp = await _repository.requestOtp(email);
       _setStatus(AuthStatus.otpRequested);
       return true;
     } catch (e) {

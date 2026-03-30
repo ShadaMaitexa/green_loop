@@ -19,15 +19,16 @@ class AuthRepository {
   AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Authenticate admin with email/password to trigger OTP flow.
-  Future<void> loginAdmin(String email, String password) async {
+  Future<String?> loginAdmin(String email, String password) async {
     try {
-      await _apiClient.postPublic(
+      final response = await _apiClient.postPublic(
         _adminLoginPath,
         data: {
           'email': email,
           'password': password,
         },
       );
+      return response.data is Map ? response.data['otp']?.toString() : null;
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
@@ -63,12 +64,13 @@ class AuthRepository {
   }
 
   /// Request OTP for a given email (User flow).
-  Future<void> requestOtp(String email) async {
+  Future<String?> requestOtp(String email) async {
     try {
-      await _apiClient.postPublic(
+      final response = await _apiClient.postPublic(
         _otpSendPath,
         data: {'email': email},
       );
+      return response.data is Map ? response.data['otp']?.toString() : null;
     } on ApiException catch (e) {
       throw AuthException(e.message);
     } catch (e) {

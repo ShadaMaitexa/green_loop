@@ -9,9 +9,9 @@ extension EnvironmentExtension on Environment {
   String get baseUrl {
     switch (this) {
       case Environment.dev:
-        return 'http://10.0.2.2:8000'; // Android emulator → localhost
+        return 'https://greenloop-hdwc.onrender.com';
       case Environment.staging:
-        return 'https://staging-api.greenloop.app';
+        return 'https://greenloop-hdwc.onrender.com';
       case Environment.production:
         return 'https://api.greenloop.app';
     }
