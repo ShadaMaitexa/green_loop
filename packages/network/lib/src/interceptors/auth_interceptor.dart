@@ -27,7 +27,12 @@ class AuthInterceptor extends Interceptor {
 
     final token = await _tokenStorage.getAccessToken();
     if (token != null && token.isNotEmpty) {
+      // ignore: avoid_print
+      print('🔑 AuthInterceptor: Attaching token (length: ${token.length})');
       options.headers['Authorization'] = 'Bearer $token';
+    } else {
+      // ignore: avoid_print
+      print('⚠️ AuthInterceptor: No access token found in storage.');
     }
 
     return handler.next(options);

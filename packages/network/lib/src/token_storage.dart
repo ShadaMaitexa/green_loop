@@ -1,64 +1,102 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
-/// Manages secure persistence of JWT access + refresh tokens.
-///
-/// Tokens are stored in the OS keychain / keystore via flutter_secure_storage,
-/// so they survive app restarts and are never written to shared-prefs in plain text.
+/// Manages persistence of JWT access + refresh tokens.
+/// 
+/// - Mobile: Uses FlutterSecureStorage for encrypted storage.
+/// - Web: Uses SharedPreferences (Browser LocalStorage) for reliability.
 class TokenStorage {
   static const _accessKey = 'greenloop_access_token';
   static const _refreshKey = 'greenloop_refresh_token';
 
-  final FlutterSecureStorage _storage;
+  final FlutterSecureStorage _secureStorage;
+  SharedPreferences? _webStorage;
 
   TokenStorage({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+      : _secureStorage = storage ?? const FlutterSecureStorage();
+
+  Future<void> _initWeb() async {
+    if (kIsWeb && _webStorage == null) {
+      _webStorage = await SharedPreferences.getInstance();
+    }
+  }
 
   // ── Access token ──────────────────────────────────────────────────────────
 
-  Future<String?> getAccessToken() => _storage.read(key: _accessKey);
+  Future<String?> getAccessToken() async {
+    if (kIsWeb) {
+      await _initWeb();
+      return _webStorage?.getString(_accessKey);
+    }
+    return _secureStorage.read(key: _accessKey);
+  }
 
-  Future<void> saveAccessToken(String token) =>
-      _storage.write(key: _accessKey, value: token);
+  Future<void> saveAccessToken(String token) async {
+    if (kIsWeb) {
+      await _initWeb();
+      await _webStorage?.setString(_accessKey, token);
+      return;
+    }
+    return _secureStorage.write(key: _accessKey, value: token);
+  }
 
-  Future<void> deleteAccessToken() => _storage.delete(key: _accessKey);
+  Future<void> deleteAccessToken() async {
+    if (kIsWeb) {
+      await _initWeb();
+      await _webStorage?.remove(_accessKey);
+      return;
+    }
+    return _secureStorage.delete(key: _accessKey);
+  }
 
   // ── Refresh token ─────────────────────────────────────────────────────────
 
-  Future<String?> getRefreshToken() => _storage.read(key: _refreshKey);
+  Future<String?> getRefreshToken() async {
+    if (kIsWeb) {
+      await _initWeb();
+      return _webStorage?.getString(_refreshKey);
+    }
+    return _secureStorage.read(key: _refreshKey);
+  }
 
-  Future<void> saveRefreshToken(String token) =>
-      _storage.write(key: _refreshKey, value: token);
+  Future<void> saveRefreshToken(String token) async {
+    if (kIsWeb) {
+      await _initWeb();
+      await _webStorage?.setString(_refreshKey, token);
+      return;
+    }
+    return _secureStorage.write(key: _refreshKey, value: token);
+  }
 
-  Future<void> deleteRefreshToken() => _storage.delete(key: _refreshKey);
+  Future<void> deleteRefreshToken() async {
+    if (kIsWeb) {
+      await _initWeb();
+      await _webStorage?.remove(_refreshKey);
+      return;
+    }
+    return _secureStorage.delete(key: _refreshKey);
+  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  /// Save both tokens at once (e.g. after login).
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
   }) async {
-    await Future.wait([
-      saveAccessToken(accessToken),
-      saveRefreshToken(refreshToken),
-    ]);
+    await saveAccessToken(accessToken);
+    await saveRefreshToken(refreshToken);
   }
 
-  /// Wipe all stored tokens (e.g. on logout).
   Future<void> clearAll() async {
-    await Future.wait([
-      deleteAccessToken(),
-      deleteRefreshToken(),
-    ]);
+    await deleteAccessToken();
+    await deleteRefreshToken();
   }
 
-  /// Returns true only when both tokens are present.
   Future<bool> hasValidSession() async {
     final access = await getAccessToken();
     final refresh = await getRefreshToken();
-    return access != null &&
-        access.isNotEmpty &&
-        refresh != null &&
-        refresh.isNotEmpty;
+    return access != null && access.isNotEmpty && 
+           refresh != null && refresh.isNotEmpty;
   }
 }
