@@ -19,6 +19,12 @@ import 'package:core/core.dart';
 import 'features/rewards/reward_settings_state.dart';
 import 'features/reports/reports_service.dart';
 import 'features/reports/reports_state.dart';
+import 'features/attendance/attendance_service.dart';
+import 'features/attendance/attendance_state.dart';
+import 'features/pickup_slots/pickup_slots_service.dart';
+import 'features/pickup_slots/pickup_slots_state.dart';
+import 'features/payments/payment_service.dart';
+import 'features/payments/payment_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -54,6 +60,24 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => ComplaintState(
             service: context.read<ComplaintService>(),
+          ),
+        ),
+        Provider(create: (_) => AttendanceService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => AttendanceState(
+            service: context.read<AttendanceService>(),
+          ),
+        ),
+        Provider(create: (_) => PickupSlotsService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => PickupSlotsState(
+            service: context.read<PickupSlotsService>(),
+          ),
+        ),
+        Provider(create: (_) => PaymentService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => PaymentState(
+            service: context.read<PaymentService>(),
           ),
         ),
         Provider(create: (_) => DashboardService(apiClient: apiClient)),

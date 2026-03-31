@@ -10,6 +10,9 @@ import 'dashboard_overview_screen.dart';
 import '../rewards/reward_settings_screen.dart';
 import '../reports/reports_screen.dart';
 import 'pilot_readiness_screen.dart';
+import '../attendance/attendance_screen.dart';
+import '../pickup_slots/pickup_slots_management_screen.dart';
+import '../payments/payment_management_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -31,6 +34,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     DashboardSection(title: 'Pickups', icon: Icons.local_shipping_rounded),
     DashboardSection(title: 'Complaints', icon: Icons.report_problem_rounded),
     DashboardSection(title: 'Reports', icon: Icons.analytics_rounded),
+    DashboardSection(title: 'Payments', icon: Icons.payments_rounded),
+    DashboardSection(title: 'Attendance', icon: Icons.how_to_reg_rounded),
+    DashboardSection(title: 'Pickup Slots', icon: Icons.calendar_month_rounded),
     DashboardSection(title: 'Reward Settings', icon: Icons.celebration_rounded),
     DashboardSection(title: 'Settings', icon: Icons.settings_rounded),
   ];
@@ -122,6 +128,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
     if (section.title == 'Reports') {
       return const ReportsScreen();
+    }
+    if (section.title == 'Attendance') {
+      return const AttendanceScreen();
+    }
+    if (section.title == 'Pickup Slots') {
+      return const PickupSlotsManagementScreen();
+    }
+    if (section.title == 'Payments') {
+      return const PaymentManagementScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
