@@ -39,6 +39,11 @@ class _BookingScreenState extends State<BookingScreen> {
     super.initState();
     // In a full implementation we'd fetch the ResidentProfile here.
     // For now, if we don't have it, we'll let the user detect GPS.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadSlots();
+      }
+    });
   }
 
   void _nextStep() => setState(() => _currentStep++);
@@ -208,11 +213,25 @@ class _BookingScreenState extends State<BookingScreen> {
 
   // --- STEP 2: DATE ---
   Widget _stepDateSelection() {
-    if (_slots.isEmpty && !_isLoadingSlots) {
-       _loadSlots();
-    }
-    
     if (_isLoadingSlots) return const Center(child: CircularProgressIndicator());
+
+    if (_slots.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.calendar_today, size: 60, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text('No slots available at the moment.'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadSlots,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
     // Group slots by date
     final dates = _slots.map((s) => s.date).toSet().toList();

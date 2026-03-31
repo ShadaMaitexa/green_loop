@@ -13,7 +13,7 @@ class ComplaintService {
   }) async {
     try {
       final response = await _apiClient.get(
-        '/api/v1/admin/complaints/',
+        '/api/v1/complaints/',
         queryParameters: {
           'sort': sortBy,
           'order': ascending ? 'asc' : 'desc',
@@ -29,9 +29,9 @@ class ComplaintService {
   /// Assign a complaint to a worker or staff.
   Future<ComplaintModel> assignComplaint(String id, String userId) async {
     try {
-      final response = await _apiClient.patch(
-        '/api/v1/admin/complaints/$id/',
-        data: {'assigned_to': userId, 'status': 'assigned'},
+      final response = await _apiClient.post(
+        '/api/v1/complaints/$id/assign/',
+        data: {'worker_id': userId},
       );
       return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
@@ -43,7 +43,7 @@ class ComplaintService {
   Future<ComplaintModel> updateStatus(String id, ComplaintStatus status) async {
     try {
       final response = await _apiClient.patch(
-        '/api/v1/admin/complaints/$id/',
+        '/api/v1/complaints/$id/',
         data: {'status': status.toJson()},
       );
       return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
@@ -55,7 +55,7 @@ class ComplaintService {
   /// Fetch heatmap data (KMeans clustered hotspots).
   Future<List<Map<String, dynamic>>> getHeatmapData() async {
     try {
-      final response = await _apiClient.get('/api/v1/admin/complaints/heatmap/');
+      final response = await _apiClient.get('/api/v1/complaints/heatmap/');
       return (response.data as List).cast<Map<String, dynamic>>();
     } catch (e) {
       rethrow;
@@ -65,7 +65,7 @@ class ComplaintService {
   /// Fetch potential assignees (HKS workers and Admin staff).
   Future<List<PlatformUser>> getPotentialAssignees() async {
     try {
-      final response = await _apiClient.get('/api/v1/admin/users/', queryParameters: {
+      final response = await _apiClient.get('/api/v1/users/', queryParameters: {
         'role__in': 'hks_worker,admin',
       });
       final list = response.data as List;

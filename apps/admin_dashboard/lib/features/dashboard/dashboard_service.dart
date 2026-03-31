@@ -10,7 +10,7 @@ class DashboardService {
   Future<DashboardStats> getStats({String range = '7d'}) async {
     try {
       final response = await _apiClient.get(
-        '/api/v1/admin/dashboard/stats/',
+        '/api/v1/dashboard/stats/',
         queryParameters: {'range': range},
       );
       return DashboardStats.fromJson(response.data as Map<String, dynamic>);

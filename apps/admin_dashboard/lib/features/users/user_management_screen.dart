@@ -283,7 +283,7 @@ class _AddUserDialogState extends State<_AddUserDialog> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  UserRole _selectedRole = UserRole.resident;
+  UserRole _selectedRole = UserRole.hksWorker;
   List<Ward> _wards = [];
   int? _selectedWardId;
 
@@ -319,7 +319,7 @@ class _AddUserDialogState extends State<_AddUserDialog> {
               DropdownButtonFormField<UserRole>(
                 value: _selectedRole,
                 decoration: const InputDecoration(labelText: 'Role'),
-                items: UserRole.values.map((role) => DropdownMenuItem(
+                items: [UserRole.hksWorker, UserRole.recycler].map((role) => DropdownMenuItem(
                       value: role,
                       child: Text(role.label),
                     )).toList(),

@@ -14,9 +14,16 @@ class MonitoringService {
   /// Fetch all ward boundaries for overlay display.
   Future<List<WardBoundary>> getWardBoundaries() async {
     try {
-      final response = await _apiClient.get('/api/v1/admin/wards/boundaries/');
-      final list = response.data as List;
-      return list.map((e) => WardBoundary.fromJson(e)).toList();
+      final response = await _apiClient.get('/api/v1/wards/');
+      final data = response.data;
+      if (data is Map && data['type'] == 'FeatureCollection') {
+        final features = data['features'] as List? ?? [];
+        return features.map((e) => WardBoundary.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      if (data is List) {
+        return data.map((e) => WardBoundary.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      return [];
     } catch (e) {
       rethrow;
     }
@@ -25,7 +32,7 @@ class MonitoringService {
   /// Fetch current pending pickups to display on map.
   Future<List<PickupResponse>> getPendingPickups() async {
     try {
-      final response = await _apiClient.get('/api/v1/admin/pickups/pending/');
+      final response = await _apiClient.get('/api/v1/pickups/pending/');
       final list = response.data as List;
       return list.map((e) => PickupResponse.fromJson(e)).toList();
     } catch (e) {
