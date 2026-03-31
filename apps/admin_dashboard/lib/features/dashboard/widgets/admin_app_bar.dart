@@ -27,12 +27,12 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
               icon: const Icon(Icons.menu_rounded),
               onPressed: onMenuPressed,
             )
-          : Padding(
-              padding: const EdgeInsets.all(GLSpacing.sm),
-              child: Image.asset(
-                'assets/logo.png', // Fallback to icon if asset missing
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.eco_rounded, color: Colors.green),
+          : const Padding(
+              padding: EdgeInsets.all(GLSpacing.sm),
+              child: Icon(
+                Icons.eco_rounded,
+                color: Colors.green,
+                size: 32,
               ),
             ),
       title: Text(

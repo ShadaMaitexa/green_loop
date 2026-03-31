@@ -15,6 +15,9 @@ import '../pickup_slots/pickup_slots_management_screen.dart';
 import '../payments/payment_management_screen.dart';
 import '../pickups/pickup_management_screen.dart';
 import '../settings/settings_screen.dart';
+import '../routes/route_management_screen.dart';
+import '../contamination/contamination_review_screen.dart';
+import '../recycler/recycler_ledger_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -40,6 +43,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     DashboardSection(title: 'Attendance', icon: Icons.how_to_reg_rounded),
     DashboardSection(title: 'Pickup Slots', icon: Icons.calendar_month_rounded),
     DashboardSection(title: 'Reward Settings', icon: Icons.celebration_rounded),
+    DashboardSection(title: 'Contamination', icon: Icons.report_off_rounded),
+    DashboardSection(title: 'Recycler Ledger', icon: Icons.recycling_rounded),
     DashboardSection(title: 'Settings', icon: Icons.settings_rounded),
   ];
 
@@ -143,8 +148,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (section.title == 'Pickups') {
       return const PickupManagementScreen();
     }
+    if (section.title == 'Routes') {
+      return const RouteManagementScreen();
+    }
     if (section.title == 'Settings') {
       return const SettingsScreen();
+    }
+    if (section.title == 'Contamination') {
+      return const ContaminationReviewScreen();
+    }
+    if (section.title == 'Recycler Ledger') {
+      return const RecyclerLedgerScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
