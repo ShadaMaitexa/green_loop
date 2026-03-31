@@ -9,14 +9,13 @@ class RecyclerRepository {
 
   /// Fetches the recycler's dashboard totals.
   Future<RecyclerDashboardData> getDashboardData() async {
-    final response = await apiClient.get('/api/v1/recycler/dashboard/');
+    final response = await apiClient.get('/api/v1/dashboard/stats/'); // Updated to match schema if standard
     return RecyclerDashboardData.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Fetches material types available to the recycler.
-  /// API returns a plain list from /api/v1/material-types/
   Future<List<MaterialType>> getMaterialTypes() async {
-    final response = await apiClient.get('/api/v1/material-types/');
+    final response = await apiClient.get('/api/v1/recycler/materials/');
     return (response.data as List)
         .map((e) => MaterialType.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -25,7 +24,7 @@ class RecyclerRepository {
   /// Adds a new material type.
   Future<bool> addMaterial(MaterialType type) async {
     try {
-      await apiClient.post('/api/v1/material-types/', data: type.toJson());
+      await apiClient.post('/api/v1/recycler/materials/', data: type.toJson());
       return true;
     } catch (e) {
       return false;
@@ -36,7 +35,7 @@ class RecyclerRepository {
   Future<bool> updateMaterial(MaterialType type) async {
     try {
       await apiClient.patch(
-        '/api/v1/material-types/${type.id}/',
+        '/api/v1/recycler/materials/${type.id}/',
         data: type.toJson(),
       );
       return true;
@@ -49,7 +48,7 @@ class RecyclerRepository {
   Future<bool> recordPurchase(RecyclerPurchase purchase) async {
     try {
       await apiClient.post(
-        '/api/v1/recycler-purchases/',
+        '/api/v1/recycler/purchases/',
         data: purchase.toJson(),
       );
       return true;
@@ -70,7 +69,7 @@ class RecyclerRepository {
     if (wardId != null) query['ward'] = wardId.toString();
 
     final response = await apiClient.get(
-      '/api/v1/recycler-purchases/',
+      '/api/v1/recycler/purchases/',
       queryParameters: query,
     );
     return (response.data as List)

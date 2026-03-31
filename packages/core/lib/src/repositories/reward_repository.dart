@@ -39,14 +39,14 @@ class RewardRepository {
 
   /// Fetches the global rewards configuration.
   Future<RewardConfig> getConfig() async {
-    final response = await apiClient.get('/api/v1/reward-config/');
-    return RewardConfig.fromJson(response as Map<String, dynamic>);
+    final response = await apiClient.get('/api/v1/reward-settings/');
+    return RewardConfig.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Updates the global rewards configuration.
   Future<bool> updateConfig(RewardConfig config) async {
     try {
-      await apiClient.patch('/api/v1/reward-config/', data: config.toJson());
+      await apiClient.patch('/api/v1/reward-settings/', data: config.toJson());
       return true;
     } catch (e) {
       return false;

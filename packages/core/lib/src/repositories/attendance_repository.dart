@@ -37,8 +37,11 @@ class AttendanceRepository {
           'coordinates': [longitude, latitude],
         },
         'properties': {
-          'selfie_url': selfieUrl,
-          'ppe_confirmed': ppeConfirmed,
+          'ppe_photo_url': selfieUrl,
+          'has_gloves': ppeConfirmed,
+          'has_mask': ppeConfirmed,
+          'has_vest': ppeConfirmed,
+          'has_boots': ppeConfirmed,
           'status': 'PRESENT',
         },
       });

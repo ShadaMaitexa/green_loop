@@ -15,3 +15,5 @@ export 'src/reward_history.dart';
 export 'src/reward_config.dart';
 export 'src/recycler.dart';
 export 'src/compliance_report.dart';
+export 'src/notification.dart';
+export 'src/nps.dart';

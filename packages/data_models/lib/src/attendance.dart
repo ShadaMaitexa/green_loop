@@ -22,14 +22,19 @@ class AttendanceRecord {
   bool get isCheckedOut => checkOutTime != null;
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
+    // Handle GeoJSON Feature format
+    final properties = json['type'] == 'Feature'
+        ? (json['properties'] as Map<String, dynamic>? ?? {})
+        : json;
+
     return AttendanceRecord(
-      id: json['id']?.toString() ?? '',
-      date: json['date'] as String? ?? '',
-      checkInTime: json['check_in_time'] as String?,
-      checkOutTime: json['check_out_time'] as String?,
-      ppeConfirmed: json['ppe_confirmed'] as bool? ?? false,
-      selfieUrl: json['selfie_url'] as String?,
-      status: json['status'] as String? ?? 'absent',
+      id: json['id']?.toString() ?? properties['id']?.toString() ?? '',
+      date: properties['date']?.toString() ?? '',
+      checkInTime: properties['check_in']?.toString() ?? properties['check_in_time']?.toString(),
+      checkOutTime: properties['check_out']?.toString() ?? properties['check_out_time']?.toString(),
+      ppeConfirmed: properties['has_gloves'] == true && properties['has_mask'] == true, // Derived from detail PPE flags
+      selfieUrl: properties['ppe_photo_url']?.toString() ?? properties['ppe_selfie']?.toString(),
+      status: properties['status']?.toString() ?? 'absent',
     );
   }
 }

@@ -7,3 +7,6 @@ export 'src/repositories/hks_route_repository.dart';
 export 'src/repositories/attendance_repository.dart';
 export 'src/repositories/reward_repository.dart';
 export 'src/repositories/recycler_repository.dart';
+export 'src/repositories/payment_repository.dart';
+export 'src/repositories/notification_repository.dart';
+export 'src/repositories/nps_repository.dart';
