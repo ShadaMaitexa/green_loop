@@ -130,12 +130,12 @@ class WardState extends ChangeNotifier {
         },
         'properties': {
           'name': data['name'] ?? data['name_en'] ?? '',
-          if (data['number'] != null) 'number': data['number'],
+          'number': data['number'] ?? 0,
         },
       };
 
       if (_selectedWard != null) {
-        await _service.updateWard(_selectedWard!.id, wardData);
+        await _service.patchWard(_selectedWard!.id, wardData);
       } else {
         await _service.createWard(wardData);
       }
@@ -147,6 +147,27 @@ class WardState extends ChangeNotifier {
       return true;
     } catch (e) {
       _error = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Delete current selected ward.
+  Future<bool> deleteSelectedWard() async {
+    if (_selectedWard == null) return false;
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _service.deleteWard(_selectedWard!.id);
+      await loadWards();
+      _selectedWard = null;
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
       return false;
     } finally {
       _isLoading = false;
@@ -158,9 +179,12 @@ class WardState extends ChangeNotifier {
   Future<bool> updateWorkerAssignment(String workerId, int? wardId) async {
     try {
       if (wardId != null) {
-        await _service.assignWorker(workerId, wardId);
+        await _service.assignWorkers(wardId, [workerId], action: 'assign');
       } else {
-        await _service.unassignWorker(workerId);
+        // Find current ward for this worker via user update or use last ward
+        if (_selectedWard != null) {
+          await _service.assignWorkers(_selectedWard!.id, [workerId], action: 'unassign');
+        }
       }
       return true;
     } catch (e) {

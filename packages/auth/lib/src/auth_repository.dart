@@ -63,14 +63,36 @@ class AuthRepository {
   }
 
   /// Authenticate recycler/HKS worker with username/password.
-  Future<void> loginWorker(String username, String password) async {
+  Future<AuthUser> loginWorker(String username, String password) async {
     try {
-      await _apiClient.postPublic(
+      final response = await _apiClient.postPublic(
         _workerLoginPath,
         data: {
           'username': username,
           'password': password,
         },
+      );
+      
+      final data = response.data;
+      if (data == null || data['access'] == null || data['refresh'] == null) {
+        throw const AuthException('Invalid server response format.');
+      }
+
+      await _apiClient.tokenStorage.saveTokens(
+        accessToken: data['access'] as String,
+        refreshToken: data['refresh'] as String,
+      );
+
+      final userObj = data['user'] as Map<String, dynamic>? ?? {};
+      final bool registrationRequired = data['registration_required'] == true;
+
+      return AuthUser(
+        id: userObj['id']?.toString() ?? '',
+        email: userObj['email']?.toString() ?? '',
+        username: userObj['username']?.toString() ?? username,
+        name: userObj['name']?.toString() ?? '',
+        role: userObj['role']?.toString() ?? 'worker',
+        isProfileCompleted: !registrationRequired,
       );
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();

@@ -48,10 +48,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           itemBuilder: (context, index) {
                             final record = state.records[index];
                             return ListTile(
-                              leading: const Icon(Icons.person_outline),
-                              title: Text('Worker ID: ${record['worker']}'),
-                              subtitle: Text('Date: ${record['date']} | Status: ${record['status']}'),
-                              trailing: Text(record['time_logged']?.toString() ?? ''),
+                              leading: record.selfieUrl != null 
+                                ? CircleAvatar(backgroundImage: NetworkImage(record.selfieUrl!))
+                                : const CircleAvatar(child: Icon(Icons.person)),
+                              title: Text('Date: ${record.date}'),
+                              subtitle: Text('Status: ${record.status.toUpperCase()}'),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (record.checkInTime != null)
+                                    Text('In: ${record.checkInTime!.substring(11, 16)}', style: const TextStyle(fontSize: 12)),
+                                  if (record.checkOutTime != null)
+                                    Text('Out: ${record.checkOutTime!.substring(11, 16)}', style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
                             );
                           },
                         ),

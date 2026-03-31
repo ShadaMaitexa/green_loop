@@ -88,4 +88,21 @@ class UserManagementState extends ChangeNotifier {
       return false;
     }
   }
+
+  /// Delete a user.
+  Future<bool> deleteUser(String id) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _service.deleteUser(id);
+      await loadUsers();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

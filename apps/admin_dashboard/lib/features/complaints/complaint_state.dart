@@ -125,4 +125,36 @@ class ComplaintState extends ChangeNotifier {
     _currentSort = sort;
     notifyListeners();
   }
+
+  /// Delete a complaint.
+  Future<bool> deleteComplaint(String id) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _service.deleteComplaint(id);
+      await loadComplaints();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetch single complaint details (refreshes specific model in list).
+  Future<void> refreshComplaint(String id) async {
+    try {
+      final updated = await _service.getComplaintDetails(id);
+      final index = _complaints.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        _complaints[index] = updated;
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
 }

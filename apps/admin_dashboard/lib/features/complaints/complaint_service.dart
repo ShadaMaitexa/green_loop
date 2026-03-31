@@ -19,8 +19,64 @@ class ComplaintService {
           'order': ascending ? 'asc' : 'desc',
         },
       );
-      final list = response.data as List;
-      return list.map((e) => ComplaintModel.fromJson(e as Map<String, dynamic>)).toList();
+      final data = response.data;
+      if (data is Map && data['type'] == 'FeatureCollection') {
+        final features = data['features'] as List? ?? [];
+        return features.map((e) => ComplaintModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      if (data is List) {
+        return data.map((e) => ComplaintModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Create a new complaint.
+  Future<ComplaintModel> createComplaint(Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.post('/api/v1/complaints/', data: data);
+      return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Fetch details of a single complaint.
+  Future<ComplaintModel> getComplaintDetails(String id) async {
+    try {
+      final response = await _apiClient.get('/api/v1/complaints/$id/');
+      return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Full update of a complaint.
+  Future<ComplaintModel> updateComplaint(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put('/api/v1/complaints/$id/', data: data);
+      return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Partial update of a complaint.
+  Future<ComplaintModel> patchComplaint(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('/api/v1/complaints/$id/', data: data);
+      return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Delete a complaint.
+  Future<void> deleteComplaint(String id) async {
+    try {
+      await _apiClient.delete('/api/v1/complaints/$id/');
     } catch (e) {
       rethrow;
     }
@@ -39,12 +95,14 @@ class ComplaintService {
     }
   }
 
-  /// Update the status of a complaint.
+  /// Update the status of a complaint (Shortcut via patch).
   Future<ComplaintModel> updateStatus(String id, ComplaintStatus status) async {
     try {
       final response = await _apiClient.patch(
         '/api/v1/complaints/$id/',
-        data: {'status': status.toJson()},
+        data: {
+          'properties': {'status': status.toJson()}
+        },
       );
       return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
@@ -56,7 +114,10 @@ class ComplaintService {
   Future<List<Map<String, dynamic>>> getHeatmapData() async {
     try {
       final response = await _apiClient.get('/api/v1/complaints/heatmap/');
-      return (response.data as List).cast<Map<String, dynamic>>();
+      if (response.data is List) {
+        return (response.data as List).cast<Map<String, dynamic>>();
+      }
+      return [];
     } catch (e) {
       rethrow;
     }
@@ -68,7 +129,7 @@ class ComplaintService {
       final response = await _apiClient.get('/api/v1/users/', queryParameters: {
         'role__in': 'hks_worker,admin',
       });
-      final list = response.data as List;
+      final list = response.data as List? ?? [];
       return list.map((e) => PlatformUser.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
       rethrow;

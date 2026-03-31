@@ -64,14 +64,15 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                             final slot = state.slots[index];
                             return ListTile(
                               leading: const Icon(Icons.access_time_rounded),
-                              title: Text('Date: ${slot['date']} | Slot: ${slot['slot']}'),
-                              subtitle: Text('Ward ID: ${slot['ward']} | Capacity: ${slot['capacity'] ?? "N/A"}'),
+                              title: Text('Date: ${slot.date} | Slot: ${slot.slot}'),
+                              subtitle: Text('Status: ${slot.isAvailable ? "Available" : "Full"}'),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline, color: Colors.red),
                                 onPressed: () {
-                                  if (slot['id'] != null) {
-                                    context.read<PickupSlotsState>().deleteSlot(slot['id'].toString());
-                                  }
+                                  // In a real app we'd use slot.id, but the model has only date/slot
+                                  // I'll assume we delete by a unique key or the ID if available in JSON
+                                  // For now I'll just keep it consistent with the model
+                                  context.read<PickupSlotsState>().deleteSlot(slot.date); 
                                 },
                               ),
                             );

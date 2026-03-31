@@ -1,16 +1,17 @@
 import 'package:flutter/foundation.dart';
+import 'package:data_models/data_models.dart';
 import 'pickup_slots_service.dart';
 
 class PickupSlotsState extends ChangeNotifier {
   final PickupSlotsService _service;
 
-  List<Map<String, dynamic>> _slots = [];
+  List<PickupSlot> _slots = [];
   bool _isLoading = false;
   String? _error;
 
   PickupSlotsState({required PickupSlotsService service}) : _service = service;
 
-  List<Map<String, dynamic>> get slots => _slots;
+  List<PickupSlot> get slots => _slots;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
