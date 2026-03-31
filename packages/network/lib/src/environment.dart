@@ -9,7 +9,7 @@ extension EnvironmentExtension on Environment {
   String get baseUrl {
     switch (this) {
       case Environment.dev:
-        return 'https://greenloop-hdwc.onrender.com';
+        return 'http://localhost:8000'; // Target local backend
       case Environment.staging:
         return 'https://greenloop-hdwc.onrender.com';
       case Environment.production:

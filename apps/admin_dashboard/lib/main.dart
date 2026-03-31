@@ -25,6 +25,8 @@ import 'features/pickup_slots/pickup_slots_service.dart';
 import 'features/pickup_slots/pickup_slots_state.dart';
 import 'features/payments/payment_service.dart';
 import 'features/payments/payment_state.dart';
+import 'features/pickups/pickup_service.dart';
+import 'features/pickups/pickup_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -96,6 +98,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => ReportsState(
             service: context.read<ReportsService>(),
+          ),
+        ),
+        Provider(create: (_) => PickupService(apiClient: apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => PickupState(
+            service: context.read<PickupService>(),
           ),
         ),
       ],

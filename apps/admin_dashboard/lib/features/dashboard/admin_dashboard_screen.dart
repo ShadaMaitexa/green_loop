@@ -13,6 +13,8 @@ import 'pilot_readiness_screen.dart';
 import '../attendance/attendance_screen.dart';
 import '../pickup_slots/pickup_slots_management_screen.dart';
 import '../payments/payment_management_screen.dart';
+import '../pickups/pickup_management_screen.dart';
+import '../settings/settings_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -137,6 +139,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
     if (section.title == 'Payments') {
       return const PaymentManagementScreen();
+    }
+    if (section.title == 'Pickups') {
+      return const PickupManagementScreen();
+    }
+    if (section.title == 'Settings') {
+      return const SettingsScreen();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
