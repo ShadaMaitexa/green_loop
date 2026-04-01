@@ -151,4 +151,33 @@ class ComplaintRepository {
       throw Exception(e.message);
     }
   }
+
+  /// Update an existing complaint.
+  Future<ComplaintModel> updateComplaint(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_complaintsPath$id/', data: data);
+      return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Replace an existing complaint.
+  Future<ComplaintModel> replaceComplaint(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put('$_complaintsPath$id/', data: data);
+      return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Delete a complaint.
+  Future<void> deleteComplaint(String id) async {
+    try {
+      await _apiClient.delete('$_complaintsPath$id/');
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }

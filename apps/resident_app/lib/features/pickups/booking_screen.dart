@@ -52,12 +52,22 @@ class _BookingScreenState extends State<BookingScreen> {
   Future<void> _loadSlots() async {
     setState(() => _isLoadingSlots = true);
     try {
-      final repo = Provider.of<PickupRepository>(context, listen: false);
-      // Using wardId from a profile (assuming hardcoded 1 for demo if no profile fetched)
-      final slots = await repo.getAvailability(1);
+      final pickupRepo = Provider.of<PickupRepository>(context, listen: false);
+      final rewardRepo = Provider.of<RewardRepository>(context, listen: false);
+      
+      // Fetch profile to get the correct wardId
+      final profile = await rewardRepo.getProfile();
+      
+      final slots = await pickupRepo.getAvailability(profile.wardId);
       setState(() {
         _slots = slots;
         _isLoadingSlots = false;
+        // Optionally update address if empty
+        if (_addressController.text.isEmpty) {
+          _addressController.text = profile.address;
+          _latitude = profile.latitude;
+          _longitude = profile.longitude;
+        }
       });
     } catch (e) {
       if (mounted) {

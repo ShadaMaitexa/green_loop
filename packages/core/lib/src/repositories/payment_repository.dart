@@ -57,4 +57,33 @@ class PaymentRepository {
       throw Exception(e.message);
     }
   }
+
+  /// Update a payment record.
+  Future<FeeCollection> updatePayment(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_paymentsPath$id/', data: data);
+      return FeeCollection.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Replace a payment record.
+  Future<FeeCollection> replacePayment(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put('$_paymentsPath$id/', data: data);
+      return FeeCollection.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Delete a payment record (only for admin/corrections).
+  Future<void> deletePayment(int id) async {
+    try {
+      await _apiClient.delete('$_paymentsPath$id/');
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }

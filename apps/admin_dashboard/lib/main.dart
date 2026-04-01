@@ -31,6 +31,7 @@ import 'features/routes/route_service.dart';
 import 'features/routes/route_state.dart';
 import 'features/recycler/recycler_service.dart';
 import 'features/recycler/recycler_state.dart';
+import 'features/settings/theme_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -122,6 +123,7 @@ void main() {
             service: context.read<RecyclerService>(),
           ),
         ),
+        ChangeNotifierProvider(create: (_) => ThemeState()),
       ],
       child: const AdminApp(),
     ),
@@ -133,12 +135,14 @@ class AdminApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ThemeState>().themeMode;
+
     return MaterialApp(
       title: 'GreenLoop Admin',
       debugShowCheckedModeBanner: false,
       theme: GreenLeafTheme.light(),
       darkTheme: GreenLeafTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       home: const AuthWrapper(),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:auth/auth.dart';
+import 'theme_state.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -58,8 +59,8 @@ class SettingsScreen extends StatelessWidget {
                       secondary: const Icon(Icons.dark_mode_outlined),
                       title: const Text('Dark Mode'),
                       subtitle: const Text('Toggle system theme'),
-                      value: theme.brightness == Brightness.dark,
-                      onChanged: (val) {},
+                      value: context.watch<ThemeState>().themeMode == ThemeMode.dark,
+                      onChanged: (val) => context.read<ThemeState>().toggleTheme(val),
                     ),
                   ],
                 ),
@@ -67,11 +68,6 @@ class SettingsScreen extends StatelessWidget {
                   context,
                   'Security',
                   [
-                    ListTile(
-                      leading: const Icon(Icons.lock_outline_rounded),
-                      title: const Text('Change Password'),
-                      onTap: () {},
-                    ),
                     ListTile(
                       leading: const Icon(Icons.logout_rounded, color: Colors.red),
                       title: const Text('Logout', style: TextStyle(color: Colors.red)),

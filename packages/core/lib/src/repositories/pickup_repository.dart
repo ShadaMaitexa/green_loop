@@ -77,6 +77,34 @@ class PickupRepository {
   /// Cancel a pickup booking (Resident Side).
   Future<void> cancelPickup(String pickupId) async {
     try {
+      await _apiClient.patch('$_pickupsPath$pickupId/cancel/');
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Complete a pickup (HKS Side).
+  Future<void> completePickup(String pickupId) async {
+    try {
+      await _apiClient.patch('$_pickupsPath$pickupId/complete/');
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Update a pickup booking.
+  Future<PickupResponse> updatePickup(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_pickupsPath$id/', data: data);
+      return PickupResponse.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Delete a pickup booking.
+  Future<void> deletePickup(String pickupId) async {
+    try {
       await _apiClient.delete('$_pickupsPath$pickupId/');
     } on ApiException catch (e) {
       throw Exception(e.message);
