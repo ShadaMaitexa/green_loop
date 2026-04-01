@@ -135,6 +135,7 @@ class AdminApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GreenLoop Admin',
+      debugShowCheckedModeBanner: false,
       theme: GreenLeafTheme.light(),
       darkTheme: GreenLeafTheme.dark(),
       themeMode: ThemeMode.system,

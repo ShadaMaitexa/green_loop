@@ -15,22 +15,7 @@ class PaymentService {
       return list.map((e) => FeeCollection.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
       if (kDebugMode || e.toString().contains('OperationError')) {
-        return [
-          FeeCollection(
-            id: 1,
-            amount: 500,
-            paymentMode: PaymentMode.cash,
-            receiptNumber: 'REC001',
-            paymentDate: DateTime.now().subtract(const Duration(hours: 2)),
-          ),
-          FeeCollection(
-            id: 2,
-            amount: 250.5,
-            paymentMode: PaymentMode.upi,
-            receiptNumber: 'REC002',
-            paymentDate: DateTime.now().subtract(const Duration(hours: 1)),
-          ),
-        ];
+        return [];
       }
       rethrow;
     }

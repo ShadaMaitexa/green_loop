@@ -3,15 +3,29 @@ class RouteModel {
   final String status;
   final String? date;
   final WorkerInfo? hksWorker;
+  final List<List<double>> plannedPath;
+  final List<List<double>> actualPath;
 
   RouteModel({
     required this.id,
     required this.status,
     this.date,
     this.hksWorker,
+    this.plannedPath = const [],
+    this.actualPath = const [],
   });
 
   factory RouteModel.fromJson(Map<String, dynamic> json) {
+    List<List<double>> parseGeoJSON(dynamic node) {
+      if (node == null || node['coordinates'] == null) return [];
+      // GeoJSON LineString: [[lng, lat], ...] -> We want [[lat, lng], ...]
+      final coords = node['coordinates'] as List;
+      return coords.map<List<double>>((e) {
+        final list = e as List;
+        return [(list[1] as num).toDouble(), (list[0] as num).toDouble()];
+      }).toList();
+    }
+
     return RouteModel(
       id: json['id']?.toString() ?? '',
       status: json['status']?.toString() ?? 'pending',
@@ -19,6 +33,8 @@ class RouteModel {
       hksWorker: json['hks_worker'] != null 
           ? WorkerInfo.fromJson(json['hks_worker'] as Map<String, dynamic>) 
           : null,
+      plannedPath: parseGeoJSON(json['planned_path']),
+      actualPath: parseGeoJSON(json['actual_path']),
     );
   }
 }

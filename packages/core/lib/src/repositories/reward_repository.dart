@@ -7,28 +7,40 @@ class RewardRepository {
 
   RewardRepository({required this.apiClient});
 
-  /// Fetches the resident's current profile including points balance and streak.
-  Future<ResidentProfile> getProfile() async {
-    final response = await apiClient.get('/api/v1/auth/profile/');
-    return ResidentProfile.fromJson(response as Map<String, dynamic>);
+  /// Fetches the resident's current point balance.
+  Future<int> getBalance() async {
+    final response = await apiClient.get('/api/v1/rewards/balance/');
+    return (response.data as Map<String, dynamic>)['balance'] as int? ?? 0;
   }
 
-  /// Fetches the list of available rewards.
+  /// Fetches the resident's current perfect segregation streak.
+  Future<String> getStreak() async {
+    final response = await apiClient.get('/api/v1/rewards/streak/');
+    return (response.data as Map<String, dynamic>)['streak_label'] as String? ?? '0-week streak';
+  }
+
+  /// Fetches the resident's reward summary (Balance + Streak + Recent history).
+  Future<Map<String, dynamic>> getSummary() async {
+    final response = await apiClient.get('/api/v1/rewards/summary/');
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Fetches the list of all reward items in the catalog.
   Future<List<Reward>> getAvailableRewards() async {
-    final response = await apiClient.get('/api/v1/rewards/');
-    return (response as List).map((e) => Reward.fromJson(e as Map<String, dynamic>)).toList();
+    final response = await apiClient.get('/api/v1/rewards/items/');
+    return (response.data as List).map((e) => Reward.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   /// Fetches the resident's reward and earning history.
   Future<List<RewardHistoryEntry>> getHistory() async {
     final response = await apiClient.get('/api/v1/rewards/history/');
-    return (response as List).map((e) => RewardHistoryEntry.fromJson(e as Map<String, dynamic>)).toList();
+    return (response.data as List).map((e) => RewardHistoryEntry.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   /// Redeems a specific reward.
   Future<bool> redeemReward(String rewardId) async {
     try {
-      await apiClient.post('/api/v1/reward-redemptions/', data: {'reward': rewardId});
+      await apiClient.post('/api/v1/rewards/redeem/', data: {'reward_id': rewardId});
       return true;
     } catch (e) {
       return false;
@@ -36,6 +48,12 @@ class RewardRepository {
   }
 
   // --- Admin Methods ---
+
+  /// Fetches the list of all reward transactions (Admin only).
+  Future<List<RewardHistoryEntry>> getAllTransactions() async {
+    final response = await apiClient.get('/api/v1/rewards/');
+    return (response.data as List).map((e) => RewardHistoryEntry.fromJson(e as Map<String, dynamic>)).toList();
+  }
 
   /// Fetches the global rewards configuration.
   Future<RewardConfig> getConfig() async {

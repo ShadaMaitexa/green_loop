@@ -53,14 +53,24 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                 : const CircleAvatar(child: Icon(Icons.person)),
                               title: Text('Date: ${record.date}'),
                               subtitle: Text('Status: ${record.status.toUpperCase()}'),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (record.checkInTime != null)
-                                    Text('In: ${record.checkInTime!.substring(11, 16)}', style: const TextStyle(fontSize: 12)),
-                                  if (record.checkOutTime != null)
-                                    Text('Out: ${record.checkOutTime!.substring(11, 16)}', style: const TextStyle(fontSize: 12)),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      if (record.checkInTime != null && record.checkInTime!.length >= 16)
+                                        Text('In: ${record.checkInTime!.substring(11, 16)}', style: const TextStyle(fontSize: 12)),
+                                      if (record.checkOutTime != null && record.checkOutTime!.length >= 16)
+                                        Text('Out: ${record.checkOutTime!.substring(11, 16)}', style: const TextStyle(fontSize: 12)),
+                                    ],
+                                  ),
+                                  const SizedBox(width: GLSpacing.md),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                    onPressed: () => context.read<AttendanceState>().deleteAttendance(record.id),
+                                  ),
                                 ],
                               ),
                             );

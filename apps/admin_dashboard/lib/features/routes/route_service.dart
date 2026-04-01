@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:network/network.dart';
 import 'route_model.dart';
 
@@ -14,17 +13,6 @@ class RouteService {
       final list = response.data as List? ?? [];
       return list.map((e) => RouteModel.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
-      if (kDebugMode) {
-        // Fallback for CORS/OperationError
-        return [
-          RouteModel(id: '1', status: 'active', date: '2026-03-31',
-            hksWorker: WorkerInfo(id: 'w1', name: 'Ravi Kumar')),
-          RouteModel(id: '2', status: 'pending', date: '2026-03-31',
-            hksWorker: WorkerInfo(id: 'w2', name: 'Anjali Sharma')),
-          RouteModel(id: '3', status: 'completed', date: '2026-03-30',
-            hksWorker: WorkerInfo(id: 'w1', name: 'Ravi Kumar')),
-        ];
-      }
       rethrow;
     }
   }

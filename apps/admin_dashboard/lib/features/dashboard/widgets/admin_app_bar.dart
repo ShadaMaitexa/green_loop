@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:auth/auth.dart';
+import '../../complaints/complaint_state.dart';
+import 'package:data_models/data_models.dart';
 
 class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showMenuButton;
@@ -43,37 +45,49 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        Stack(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.notifications_none_rounded),
-              onPressed: () {},
-            ),
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(10),
+        Consumer<ComplaintState>(
+          builder: (context, state, _) {
+            final pendingCount = state.complaints.where((c) => c.status != ComplaintStatus.resolved).length;
+            
+            return Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_none_rounded),
+                  onPressed: () {
+                    // Navigate to complaints or show dropdown
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('You have $pendingCount active attention items.')),
+                    );
+                  },
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
-                child: const Text(
-                  '3',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                if (pendingCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$pendingCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
         const SizedBox(width: GLSpacing.md),
         PopupMenuButton<String>(

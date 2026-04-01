@@ -7,6 +7,8 @@ import 'models/dashboard_stats.dart';
 import '../users/user_management_state.dart';
 import '../wards/ward_state.dart';
 import '../complaints/complaint_state.dart';
+import '../pickups/pickup_state.dart';
+import '../recycler/recycler_state.dart';
 import 'package:data_models/data_models.dart';
 
 class DashboardOverviewScreen extends StatefulWidget {
@@ -25,6 +27,8 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
       context.read<UserManagementState>().loadUsers();
       context.read<WardState>().loadWards();
       context.read<ComplaintState>().loadComplaints();
+      context.read<PickupState>().fetchPickups();
+      context.read<RecyclerState>().loadLedger();
     });
   }
 
@@ -33,17 +37,25 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
     final state = context.watch<DashboardState>();
     final userState = context.watch<UserManagementState>();
     final complaintState = context.watch<ComplaintState>();
+    final pickupState = context.watch<PickupState>();
+    final recyclerState = context.watch<RecyclerState>();
     final theme = Theme.of(context);
 
-    // Dynamic stats from other slices
-    final hksWorkers = userState.users.where((u) => u.isActive && (u.role.name.toLowerCase().contains('hks'))).length;
-    final pendingComplaints = complaintState.complaints.where((c) => c.status == ComplaintStatus.submitted || c.status == ComplaintStatus.inProgress).length;
+    // ── Aggregated Stats (Dynamic) ───────────────────────────────────────────
     
-    // Fallback logic: Use real data if available, otherwise use dashboard stats
-    final pickupsCount = state.stats?.kpis.pickupsToday ?? 0;
-    final activeWorkers = hksWorkers > 0 ? hksWorkers : (state.stats?.kpis.activeWorkers ?? 0);
-    final complaintsCount = pendingComplaints > 0 ? pendingComplaints : (state.stats?.kpis.pendingComplaints ?? 0);
-    final totalWaste = state.stats?.kpis.totalWasteKg ?? 0.0;
+    // 1. Active Workers
+    final activeWorkersCount = userState.users.where((u) => u.isActive && (u.role.name.toLowerCase().contains('hks'))).length;
+    
+    // 2. Pending Complaints
+    final pendingCount = complaintState.complaints.where((c) => c.status != ComplaintStatus.resolved).length;
+    
+    // 3. Pickups Today
+    final now = DateTime.now();
+    final todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    final pickupsToday = pickupState.pickups.where((p) => p.scheduledDate == todayStr).length;
+
+    // 4. Waste Weight
+    final wasteKg = recyclerState.purchases.fold<double>(0.0, (sum, p) => sum + p.weightKg);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(GLSpacing.xl),
@@ -58,10 +70,10 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
             _buildKPIs(
               context, 
               DashboardKPIs(
-                pickupsToday: pickupsCount, 
-                activeWorkers: activeWorkers, 
-                pendingComplaints: complaintsCount, 
-                totalWasteKg: totalWaste
+                pickupsToday: pickupsToday, 
+                activeWorkers: activeWorkersCount, 
+                pendingComplaints: pendingCount, 
+                totalWasteKg: wasteKg
               ), 
               theme
             ),
