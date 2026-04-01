@@ -257,8 +257,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
   }
 
   void _showSaveWardDialog(BuildContext context, WardState state) {
-    final nameEnController = TextEditingController(text: state.selectedWard?.nameEn);
-    final nameMlController = TextEditingController(text: state.selectedWard?.nameMl);
+    final nameController = TextEditingController(text: state.selectedWard?.name);
 
     showDialog(
       context: context,
@@ -267,9 +266,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            GLTextField(label: 'Name (English)', controller: nameEnController),
-            const SizedBox(height: GLSpacing.md),
-            GLTextField(label: 'Name (Malayalam)', controller: nameMlController),
+            GLTextField(label: 'Ward Name', controller: nameController),
           ],
         ),
         actions: [
@@ -278,8 +275,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
             text: 'Save Ward',
             onPressed: () async {
               final success = await state.saveWard({
-                'name_en': nameEnController.text,
-                'name_ml': nameMlController.text,
+                'name': nameController.text,
               });
               if (success && mounted && context.mounted) Navigator.pop(context);
             },

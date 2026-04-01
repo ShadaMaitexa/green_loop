@@ -14,9 +14,20 @@ class Ward {
   });
 
   // ── Backwards compat getters used across the app ──────────────────────────
-  /// Alias kept for components that use nameEn.
+  // ── Translation Helpers ──────────────────────────────────────────────────
+  /// Alias kept for components that use nameEn. Always returns the stored name.
   String get nameEn => name;
-  String get nameMl => name; // API provides one name only
+
+  /// Returns the translated name in Malayalam if possible.
+  /// Translates common patterns like "Ward X" to "വാർഡ് X".
+  String get nameMl {
+    final trimmed = name.trim();
+    final match = RegExp(r'^Ward\s+(\d+)$', caseSensitive: false).firstMatch(trimmed);
+    if (match != null) {
+      return 'വാർഡ് ${match.group(1)}';
+    }
+    return name;
+  }
 
   factory Ward.fromJson(Map<String, dynamic> json) {
     // Support both flat JSON and GeoJSON Feature format

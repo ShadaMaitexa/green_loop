@@ -29,6 +29,8 @@ import 'features/pickups/pickup_service.dart';
 import 'features/pickups/pickup_state.dart';
 import 'features/routes/route_service.dart';
 import 'features/routes/route_state.dart';
+import 'features/recycler/recycler_service.dart';
+import 'features/recycler/recycler_state.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -112,6 +114,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => RouteState(
             service: context.read<RouteService>(),
+          ),
+        ),
+        Provider(create: (_) => RecyclerService(apiClient)),
+        ChangeNotifierProvider(
+          create: (context) => RecyclerState(
+            service: context.read<RecyclerService>(),
           ),
         ),
       ],

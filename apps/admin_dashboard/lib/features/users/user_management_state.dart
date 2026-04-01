@@ -29,11 +29,13 @@ class UserManagementState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _users = await _service.getUsers(
+      final allUsers = await _service.getUsers(
         role: _filterRole?.toJson(),
         searchQuery: _searchQuery.isNotEmpty ? _searchQuery : null,
         wardId: _filterWardId,
       );
+      // Filter out administrators as per user request
+      _users = allUsers.where((user) => user.role != UserRole.admin).toList();
     } catch (e) {
       _error = e.toString();
     } finally {

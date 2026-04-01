@@ -115,10 +115,12 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             ),
             items: [
               const DropdownMenuItem(value: null, child: Text('All Roles')),
-              ...UserRole.values.map((role) => DropdownMenuItem(
-                    value: role,
-                    child: Text(role.label),
-                  )),
+              ...UserRole.values
+                  .where((role) => role != UserRole.admin)
+                  .map((role) => DropdownMenuItem(
+                        value: role,
+                        child: Text(role.label),
+                      )),
             ],
             onChanged: (value) => state.setRoleFilter(value),
           ),

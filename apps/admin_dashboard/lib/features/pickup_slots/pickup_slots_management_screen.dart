@@ -89,7 +89,8 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
 
   void _showAddSlotDialog(BuildContext context) {
     final dateController = TextEditingController();
-    final slotController = TextEditingController();
+    final startTimeController = TextEditingController();
+    final endTimeController = TextEditingController();
     int? selectedWardId;
     final capacityController = TextEditingController();
 
@@ -123,7 +124,47 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                 },
               ),
               const SizedBox(height: GLSpacing.md),
-              GLTextField(label: 'Time Slot (e.g. 09:00 AM - 12:00 PM)', controller: slotController),
+              Row(
+                children: [
+                  Expanded(
+                    child: GLTextField(
+                      label: 'Start Time',
+                      controller: startTimeController,
+                      readOnly: true,
+                      onTap: () async {
+                        final pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: const TimeOfDay(hour: 9, minute: 0),
+                        );
+                        if (pickedTime != null) {
+                          setDialogState(() {
+                            startTimeController.text = pickedTime.format(context);
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: GLSpacing.sm),
+                  Expanded(
+                    child: GLTextField(
+                      label: 'End Time',
+                      controller: endTimeController,
+                      readOnly: true,
+                      onTap: () async {
+                        final pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: const TimeOfDay(hour: 12, minute: 0),
+                        );
+                        if (pickedTime != null) {
+                          setDialogState(() {
+                            endTimeController.text = pickedTime.format(context);
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: GLSpacing.md),
               Consumer<WardState>(
                 builder: (context, wardState, child) {
@@ -158,15 +199,21 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
               text: 'Save',
               isLoading: context.watch<PickupSlotsState>().isLoading,
               onPressed: () async {
-                if (dateController.text.isEmpty || slotController.text.isEmpty || selectedWardId == null) {
+                if (dateController.text.isEmpty ||
+                    startTimeController.text.isEmpty ||
+                    endTimeController.text.isEmpty ||
+                    selectedWardId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please fill all required fields')),
                   );
                   return;
                 }
+                
+                final combinedSlot = '${startTimeController.text} - ${endTimeController.text}';
+                
                 final success = await context.read<PickupSlotsState>().createSlot({
                   'date': dateController.text,
-                  'slot': slotController.text,
+                  'slot': combinedSlot,
                   'ward': selectedWardId,
                   if (capacityController.text.isNotEmpty) 'capacity': int.tryParse(capacityController.text),
                 });
