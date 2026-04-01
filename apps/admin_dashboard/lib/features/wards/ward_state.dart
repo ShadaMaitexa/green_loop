@@ -121,17 +121,15 @@ class WardState extends ChangeNotifier {
         ring.add(ring.first);
       }
 
-      // Send as GeoJSON Feature to match POST/PATCH /api/v1/wards/ schema
+      // Using WKT format for geometry as some GIS backends expect it over GeoJSON objects
+      final wktLocation = 'POINT(${ring.first[0]} ${ring.first[1]})';
+      final wktBoundary = 'POLYGON((${ring.map((c) => "${c[0]} ${c[1]}").join(", ")}))';
+
       final wardData = {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'Polygon',
-          'coordinates': [ring],
-        },
-        'properties': {
-          'name': data['name'] ?? data['name_en'] ?? '',
-          'number': data['number'] ?? 0,
-        },
+        'name': data['name'] ?? '',
+        'number': data['number'] ?? 0,
+        'location': wktLocation,
+        'boundary': wktBoundary,
       };
 
       if (_selectedWard != null) {

@@ -258,6 +258,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
 
   void _showSaveWardDialog(BuildContext context, WardState state) {
     final nameController = TextEditingController(text: state.selectedWard?.name);
+    final numberController = TextEditingController(text: state.selectedWard?.number?.toString() ?? '');
 
     showDialog(
       context: context,
@@ -267,6 +268,8 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             GLTextField(label: 'Ward Name', controller: nameController),
+            const SizedBox(height: GLSpacing.md),
+            GLTextField(label: 'Ward Number', controller: numberController, keyboardType: TextInputType.number),
           ],
         ),
         actions: [
@@ -276,6 +279,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
             onPressed: () async {
               final success = await state.saveWard({
                 'name': nameController.text,
+                'number': int.tryParse(numberController.text) ?? 0,
               });
               if (success && mounted && context.mounted) Navigator.pop(context);
             },

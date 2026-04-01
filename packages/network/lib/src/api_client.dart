@@ -74,11 +74,11 @@ class ApiClient {
       allowPostMethod: false,
     );
 
-    // Order matters: logging (first to see raw) → token → refresh logic → cache
+    // Order matters: token → refresh logic → logging → cache
     dio.interceptors.addAll([
-      LoggingInterceptor(debug: environment.isDebug),
       AuthInterceptor(this.tokenStorage),
       RefreshTokenInterceptor(dio: dio, tokenStorage: this.tokenStorage),
+      LoggingInterceptor(debug: environment.isDebug),
       DioCacheInterceptor(options: cacheOptions),
     ]);
 

@@ -60,7 +60,7 @@ class _RouteManagementScreenState extends State<RouteManagementScreen> {
                           return Card(
                             child: ListTile(
                               leading: const CircleAvatar(child: Icon(Icons.route_rounded)),
-                              title: Text('Route: ${route.id.substring(0, 8)}'),
+                              title: Text('Route: ${route.id.length > 8 ? route.id.substring(0, 8) : route.id}'),
                               subtitle: Text('Status: ${route.status.toUpperCase()} | Assigned to: ${route.hksWorker?.name ?? "Unassigned"}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,

@@ -4,6 +4,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'dashboard_state.dart';
 import 'models/dashboard_stats.dart';
+import '../users/user_management_state.dart';
+import '../wards/ward_state.dart';
+import '../complaints/complaint_state.dart';
+import 'package:data_models/data_models.dart';
 
 class DashboardOverviewScreen extends StatefulWidget {
   const DashboardOverviewScreen({super.key});
@@ -18,13 +22,28 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DashboardState>().loadStats();
+      context.read<UserManagementState>().loadUsers();
+      context.read<WardState>().loadWards();
+      context.read<ComplaintState>().loadComplaints();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<DashboardState>();
+    final userState = context.watch<UserManagementState>();
+    final complaintState = context.watch<ComplaintState>();
     final theme = Theme.of(context);
+
+    // Dynamic stats from other slices
+    final hksWorkers = userState.users.where((u) => u.isActive && (u.role.name.toLowerCase().contains('hks'))).length;
+    final pendingComplaints = complaintState.complaints.where((c) => c.status == ComplaintStatus.submitted || c.status == ComplaintStatus.inProgress).length;
+    
+    // Fallback logic: Use real data if available, otherwise use dashboard stats
+    final pickupsCount = state.stats?.kpis.pickupsToday ?? 0;
+    final activeWorkers = hksWorkers > 0 ? hksWorkers : (state.stats?.kpis.activeWorkers ?? 0);
+    final complaintsCount = pendingComplaints > 0 ? pendingComplaints : (state.stats?.kpis.pendingComplaints ?? 0);
+    final totalWaste = state.stats?.kpis.totalWasteKg ?? 0.0;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(GLSpacing.xl),
@@ -33,20 +52,31 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
         children: [
           _buildHeader(context, state, theme),
           const SizedBox(height: GLSpacing.xl),
-          if (state.isLoading && state.stats == null)
+          if (state.isLoading && state.stats == null && userState.isLoading)
             const Center(child: CircularProgressIndicator())
-          else if (state.stats != null) ...[
-            _buildKPIs(context, state.stats!.kpis, theme),
+          else ...[
+            _buildKPIs(
+              context, 
+              DashboardKPIs(
+                pickupsToday: pickupsCount, 
+                activeWorkers: activeWorkers, 
+                pendingComplaints: complaintsCount, 
+                totalWasteKg: totalWaste
+              ), 
+              theme
+            ),
             const SizedBox(height: GLSpacing.xxl),
-            _buildTrendChart(context, state.stats!.weeklyTrend, theme),
-            const SizedBox(height: GLSpacing.xxl),
-            _buildWardComparison(context, state.stats!.wardComparison, theme),
-            if (state.stats!.npsStats != null) ...[
+            if (state.stats != null) ...[
+              _buildTrendChart(context, state.stats!.weeklyTrend, theme),
               const SizedBox(height: GLSpacing.xxl),
-              _buildNpsSection(context, state.stats!.npsStats!, theme),
-            ],
-          ] else
-            Center(child: Text(state.error ?? 'Failed to load data')),
+              _buildWardComparison(context, state.stats!.wardComparison, theme),
+              if (state.stats!.npsStats != null) ...[
+                const SizedBox(height: GLSpacing.xxl),
+                _buildNpsSection(context, state.stats!.npsStats!, theme),
+              ],
+            ] else if (state.error != null)
+              Center(child: Text(state.error!)),
+          ],
         ],
       ),
     );

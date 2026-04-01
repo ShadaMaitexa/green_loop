@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:data_models/data_models.dart';
-import 'package:auth/auth.dart';
 import 'user_management_state.dart';
+import '../wards/ward_state.dart';
 import 'package:ui_kit/ui_kit.dart';
 
 class UserManagementScreen extends StatefulWidget {
@@ -283,8 +283,9 @@ class _AddUserDialog extends StatefulWidget {
 class _AddUserDialogState extends State<_AddUserDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
   UserRole _selectedRole = UserRole.hksWorker;
   List<Ward> _wards = [];
   int? _selectedWardId;
@@ -297,15 +298,18 @@ class _AddUserDialogState extends State<_AddUserDialog> {
 
   Future<void> _loadWards() async {
     try {
-      final wards = await context.read<AuthRepository>().getWards();
-      if (mounted) setState(() => _wards = wards);
+      final wardState = context.read<WardState>();
+      await wardState.loadWards();
+      if (mounted) {
+        setState(() => _wards = wardState.wards);
+      }
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add New User'),
+      title: const Text('Add New User / Worker'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -314,34 +318,47 @@ class _AddUserDialogState extends State<_AddUserDialog> {
             children: [
               GLTextField(label: 'Full Name', controller: _nameController),
               const SizedBox(height: GLSpacing.md),
+              GLTextField(label: 'Username', controller: _usernameController),
+              const SizedBox(height: GLSpacing.md),
               GLTextField(label: 'Email', controller: _emailController),
               const SizedBox(height: GLSpacing.md),
-              GLTextField(label: 'Phone', controller: _phoneController),
+              GLTextField(
+                label: 'Password',
+                controller: _passwordController,
+                obscureText: true,
+              ),
               const SizedBox(height: GLSpacing.md),
               DropdownButtonFormField<UserRole>(
                 value: _selectedRole,
-                decoration: const InputDecoration(labelText: 'Role'),
-                items: [UserRole.hksWorker, UserRole.recycler].map((role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(role.label),
-                    )).toList(),
+                decoration: const InputDecoration(
+                  labelText: 'Role',
+                  border: OutlineInputBorder(),
+                ),
+                items: UserRole.values
+                    .where((r) => r != UserRole.admin)
+                    .map((role) => DropdownMenuItem(
+                          value: role,
+                          child: Text(role.label),
+                        ))
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) setState(() => _selectedRole = value);
                 },
               ),
-              if (_selectedRole == UserRole.hksWorker) ...[
-                const SizedBox(height: GLSpacing.md),
-                DropdownButtonFormField<int>(
-                  value: _selectedWardId,
-                  decoration: const InputDecoration(labelText: 'Assign Ward'),
-                  items: _wards.map((ward) => DropdownMenuItem(
-                        value: ward.id,
-                        child: Text(ward.nameEn),
-                      )).toList(),
-                  onChanged: (value) => setState(() => _selectedWardId = value),
-                  validator: (value) => value == null ? 'Please select a ward' : null,
+              const SizedBox(height: GLSpacing.md),
+              DropdownButtonFormField<int>(
+                value: _selectedWardId,
+                decoration: const InputDecoration(
+                  labelText: 'Assign Ward',
+                  border: OutlineInputBorder(),
                 ),
-              ],
+                items: _wards.map((ward) => DropdownMenuItem(
+                      value: ward.id,
+                      child: Text('Ward ${ward.number}: ${ward.name}'),
+                    )).toList(),
+                onChanged: (value) => setState(() => _selectedWardId = value),
+                validator: (value) => value == null ? 'Please select a ward' : null,
+              ),
             ],
           ),
         ),
@@ -355,10 +372,11 @@ class _AddUserDialogState extends State<_AddUserDialog> {
             if (_formKey.currentState!.validate()) {
               final success = await context.read<UserManagementState>().createUser({
                 'name': _nameController.text,
+                'username': _usernameController.text,
                 'email': _emailController.text,
-                'phone': _phoneController.text,
+                'password': _passwordController.text,
                 'role': _selectedRole.toJson(),
-                if (_selectedRole == UserRole.hksWorker) 'ward_id': _selectedWardId,
+                'ward': _selectedWardId,
               });
               if (success && mounted && context.mounted) Navigator.pop(context);
             }

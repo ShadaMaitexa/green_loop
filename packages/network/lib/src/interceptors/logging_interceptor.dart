@@ -54,6 +54,11 @@ class LoggingInterceptor extends Interceptor {
 
   /// Replace the Authorization value with [REDACTED] so tokens don't appear in logs.
   Map<String, dynamic> _sanitiseHeaders(Map<String, dynamic> headers) {
-    return headers; // Disable for debugging CORS/Auth on Web
+    if (headers.containsKey('Authorization')) {
+      final newHeaders = Map<String, dynamic>.from(headers);
+      newHeaders['Authorization'] = '[REDACTED]';
+      return newHeaders;
+    }
+    return headers;
   }
 }
