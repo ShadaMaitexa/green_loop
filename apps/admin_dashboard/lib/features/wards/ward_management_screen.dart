@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:data_models/data_models.dart';
 import 'package:ui_kit/ui_kit.dart';
@@ -13,7 +14,7 @@ class WardManagementScreen extends StatefulWidget {
 }
 
 class _WardManagementScreenState extends State<WardManagementScreen> {
-  GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   final LatLng _initialCenter = const LatLng(11.2588, 75.7804); // Default to Kozhikode
 
   @override
@@ -120,8 +121,9 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
                           Navigator.pop(context); // Close Drawer
                         }
                         if (ward.boundary != null && ward.boundary!.isNotEmpty) {
-                          _mapController?.animateCamera(
-                            CameraUpdate.newLatLng(LatLng(ward.boundary![0][0], ward.boundary![0][1])),
+                          _mapController.move(
+                            LatLng(ward.boundary![0][0], ward.boundary![0][1]),
+                            15.0,
                           );
                         }
                       },
@@ -134,20 +136,18 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
   }
 
   Widget _buildMap(BuildContext context, WardState state) {
-    final polygons = <Polygon>{};
+    final polygons = <Polygon>[];
 
     // Existing ward polygons
     for (final ward in state.wards) {
       if (ward.boundary != null && ward.boundary!.isNotEmpty) {
         final isSelected = state.selectedWard?.id == ward.id;
         polygons.add(Polygon(
-          polygonId: PolygonId('ward_${ward.id}'),
           points: ward.boundary!.map((c) => LatLng(c[0], c[1])).toList(),
-          fillColor: (isSelected ? Colors.blue : Colors.green).withOpacity(0.2),
-          strokeColor: isSelected ? Colors.blue : Colors.green,
-          strokeWidth: 2,
-          consumeTapEvents: true,
-          onTap: () => state.selectWard(ward),
+          color: (isSelected ? Colors.blue : Colors.green).withOpacity(0.2),
+          borderColor: isSelected ? Colors.blue : Colors.green,
+          borderStrokeWidth: 2,
+          isFilled: true,
         ));
       }
     }
@@ -155,23 +155,50 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
     // Pending drawing polygon
     if (state.pendingPolygon.isNotEmpty) {
       polygons.add(Polygon(
-        polygonId: const PolygonId('pending'),
         points: state.pendingPolygon.map((c) => LatLng(c[0], c[1])).toList(),
-        fillColor: Colors.orange.withOpacity(0.3),
-        strokeColor: Colors.orange,
-        strokeWidth: 3,
+        color: Colors.orange.withOpacity(0.3),
+        borderColor: Colors.orange,
+        borderStrokeWidth: 3,
+        isFilled: true,
       ));
     }
 
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(target: _initialCenter, zoom: 13),
-      onMapCreated: (controller) => _mapController = controller,
-      polygons: polygons,
-      onTap: (latLng) {
-        if (state.drawMode != WardDrawMode.idle) {
-          state.addCoordinate(latLng.latitude, latLng.longitude);
-        }
-      },
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: _initialCenter,
+        initialZoom: 13,
+        onTap: (tapPosition, latLng) {
+          if (state.drawMode != WardDrawMode.idle) {
+            state.addCoordinate(latLng.latitude, latLng.longitude);
+          }
+        },
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.green_loop',
+        ),
+        PolygonLayer(
+          polygons: polygons,
+        ),
+        if (state.drawMode != WardDrawMode.idle && state.pendingPolygon.isNotEmpty)
+          MarkerLayer(
+            markers: state.pendingPolygon.map((c) {
+              return Marker(
+                point: LatLng(c[0], c[1]),
+                width: 10,
+                height: 10,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+      ],
     );
   }
 
@@ -269,6 +296,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
     );
   }
 }
+
 
 class _WorkerAssignmentDialog extends StatefulWidget {
   final Ward ward;

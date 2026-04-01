@@ -17,6 +17,7 @@ class GLTextField extends StatelessWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final void Function(String)? onChanged;
+  final VoidCallback? onTap;
   final String? Function(String?)? validator;
 
   const GLTextField({
@@ -34,6 +35,7 @@ class GLTextField extends StatelessWidget {
     this.controller,
     this.keyboardType,
     this.onChanged,
+    this.onTap,
     this.validator,
   });
 
@@ -77,6 +79,7 @@ class GLTextField extends StatelessWidget {
           maxLines: maxLines,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          onTap: onTap,
           validator: validator,
           style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(

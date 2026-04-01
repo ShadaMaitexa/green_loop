@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:data_models/data_models.dart';
 import 'monitoring_state.dart';
@@ -13,13 +14,10 @@ class LiveMapScreen extends StatefulWidget {
 }
 
 class _LiveMapScreenState extends State<LiveMapScreen> {
-  GoogleMapController? _controller;
+  final MapController _mapController = MapController();
 
-  // Initial camera position pointing at Kozhikode
-  static const _initialCameraPosition = CameraPosition(
-    target: LatLng(11.2588, 75.7804),
-    zoom: 13,
-  );
+  static const _initialCenter = LatLng(11.2588, 75.7804);
+  static const _initialZoom = 13.0;
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +47,24 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: _initialCameraPosition,
-            onMapCreated: (controller) => _controller = controller,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: true,
-            mapToolbarEnabled: false,
-            polygons: _buildPolygons(state),
-            markers: _buildMarkers(state),
+          FlutterMap(
+            mapController: _mapController,
+            options: const MapOptions(
+              initialCenter: _initialCenter,
+              initialZoom: _initialZoom,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.green_loop',
+              ),
+              PolygonLayer(
+                polygons: _buildPolygons(state),
+              ),
+              MarkerLayer(
+                markers: _buildMarkers(state),
+              ),
+            ],
           ),
           _buildOverlay(state),
         ],
@@ -64,10 +72,9 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           if (state.workerPositions.isNotEmpty) {
-            _controller?.animateCamera(
-              CameraUpdate.newLatLng(
-                LatLng(state.workerPositions.first.latitude, state.workerPositions.first.longitude),
-              ),
+            _mapController.move(
+              LatLng(state.workerPositions.first.latitude, state.workerPositions.first.longitude),
+              15.0,
             );
           }
         },
@@ -76,34 +83,36 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
     );
   }
 
-  Set<Polygon> _buildPolygons(MonitoringState state) {
+  List<Polygon> _buildPolygons(MonitoringState state) {
     return state.wardBoundaries.map((ward) {
       return Polygon(
-        polygonId: PolygonId('ward_${ward.wardId}'),
         points: ward.polygon.map((p) => LatLng(p[0], p[1])).toList(),
-        strokeWidth: 2,
-        strokeColor: Colors.blue.withOpacity(0.5),
-        fillColor: Colors.blue.withOpacity(0.1),
+        borderStrokeWidth: 2,
+        borderColor: Colors.blue.withOpacity(0.5),
+        color: Colors.blue.withOpacity(0.1),
+        isFilled: true,
       );
-    }).toSet();
+    }).toList();
   }
 
-  Set<Marker> _buildMarkers(MonitoringState state) {
-    final Set<Marker> markers = {};
+  List<Marker> _buildMarkers(MonitoringState state) {
+    final List<Marker> markers = [];
 
     // Pickup Markers
     for (final pickup in state.pendingPickups) {
       if (pickup.latitude != null && pickup.longitude != null) {
         markers.add(
           Marker(
-            markerId: MarkerId('pickup_${pickup.id}'),
-            position: LatLng(pickup.latitude!, pickup.longitude!),
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              _getWasteTypeHue(pickup.wasteType),
-            ),
-            infoWindow: InfoWindow(
-              title: '${pickup.wasteType.label} Pickup',
-              snippet: 'Status: ${pickup.status}',
+            point: LatLng(pickup.latitude!, pickup.longitude!),
+            width: 40,
+            height: 40,
+            child: Tooltip(
+              message: '${pickup.wasteType.label} Pickup\nStatus: ${pickup.status}',
+              child: Icon(
+                Icons.location_on,
+                color: _getWasteTypeColor(pickup.wasteType),
+                size: 30,
+              ),
             ),
           ),
         );
@@ -114,21 +123,20 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
     for (final worker in state.workerPositions) {
       markers.add(
         Marker(
-          markerId: MarkerId('worker_${worker.workerId}'),
-          position: LatLng(worker.latitude, worker.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            worker.isDeviated ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueAzure,
-          ),
-          infoWindow: InfoWindow(
-            title: worker.workerName,
-            snippet: worker.isDeviated ? 'DEVIATION ALERT (>500m)' : 'On Route',
+          point: LatLng(worker.latitude, worker.longitude),
+          width: 40,
+          height: 40,
+          child: Tooltip(
+            message: '${worker.workerName}\n${worker.isDeviated ? 'DEVIATION ALERT (>500m)' : 'On Route'}',
+            child: Icon(
+              Icons.person_pin_circle,
+              color: worker.isDeviated ? Colors.orange : Colors.blue,
+              size: 35,
+            ),
           ),
         ),
       );
     }
-    
-    // Fallback for pending pickups (since I need markers for them)
-    // For now, let's assume we implement it correctly in the model.
     
     return markers;
   }
@@ -150,7 +158,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
               ),
               const SizedBox(height: GLSpacing.xs),
               _buildLegendItem(Colors.blue, 'Wards'),
-              _buildLegendItem(Colors.lightBlue, 'HKS Workers'),
+              _buildLegendItem(Colors.blue, 'HKS Workers'),
               _buildLegendItem(Colors.orange, 'Deviation Alerts'),
               const Divider(),
               Text(
@@ -175,16 +183,17 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
     );
   }
 
-  double _getWasteTypeHue(WasteType type) {
+  Color _getWasteTypeColor(WasteType type) {
     switch (type) {
       case WasteType.dry:
-        return BitmapDescriptor.hueGreen;
+        return Colors.green;
       case WasteType.wet:
-        return BitmapDescriptor.hueBlue;
+        return Colors.blue;
       case WasteType.eWaste:
-        return BitmapDescriptor.hueOrange;
+        return Colors.orange;
       case WasteType.biomedical:
-        return BitmapDescriptor.hueRed;
+        return Colors.red;
     }
   }
 }
+

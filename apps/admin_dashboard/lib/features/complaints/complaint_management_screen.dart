@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:data_models/data_models.dart';
 import 'package:ui_kit/ui_kit.dart';
@@ -196,7 +197,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
               const SizedBox(height: GLSpacing.sm),
               Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 14),
+                   Icon(Icons.warning_amber_rounded, color: Colors.red, size: 14),
                   const SizedBox(width: GLSpacing.xs),
                   Text('Escalated: ${ageHours}h unresolved', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 11)),
                 ],
@@ -277,21 +278,30 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
   }
 
   Widget _buildHeatmap(BuildContext context, ComplaintState state) {
-    // Note: To show a real "heatmap" in google_maps_flutter, one might use circles with gradients or markers.
-    // For this implementation, we will use Circles representing clusters from KMeans.
-    
-    return GoogleMap(
-      initialCameraPosition: const CameraPosition(target: LatLng(11.2588, 75.7804), zoom: 12),
-      onMapCreated: (_) => state.loadHeatmap(),
-      circles: state.heatmapData.map((cluster) {
-        return Circle(
-          circleId: CircleId('cluster_${cluster['id']}'),
-          center: LatLng(cluster['latitude'], cluster['longitude']),
-          radius: cluster['density'] * 50.0, // Scale radius by cluster weight
-          fillColor: Colors.red.withOpacity(0.3 + (cluster['weight'] * 0.4)),
-          strokeWidth: 0,
-        );
-      }).toSet(),
+    return FlutterMap(
+      options: MapOptions(
+        initialCenter: const LatLng(11.2588, 75.7804),
+        initialZoom: 12,
+        onMapReady: () => state.loadHeatmap(),
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.green_loop',
+        ),
+        CircleLayer(
+          circles: state.heatmapData.map((cluster) {
+            return CircleMarker(
+              point: LatLng(cluster['latitude'], cluster['longitude']),
+              radius: cluster['density'] * 50.0,
+              useRadiusInMeter: true,
+              color: Colors.red.withOpacity(0.3 + (cluster['weight'] * 0.4)),
+              borderStrokeWidth: 0,
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }
+

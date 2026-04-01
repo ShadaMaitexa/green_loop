@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:ui_kit/ui_kit.dart';
+import '../wards/ward_state.dart';
 import 'pickup_slots_state.dart';
 
 class PickupSlotsManagementScreen extends StatefulWidget {
@@ -88,41 +90,91 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
   void _showAddSlotDialog(BuildContext context) {
     final dateController = TextEditingController();
     final slotController = TextEditingController();
-    final wardController = TextEditingController();
+    int? selectedWardId;
     final capacityController = TextEditingController();
+
+    // Trigger ward loading
+    context.read<WardState>().loadWards();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Pickup Slot'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GLTextField(label: 'Date (YYYY-MM-DD)', controller: dateController),
-            const SizedBox(height: GLSpacing.md),
-            GLTextField(label: 'Time Slot (e.g. 09:00 AM - 12:00 PM)', controller: slotController),
-            const SizedBox(height: GLSpacing.md),
-            GLTextField(label: 'Ward ID', controller: wardController, keyboardType: TextInputType.number),
-            const SizedBox(height: GLSpacing.md),
-            GLTextField(label: 'Capacity (Optional)', controller: capacityController, keyboardType: TextInputType.number),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Pickup Slot'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GLTextField(
+                label: 'Date (YYYY-MM-DD)',
+                controller: dateController,
+                readOnly: true,
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (pickedDate != null) {
+                    setDialogState(() {
+                      dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: GLSpacing.md),
+              GLTextField(label: 'Time Slot (e.g. 09:00 AM - 12:00 PM)', controller: slotController),
+              const SizedBox(height: GLSpacing.md),
+              Consumer<WardState>(
+                builder: (context, wardState, child) {
+                  return DropdownButtonFormField<int>(
+                    decoration: const InputDecoration(
+                      labelText: 'Select Ward',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: wardState.wards.map((ward) {
+                      return DropdownMenuItem<int>(
+                        value: ward.id,
+                        child: Text('Ward ${ward.number}: ${ward.name}'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        selectedWardId = value;
+                      });
+                    },
+                    value: selectedWardId,
+                    hint: const Text('Loading wards...'),
+                  );
+                },
+              ),
+              const SizedBox(height: GLSpacing.md),
+              GLTextField(label: 'Capacity (Optional)', controller: capacityController, keyboardType: TextInputType.number),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            GLButton(
+              text: 'Save',
+              isLoading: context.watch<PickupSlotsState>().isLoading,
+              onPressed: () async {
+                if (dateController.text.isEmpty || slotController.text.isEmpty || selectedWardId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fill all required fields')),
+                  );
+                  return;
+                }
+                final success = await context.read<PickupSlotsState>().createSlot({
+                  'date': dateController.text,
+                  'slot': slotController.text,
+                  'ward': selectedWardId,
+                  if (capacityController.text.isNotEmpty) 'capacity': int.tryParse(capacityController.text),
+                });
+                if (success && mounted && context.mounted) Navigator.pop(context);
+              },
+            ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          GLButton(
-            text: 'Save',
-            isLoading: context.watch<PickupSlotsState>().isLoading,
-            onPressed: () async {
-              final success = await context.read<PickupSlotsState>().createSlot({
-                'date': dateController.text,
-                'slot': slotController.text,
-                'ward': int.tryParse(wardController.text),
-                if (capacityController.text.isNotEmpty) 'capacity': int.tryParse(capacityController.text),
-              });
-              if (success && mounted && context.mounted) Navigator.pop(context);
-            },
-          ),
-        ],
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:data_models/data_models.dart';
@@ -22,7 +23,7 @@ class RouteMapScreen extends StatefulWidget {
 }
 
 class _RouteMapScreenState extends State<RouteMapScreen> {
-  GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   bool _followUser = false;
   LatLng? _lastKnownPosition;
   bool _isListView = false;
@@ -77,7 +78,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       final pos = LatLng(state.currentPosition!.latitude, state.currentPosition!.longitude);
       if (_lastKnownPosition?.latitude != pos.latitude || _lastKnownPosition?.longitude != pos.longitude) {
         _lastKnownPosition = pos;
-        _mapController?.animateCamera(CameraUpdate.newLatLng(pos));
+        _mapController.move(pos, _mapController.camera.zoom);
       }
     }
   }
@@ -133,31 +134,6 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
     if (route == null) {
        return const Scaffold(body: Center(child: Text('No active route assigned.')));
     }
-
-    // Prepare Map Layers
-    final Set<Polyline> polylines = {
-      Polyline(
-        polylineId: const PolylineId('route_path'),
-        points: route.routePath.map((e) => LatLng(e[0], e[1])).toList(),
-        color: theme.colorScheme.primary,
-        width: 6,
-        startCap: Cap.roundCap,
-        endCap: Cap.roundCap,
-        jointType: JointType.round,
-      ),
-    };
-
-    final Set<Polygon> polygons = route.wardBoundary != null 
-        ? {
-            Polygon(
-              polygonId: const PolygonId('ward_boundary'),
-              points: route.wardBoundary!.map((e) => LatLng(e[0], e[1])).toList(),
-              fillColor: theme.colorScheme.primary.withOpacity(0.08),
-              strokeColor: theme.colorScheme.primary.withOpacity(0.3),
-              strokeWidth: 2,
-            ),
-          }
-        : {};
 
     return Scaffold(
       appBar: AppBar(
@@ -223,27 +199,64 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       ),
       body: _isListView ? _buildRouteListView(route) : Stack(
         children: [
-           GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: route.routePath.isNotEmpty 
+           FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: route.routePath.isNotEmpty 
                   ? LatLng(route.routePath[0][0], route.routePath[0][1])
-                  : const LatLng(9.9312, 76.2673), // Fallback to Kochi
-              zoom: 15.0,
+                  : const LatLng(9.9312, 76.2673),
+              initialZoom: 15.0,
+              onMapReady: () {
+                if (route.routePath.isNotEmpty) _fitRouteBounds(route);
+              },
             ),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              if (route.routePath.isNotEmpty) {
-                _fitRouteBounds(route);
-              }
-            },
-            markers: _buildMarkers(route.pickups),
-            polylines: polylines,
-            polygons: polygons,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            mapToolbarEnabled: false,
-            compassEnabled: true,
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.green_loop',
+              ),
+              if (route.wardBoundary != null)
+                PolygonLayer(
+                  polygons: [
+                    Polygon(
+                      points: route.wardBoundary!.map((e) => LatLng(e[0], e[1])).toList(),
+                      color: theme.colorScheme.primary.withOpacity(0.08),
+                      borderColor: theme.colorScheme.primary.withOpacity(0.3),
+                      borderStrokeWidth: 2,
+                      isFilled: true,
+                    ),
+                  ],
+                ),
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: route.routePath.map((e) => LatLng(e[0], e[1])).toList(),
+                    color: theme.colorScheme.primary,
+                    strokeWidth: 6,
+                  ),
+                ],
+              ),
+              MarkerLayer(
+                markers: _buildMarkers(route.pickups),
+              ),
+              if (state.currentPosition != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: LatLng(state.currentPosition!.latitude, state.currentPosition!.longitude),
+                      width: 20,
+                      height: 20,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
           
           // Camera Control Buttons
@@ -324,58 +337,50 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   }
 
   void _fitRouteBounds(HksRoute route) {
-    if (route.routePath.isEmpty || _mapController == null) return;
+    if (route.routePath.isEmpty) return;
 
-    double minLat = route.routePath[0][0];
-    double maxLat = route.routePath[0][0];
-    double minLng = route.routePath[0][1];
-    double maxLng = route.routePath[0][1];
+    final bounds = LatLngBounds.fromPoints(
+      route.routePath.map((e) => LatLng(e[0], e[1])).toList(),
+    );
 
-    for (final point in route.routePath) {
-      if (point[0] < minLat) minLat = point[0];
-      if (point[0] > maxLat) maxLat = point[0];
-      if (point[1] < minLng) minLng = point[1];
-      if (point[1] > maxLng) maxLng = point[1];
-    }
-
-    _mapController!.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(minLat, minLng),
-          northeast: LatLng(maxLat, maxLng),
-        ),
-        80.0, // padding
+    _mapController.fitCamera(
+      CameraFit.bounds(
+        bounds: bounds,
+        padding: const EdgeInsets.all(80.0),
       ),
     );
   }
 
   void _centerOnUser() {
     final state = context.read<RouteMapState>();
-    if (state.currentPosition != null && _mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLng(
-          LatLng(state.currentPosition!.latitude, state.currentPosition!.longitude),
-        ),
+    if (state.currentPosition != null) {
+      _mapController.move(
+        LatLng(state.currentPosition!.latitude, state.currentPosition!.longitude),
+        _mapController.camera.zoom,
       );
     }
   }
 
-  Set<Marker> _buildMarkers(List<HksPickup> pickups) {
-    final Set<Marker> markers = {};
+  List<Marker> _buildMarkers(List<HksPickup> pickups) {
+    final List<Marker> markers = [];
     for (int i = 0; i < pickups.length; i++) {
       final p = pickups[i];
       markers.add(
         Marker(
-          markerId: MarkerId(p.id),
-          position: LatLng(p.latitude, p.longitude),
-          infoWindow: InfoWindow(title: '${i + 1}. ${p.residentName}'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            p.wasteType == WasteType.wet ? BitmapDescriptor.hueGreen :
-            p.wasteType == WasteType.dry ? BitmapDescriptor.hueBlue :
-            p.wasteType == WasteType.eWaste ? BitmapDescriptor.hueViolet :
-            BitmapDescriptor.hueRed,
+          point: LatLng(p.latitude, p.longitude),
+          width: 40,
+          height: 40,
+          child: GestureDetector(
+            onTap: () => _showPickupDetails(p),
+            child: Tooltip(
+              message: '${i + 1}. ${p.residentName}',
+              child: Icon(
+                Icons.location_on,
+                color: p.wasteType.color,
+                size: 30,
+              ),
+            ),
           ),
-          onTap: () => _showPickupDetails(p),
         ),
       );
     }
@@ -685,3 +690,4 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
     }
   }
 }
+
