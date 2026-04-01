@@ -13,6 +13,12 @@ class RewardRepository {
     return (response.data as Map<String, dynamic>)['balance'] as int? ?? 0;
   }
 
+  /// Fetches the resident's core profile information (including points).
+  Future<ResidentProfile> getProfile() async {
+    final response = await apiClient.get('/api/v1/users/me/');
+    return ResidentProfile.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Fetches the resident's current perfect segregation streak.
   Future<String> getStreak() async {
     final response = await apiClient.get('/api/v1/rewards/streak/');

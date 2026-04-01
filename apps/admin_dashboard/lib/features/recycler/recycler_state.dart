@@ -41,6 +41,11 @@ class RecyclerState extends ChangeNotifier {
     }
   }
 
+  double get totalSpent => _purchases.fold(0.0, (sum, p) => sum + p.totalAmount);
+  double get totalWeight => _purchases.fold(0.0, (sum, p) => sum + p.weightKg);
+  int get totalMaterials => _materialTypes.length;
+  int get pendingCount => _pendingCertificates.length;
+
   Future<bool> addMaterial(Map<String, dynamic> data) async {
     try {
       await _service.createMaterialType(data);
