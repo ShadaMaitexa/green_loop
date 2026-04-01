@@ -7,6 +7,7 @@ class RecyclerState extends ChangeNotifier {
 
   List<MaterialType> _materialTypes = [];
   List<RecyclerPurchase> _purchases = [];
+  List<RecyclerCertificate> _pendingCertificates = [];
   bool _isLoading = false;
   String? _error;
 
@@ -14,6 +15,7 @@ class RecyclerState extends ChangeNotifier {
 
   List<MaterialType> get materialTypes => _materialTypes;
   List<RecyclerPurchase> get purchases => _purchases;
+  List<RecyclerCertificate> get pendingCertificates => _pendingCertificates;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -26,9 +28,11 @@ class RecyclerState extends ChangeNotifier {
       final futures = await Future.wait([
         _service.getMaterialTypes(),
         _service.getPurchases(),
+        _service.getPendingCertificates(),
       ]);
       _materialTypes = futures[0] as List<MaterialType>;
       _purchases = futures[1] as List<RecyclerPurchase>;
+      _pendingCertificates = futures[2] as List<RecyclerCertificate>;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -40,6 +44,30 @@ class RecyclerState extends ChangeNotifier {
   Future<bool> addMaterial(Map<String, dynamic> data) async {
     try {
       await _service.createMaterialType(data);
+      await loadLedger();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateMaterial(int id, Map<String, dynamic> data) async {
+    try {
+      await _service.updateMaterialType(id, data);
+      await loadLedger();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> verifyCertificate(int id) async {
+    try {
+      await _service.verifyCertificate(id);
       await loadLedger();
       return true;
     } catch (e) {

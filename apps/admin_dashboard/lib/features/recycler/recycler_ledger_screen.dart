@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MaterialType;
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:ui_kit/ui_kit.dart';
@@ -60,6 +60,40 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
           ),
           const SizedBox(height: GLSpacing.xl),
 
+          if (state.pendingCertificates.isNotEmpty) ...[
+            Text('Pending Certificates', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: GLSpacing.md),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: state.pendingCertificates.length,
+              itemBuilder: (context, index) {
+                final cert = state.pendingCertificates[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: GLSpacing.sm),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Colors.orange,
+                      child: Icon(Icons.description, color: Colors.white),
+                    ),
+                    title: Text('Certificate #${cert.id} - ${cert.recyclerName ?? "Recycler"}'),
+                    subtitle: Text('Requested: ${cert.dateRequested != null ? DateFormat('yyyy-MM-dd').format(cert.dateRequested!) : "N/A"}'),
+                    trailing: GLButton(
+                      text: 'Verify',
+                      onPressed: () async {
+                        final success = await context.read<RecyclerState>().verifyCertificate(cert.id);
+                        if (success && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Certificate verified!')));
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: GLSpacing.xl),
+          ],
+
           Text('Current Material Prices', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: GLSpacing.md),
           if (state.materialTypes.isEmpty)
@@ -82,10 +116,12 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
                 final m = state.materialTypes[i];
                 final color = _getMaterialColor(m.name);
                 return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(GLSpacing.md),
-                    child: Row(
-                      children: [
+                  child: InkWell(
+                    onTap: () => _showEditMaterialDialog(context, m),
+                    child: Padding(
+                      padding: const EdgeInsets.all(GLSpacing.md),
+                      child: Row(
+                        children: [
                         CircleAvatar(
                           backgroundColor: color.withOpacity(0.15),
                           child: Icon(_getMaterialIcon(m.name), color: color),
@@ -115,10 +151,9 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
                       ],
                     ),
                   ),
-                );
+                ));
               },
             ),
-
           const SizedBox(height: GLSpacing.xl),
           Text('Recent Purchases', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: GLSpacing.md),
@@ -210,6 +245,43 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
               final success = await context.read<RecyclerState>().addMaterial({
                 'name': nameController.text,
                 'price_per_kg': double.tryParse(priceController.text) ?? 0.0,
+                'description': descController.text,
+              });
+              if (success && mounted && context.mounted) Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditMaterialDialog(BuildContext context, MaterialType material) {
+    final nameController = TextEditingController(text: material.name);
+    final priceController = TextEditingController(text: material.currentPricePerKg.toString());
+    final descController = TextEditingController(text: material.description);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Material Type'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GLTextField(label: 'Name', controller: nameController),
+            const SizedBox(height: GLSpacing.md),
+            GLTextField(label: 'Price per Kg', controller: priceController, keyboardType: TextInputType.number),
+            const SizedBox(height: GLSpacing.md),
+            GLTextField(label: 'Description', controller: descController),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          GLButton(
+            text: 'Update',
+            onPressed: () async {
+              final success = await context.read<RecyclerState>().updateMaterial(material.id, {
+                'name': nameController.text,
+                'price_per_kg': double.tryParse(priceController.text) ?? material.currentPricePerKg,
                 'description': descController.text,
               });
               if (success && mounted && context.mounted) Navigator.pop(context);

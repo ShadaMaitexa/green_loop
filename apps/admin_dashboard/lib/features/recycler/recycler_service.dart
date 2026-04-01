@@ -8,7 +8,7 @@ class RecyclerService {
 
   Future<List<MaterialType>> getMaterialTypes() async {
     try {
-      final response = await _api.get('/api/v1/material-types/');
+      final response = await _api.get('/api/v1/recycler/materials/');
       final List data = response.data;
       return data.map((json) => MaterialType.fromJson(json)).toList();
     } catch (e) {
@@ -18,7 +18,7 @@ class RecyclerService {
 
   Future<List<RecyclerPurchase>> getPurchases() async {
     try {
-      final response = await _api.get('/api/v1/recycler-purchases/');
+      final response = await _api.get('/api/v1/recycler/purchases/');
       final List data = response.data;
       return data.map((json) => RecyclerPurchase.fromJson(json)).toList();
     } catch (e) {
@@ -26,11 +26,29 @@ class RecyclerService {
     }
   }
 
+  Future<List<RecyclerCertificate>> getPendingCertificates() async {
+    try {
+      final response = await _api.get('/api/v1/recycler/certificates/admin_pending/');
+      final List data = response.data;
+      return data.map((json) => RecyclerCertificate.fromJson(json)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> verifyCertificate(int id) async {
+    await _api.post('/api/v1/recycler/certificates/$id/verify/');
+  }
+
   Future<void> createMaterialType(Map<String, dynamic> data) async {
-    await _api.post('/api/v1/material-types/', data: data);
+    await _api.post('/api/v1/recycler/materials/', data: data);
+  }
+
+  Future<void> updateMaterialType(int id, Map<String, dynamic> data) async {
+    await _api.patch('/api/v1/recycler/materials/$id/', data: data);
   }
 
   Future<void> createPurchase(Map<String, dynamic> data) async {
-    await _api.post('/api/v1/recycler-purchases/', data: data);
+    await _api.post('/api/v1/recycler/purchases/', data: data);
   }
 }

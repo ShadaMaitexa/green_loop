@@ -37,6 +37,46 @@ class MaterialType {
   int get hashCode => id.hashCode;
 }
 
+class RecyclerCertificate {
+  final int id;
+  final String status;
+  final String? recyclerName;
+  final String? certificateUrl;
+  final DateTime? dateRequested;
+  final DateTime? dateVerified;
+
+  const RecyclerCertificate({
+    required this.id,
+    required this.status,
+    this.recyclerName,
+    this.certificateUrl,
+    this.dateRequested,
+    this.dateVerified,
+  });
+
+  factory RecyclerCertificate.fromJson(Map<String, dynamic> json) {
+    return RecyclerCertificate(
+      id: json['id'] as int? ?? 0,
+      status: json['status']?.toString() ?? 'PENDING',
+      recyclerName: json['recycler_name']?.toString(),
+      certificateUrl: json['certificate_url']?.toString(),
+      dateRequested: DateTime.tryParse(json['date_requested']?.toString() ?? ''),
+      dateVerified: DateTime.tryParse(json['date_verified']?.toString() ?? ''),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'status': status,
+      'recycler_name': recyclerName,
+      'certificate_url': certificateUrl,
+      'date_requested': dateRequested?.toIso8601String(),
+      'date_verified': dateVerified?.toIso8601String(),
+    };
+  }
+}
+
 /// Model representing a purchase record for the recycler.
 /// Aligns with GET /api/v1/recycler-purchases/
 class RecyclerPurchase {

@@ -3,6 +3,7 @@ import 'package:ui_kit/ui_kit.dart';
 import 'package:provider/provider.dart';
 import '../wards/ward_state.dart';
 import '../users/user_management_state.dart';
+import 'package:data_models/data_models.dart';
 
 class PilotReadinessScreen extends StatefulWidget {
   const PilotReadinessScreen({super.key});
@@ -28,9 +29,9 @@ class _PilotReadinessScreenState extends State<PilotReadinessScreen> {
     final theme = Theme.of(context);
 
     final seededWards = wardState.wards.where((w) => w.boundary != null && w.boundary!.isNotEmpty).toList();
-    final hksWorkers = userState.users.where((u) => u.role.name == 'HKS_WORKER' || u.role.name == 'hks').toList();
+    final hksWorkers = userState.users.where((u) => u.role == UserRole.hksWorker).toList();
     final activeWorkers = hksWorkers.where((u) => u.isActive).toList();
-    final residents = userState.users.where((u) => u.role.name == 'RESIDENT').toList();
+    final residents = userState.users.where((u) => u.role == UserRole.resident).toList();
 
     return Padding(
       padding: const EdgeInsets.all(GLSpacing.xl),

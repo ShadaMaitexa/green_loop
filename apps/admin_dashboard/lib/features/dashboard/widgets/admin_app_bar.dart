@@ -116,16 +116,6 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             const PopupMenuItem(
-              value: 'profile',
-              child: Row(
-                children: [
-                  Icon(Icons.person_outline_rounded, size: 20),
-                  SizedBox(width: GLSpacing.sm),
-                  Text('Profile'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
               value: 'logout',
               child: Row(
                 children: [

@@ -44,7 +44,7 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
     // ── Aggregated Stats (Dynamic) ───────────────────────────────────────────
     
     // 1. Active Workers
-    final activeWorkersCount = userState.users.where((u) => u.isActive && (u.role.name.toLowerCase().contains('hks'))).length;
+    final activeWorkersCount = userState.users.where((u) => u.isActive && u.role == UserRole.hksWorker).length;
     
     // 2. Pending Complaints
     final pendingCount = complaintState.complaints.where((c) => c.status != ComplaintStatus.resolved).length;
