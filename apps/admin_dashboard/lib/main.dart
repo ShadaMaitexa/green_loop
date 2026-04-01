@@ -48,7 +48,7 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => MonitoringState(
             service: context.read<MonitoringService>(),
-          )..initializeMap(),
+          ),
         ),
         Provider(create: (_) => UserManagementService(apiClient: apiClient)),
         ChangeNotifierProvider(

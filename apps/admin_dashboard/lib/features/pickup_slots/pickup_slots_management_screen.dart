@@ -71,10 +71,7 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline, color: Colors.red),
                                 onPressed: () {
-                                  // In a real app we'd use slot.id, but the model has only date/slot
-                                  // I'll assume we delete by a unique key or the ID if available in JSON
-                                  // For now I'll just keep it consistent with the model
-                                  context.read<PickupSlotsState>().deleteSlot(slot.date); 
+                                  context.read<PickupSlotsState>().deleteSlot(slot.id); 
                                 },
                               ),
                             );
@@ -91,7 +88,7 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
     final dateController = TextEditingController();
     final startTimeController = TextEditingController();
     final endTimeController = TextEditingController();
-    int? selectedWardId;
+    List<int> selectedWardIds = [];
     final capacityController = TextEditingController();
 
     // Trigger ward loading
@@ -102,96 +99,105 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Add Pickup Slot'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GLTextField(
-                label: 'Date (YYYY-MM-DD)',
-                controller: dateController,
-                readOnly: true,
-                onTap: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (pickedDate != null) {
-                    setDialogState(() {
-                      dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: GLSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: GLTextField(
-                      label: 'Start Time',
-                      controller: startTimeController,
-                      readOnly: true,
-                      onTap: () async {
-                        final pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: const TimeOfDay(hour: 9, minute: 0),
-                        );
-                        if (pickedTime != null) {
-                          setDialogState(() {
-                            startTimeController.text = pickedTime.format(context);
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: GLSpacing.sm),
-                  Expanded(
-                    child: GLTextField(
-                      label: 'End Time',
-                      controller: endTimeController,
-                      readOnly: true,
-                      onTap: () async {
-                        final pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: const TimeOfDay(hour: 12, minute: 0),
-                        );
-                        if (pickedTime != null) {
-                          setDialogState(() {
-                            endTimeController.text = pickedTime.format(context);
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: GLSpacing.md),
-              Consumer<WardState>(
-                builder: (context, wardState, child) {
-                  return DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'Select Ward',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: wardState.wards.map((ward) {
-                      return DropdownMenuItem<int>(
-                        value: ward.id,
-                        child: Text('Ward ${ward.number}: ${ward.name}'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GLTextField(
+                  label: 'Date (YYYY-MM-DD)',
+                  controller: dateController,
+                  readOnly: true,
+                  onTap: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (pickedDate != null) {
                       setDialogState(() {
-                        selectedWardId = value;
+                        dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
                       });
-                    },
-                    value: selectedWardId,
-                    hint: const Text('Loading wards...'),
-                  );
-                },
-              ),
-              const SizedBox(height: GLSpacing.md),
-              GLTextField(label: 'Capacity (Optional)', controller: capacityController, keyboardType: TextInputType.number),
-            ],
+                    }
+                  },
+                ),
+                const SizedBox(height: GLSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GLTextField(
+                        label: 'Start Time',
+                        controller: startTimeController,
+                        readOnly: true,
+                        onTap: () async {
+                          final pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: const TimeOfDay(hour: 9, minute: 0),
+                          );
+                          if (pickedTime != null) {
+                            setDialogState(() {
+                              startTimeController.text = pickedTime.format(context);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: GLSpacing.sm),
+                    Expanded(
+                      child: GLTextField(
+                        label: 'End Time',
+                        controller: endTimeController,
+                        readOnly: true,
+                        onTap: () async {
+                          final pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: const TimeOfDay(hour: 12, minute: 0),
+                          );
+                          if (pickedTime != null) {
+                            setDialogState(() {
+                              endTimeController.text = pickedTime.format(context);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: GLSpacing.lg),
+                Text('Select Wards', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: GLSpacing.sm),
+                Consumer<WardState>(
+                  builder: (context, wardState, child) {
+                    if (wardState.isLoading) return const LinearProgressIndicator();
+                    if (wardState.wards.isEmpty) return const Text('No wards available');
+                    
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: wardState.wards.map((ward) {
+                        final isSelected = selectedWardIds.contains(ward.id);
+                        return FilterChip(
+                          label: Text('Ward ${ward.number ?? ward.id}'),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setDialogState(() {
+                              if (selected) {
+                                selectedWardIds.add(ward.id);
+                              } else {
+                                selectedWardIds.remove(ward.id);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                const SizedBox(height: GLSpacing.md),
+                GLTextField(label: 'Capacity (Optional)', controller: capacityController, keyboardType: TextInputType.number),
+              ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -202,9 +208,9 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                 if (dateController.text.isEmpty ||
                     startTimeController.text.isEmpty ||
                     endTimeController.text.isEmpty ||
-                    selectedWardId == null) {
+                    selectedWardIds.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all required fields')),
+                    const SnackBar(content: Text('Please fill all required fields and select at least one ward')),
                   );
                   return;
                 }
@@ -213,8 +219,8 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                 
                 final success = await context.read<PickupSlotsState>().createSlot({
                   'date': dateController.text,
-                  'slot': combinedSlot,
-                  'ward': selectedWardId,
+                  'time_range': combinedSlot,
+                  'wards': selectedWardIds,
                   if (capacityController.text.isNotEmpty) 'capacity': int.tryParse(capacityController.text),
                 });
                 if (success && mounted && context.mounted) Navigator.pop(context);

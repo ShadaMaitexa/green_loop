@@ -24,7 +24,7 @@ class MonitoringState extends ChangeNotifier {
   String? get error => _error;
 
   /// Load initial map data.
-  Future<void> initializeMap() async {
+  Future<void> initializeMap({String? token}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -36,7 +36,7 @@ class MonitoringState extends ChangeNotifier {
       _wardBoundaries = boundaries;
       _pendingPickups = pickups;
 
-      _startTracking();
+      _startTracking(token: token);
     } catch (e) {
       _error = 'Failed to load monitoring data: $e';
     } finally {
@@ -46,9 +46,9 @@ class MonitoringState extends ChangeNotifier {
   }
 
   /// Start listening to WebSocket tracking updates.
-  void _startTracking() {
+  void _startTracking({String? token}) {
     _trackingSubscription?.cancel();
-    final channel = _service.connectTracking();
+    final channel = _service.connectTracking(token: token);
     
     _trackingSubscription = channel.stream.listen(
       (data) {
@@ -66,12 +66,12 @@ class MonitoringState extends ChangeNotifier {
         _error = 'Live tracking error: $e';
         notifyListeners();
         // Re-try after delay...
-        Future.delayed(const Duration(seconds: 5), _startTracking);
+        Future.delayed(const Duration(seconds: 5), () => _startTracking(token: token));
       },
       onDone: () {
         debugPrint('Tracking WebSocket closed');
         // Re-try after delay...
-        Future.delayed(const Duration(seconds: 5), _startTracking);
+        Future.delayed(const Duration(seconds: 5), () => _startTracking(token: token));
       },
     );
   }

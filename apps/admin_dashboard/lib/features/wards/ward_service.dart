@@ -24,11 +24,7 @@ class WardService {
       return [];
     } catch (e) {
       if (kDebugMode && e.toString().contains('OperationError')) {
-        // Fallback for CORS/OperationError during local dev with remote server
-        return [
-          const Ward(id: 1, name: 'Palayam', boundary: [[11.2588, 75.7804], [11.26, 75.78], [11.26, 75.79]]),
-          const Ward(id: 2, name: 'Vellayambalam', boundary: [[11.25, 75.78], [11.25, 75.79], [11.24, 75.79]]),
-        ];
+        return [];
       }
       rethrow;
     }

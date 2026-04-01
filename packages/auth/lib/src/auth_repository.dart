@@ -234,4 +234,9 @@ class AuthRepository {
       await _apiClient.tokenStorage.clearAll();
     }
   }
+
+  /// Get current access token from storage.
+  Future<String?> getAccessToken() async {
+    return _apiClient.tokenStorage.getAccessToken();
+  }
 }

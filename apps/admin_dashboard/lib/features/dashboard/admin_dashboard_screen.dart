@@ -14,10 +14,13 @@ import '../attendance/attendance_screen.dart';
 import '../pickup_slots/pickup_slots_management_screen.dart';
 import '../payments/payment_management_screen.dart';
 import '../pickups/pickup_management_screen.dart';
+import '../monitoring/monitoring_state.dart';
+import '../recycler/recycler_ledger_screen.dart';
 import '../settings/settings_screen.dart';
 import '../routes/route_management_screen.dart';
 import '../contamination/contamination_review_screen.dart';
-import '../recycler/recycler_ledger_screen.dart';
+import 'package:auth/auth.dart';
+import 'package:provider/provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -28,6 +31,20 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final auth = context.read<AuthState>();
+      if (auth.status == AuthStatus.authenticated) {
+        final token = await auth.token;
+        if (token != null && mounted && context.mounted) {
+          context.read<MonitoringState>().initializeMap(token: token);
+        }
+      }
+    });
+  }
 
   final List<DashboardSection> _sections = [
     DashboardSection(title: 'Pilot Launch', icon: Icons.rocket_launch_rounded),

@@ -27,10 +27,7 @@ class MonitoringService {
       return [];
     } catch (e) {
       if (kDebugMode || e.toString().contains('OperationError')) {
-        return [
-          const WardBoundary(wardId: 1, polygon: [[11.25, 75.78], [11.26, 75.78], [11.26, 75.79]]),
-          const WardBoundary(wardId: 2, polygon: [[11.24, 75.78], [11.25, 75.78], [11.25, 75.79]]),
-        ];
+        return [];
       }
       rethrow;
     }
@@ -44,20 +41,17 @@ class MonitoringService {
       return list.map((e) => PickupResponse.fromJson(e)).toList();
     } catch (e) {
       if (kDebugMode || e.toString().contains('OperationError')) {
-        return [
-          const PickupResponse(id: '1', qrCodeData: 'P1', status: 'pending', scheduledDate: '2026-03-31', slot: 'MORNING', wasteType: WasteType.dry, latitude: 11.255, longitude: 75.785),
-        ];
+        return [];
       }
       rethrow;
     }
   }
 
   /// Connect to real-time GPS tracking WebSocket.
-  WebSocketChannel connectTracking() {
-    // Note: Assuming the backend handles JWT via query param or subprotocol
-    // since WebSocket headers aren't natively supported in all browser/web environments easily.
-    // However, for mobile it works. For now, let's use the simplest approach.
-    final uri = Uri.parse('$_wsBaseUrl/ws/tracking/');
+  WebSocketChannel connectTracking({String? token}) {
+    // Note: Most DRF/Channels backends require the token in the query param for WebSockets on the web
+    final url = '$_wsBaseUrl/ws/tracking/${token != null ? "?token=$token" : ""}';
+    final uri = Uri.parse(url);
     return WebSocketChannel.connect(uri);
   }
 }

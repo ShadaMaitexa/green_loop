@@ -37,11 +37,13 @@ enum WasteType {
 }
 
 class PickupSlot {
-  final String date; // YYYY-MM-DD
-  final String slot; // MORNING, AFTERNOON, EVENING
-  final bool isAvailable;
+  final String id;
+  final String date;
+  final String slot; // Maps to time_range or label
+  final bool isAvailable; // Maps to is_active
 
   const PickupSlot({
+    required this.id,
     required this.date,
     required this.slot,
     this.isAvailable = true,
@@ -49,9 +51,10 @@ class PickupSlot {
 
   factory PickupSlot.fromJson(Map<String, dynamic> json) {
     return PickupSlot(
-      date: json['date'] as String,
-      slot: json['slot'] as String,
-      isAvailable: json['is_available'] as bool? ?? true,
+      id: json['id']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      slot: (json['time_range'] ?? json['label'] ?? json['slot'])?.toString() ?? 'MORNING',
+      isAvailable: json['is_active'] as bool? ?? json['is_available'] as bool? ?? true,
     );
   }
 }

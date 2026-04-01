@@ -29,6 +29,9 @@ class AuthState extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String? get fallbackOtp => _fallbackOtp;
 
+  /// Get current access token if available.
+  Future<String?> get token async => await _repository.getAccessToken();
+
   /// Check current active session (for app cold starts).
   Future<void> initialize() async {
     _setStatus(AuthStatus.checking);

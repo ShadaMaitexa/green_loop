@@ -39,8 +39,10 @@ class PickupSlotsState extends ChangeNotifier {
       return true;
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
