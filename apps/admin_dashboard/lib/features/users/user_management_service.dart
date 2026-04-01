@@ -26,12 +26,33 @@ class UserManagementService {
       return list.map((e) => PlatformUser.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
       if (kDebugMode) {
-        // Fallback for CORS/OperationError
-        return [
-          const PlatformUser(id: '1', email: 'worker1@greenloop.app', name: 'Ravi Kumar', role: UserRole.hksWorker, isActive: true),
-          const PlatformUser(id: '2', email: 'worker2@greenloop.app', name: 'Anjali Sharma', role: UserRole.hksWorker, isActive: true),
-          const PlatformUser(id: '3', email: 'admin@greenloop.app', name: 'Project Lead', role: UserRole.admin, isActive: true),
+        // More comprehensive Mock data for testing filtering/search
+        final mockUsers = [
+          const PlatformUser(id: '1', email: 'arathyrajeesh2@gmail.com', name: 'arathyrajeesh2', role: UserRole.resident, isActive: true),
+          const PlatformUser(id: '2', email: 'arathyrajeesh050@example.com', name: 'arathyrajeesh050', role: UserRole.resident, isActive: true),
+          const PlatformUser(id: '3', email: 'aswathy@gmail.com', name: 'Aswathy', role: UserRole.hksWorker, isActive: true),
+          const PlatformUser(id: '4', email: 'amaya@gmail.com', name: 'amaya', role: UserRole.recycler, isActive: true),
+          const PlatformUser(id: '5', email: 'user@example.com', name: 'user', role: UserRole.resident, isActive: true),
+          const PlatformUser(id: '6', email: 'athy@gmail.com', name: 'arthy', role: UserRole.resident, isActive: true),
+          const PlatformUser(id: '7', email: 'arathy2@gmail.com', name: 'arathy2', role: UserRole.resident, isActive: true),
+          const PlatformUser(id: '8', email: 'admin@greenloop.app', name: 'Project Lead', role: UserRole.admin, isActive: true),
         ];
+
+        return mockUsers.where((user) {
+          bool matchesSearch = true;
+          if (searchQuery != null && searchQuery.isNotEmpty) {
+            final query = searchQuery.toLowerCase();
+            matchesSearch = user.name.toLowerCase().contains(query) || user.email.toLowerCase().contains(query);
+          }
+
+          bool matchesRole = true;
+          if (role != null) {
+            // DataModels role toString/toJson check
+            matchesRole = user.role.toJson().toLowerCase() == role.toLowerCase();
+          }
+
+          return matchesSearch && matchesRole;
+        }).toList();
       }
       rethrow;
     }

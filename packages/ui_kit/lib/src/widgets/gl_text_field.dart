@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/spacing.dart';
 
 /// App-wide standard TextField with labels, hints, and unified styling
-class GLTextField extends StatelessWidget {
+class GLTextField extends StatefulWidget {
   final String label;
   final String? hint;
   final String? errorText;
@@ -40,6 +40,25 @@ class GLTextField extends StatelessWidget {
   });
 
   @override
+  State<GLTextField> createState() => _GLTextFieldState();
+}
+
+class _GLTextFieldState extends State<GLTextField> {
+  late bool _obscured;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscured = widget.obscureText;
+  }
+
+  void _toggleObscure() {
+    setState(() {
+      _obscured = !_obscured;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -60,12 +79,24 @@ class GLTextField extends StatelessWidget {
       borderSide: BorderSide(color: colorScheme.primary, width: 2),
     );
 
+    Widget? suffix = widget.suffixIcon;
+    if (widget.obscureText && widget.suffixIcon == null) {
+      suffix = IconButton(
+        icon: Icon(
+          _obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+          size: 20,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        onPressed: _toggleObscure,
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          label,
+          widget.label,
           style: theme.textTheme.labelLarge?.copyWith(
             color: colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -73,22 +104,22 @@ class GLTextField extends StatelessWidget {
         ),
         const SizedBox(height: GLSpacing.sm),
         TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          readOnly: readOnly,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          onChanged: onChanged,
-          onTap: onTap,
-          validator: validator,
+          controller: widget.controller,
+          obscureText: _obscured,
+          readOnly: widget.readOnly,
+          maxLines: widget.maxLines,
+          keyboardType: widget.keyboardType,
+          onChanged: widget.onChanged,
+          onTap: widget.onTap,
+          validator: widget.validator,
           style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
-            hintText: hint,
-            errorText: errorText,
-            prefixText: prefixText,
-            helperText: helperText,
-            prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
+            hintText: widget.hint,
+            errorText: widget.errorText,
+            prefixText: widget.prefixText,
+            helperText: widget.helperText,
+            prefixIcon: widget.prefixIcon,
+            suffixIcon: suffix,
             filled: true,
             fillColor: isDark ? Colors.white10 : Colors.white,
             border: border,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:data_models/data_models.dart';
 import 'user_management_service.dart';
@@ -13,6 +14,7 @@ class UserManagementState extends ChangeNotifier {
   UserRole? _filterRole;
   String _searchQuery = '';
   int? _filterWardId;
+  Timer? _debounceTimer;
 
   UserManagementState({required UserManagementService service}) : _service = service;
 
@@ -44,10 +46,19 @@ class UserManagementState extends ChangeNotifier {
     }
   }
 
-  /// Update search query and reload.
+  /// Update search query with debouncing and reload.
   void setSearchQuery(String query) {
     _searchQuery = query;
-    loadUsers();
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      loadUsers();
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 
   /// Update role filter and reload.
