@@ -39,17 +39,12 @@ class AuthRepository {
         refreshToken: data['refresh'] as String,
       );
 
-      final userObj = data['user'] as Map<String, dynamic>? ?? {};
-      final bool registrationRequired = data['registration_required'] == true;
-
-      return AuthUser(
-        id: userObj['id']?.toString() ?? '',
-        email: userObj['email']?.toString() ?? email,
-        username: userObj['username']?.toString() ?? email,
-        name: userObj['name']?.toString() ?? '',
-        role: userObj['role']?.toString() ?? 'admin',
-        isProfileCompleted: !registrationRequired,
-      );
+      // We merge the user object with the outer response data to have access to registration_required 
+      // and other meta-flags in AuthUser.fromJson.
+      return AuthUser.fromJson({
+        ...(data['user'] as Map? ?? {}),
+        ...data,
+      });
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
@@ -83,17 +78,10 @@ class AuthRepository {
         refreshToken: data['refresh'] as String,
       );
 
-      final userObj = data['user'] as Map<String, dynamic>? ?? {};
-      final bool registrationRequired = data['registration_required'] == true;
-
-      return AuthUser(
-        id: userObj['id']?.toString() ?? '',
-        email: userObj['email']?.toString() ?? '',
-        username: userObj['username']?.toString() ?? username,
-        name: userObj['name']?.toString() ?? '',
-        role: userObj['role']?.toString() ?? 'worker',
-        isProfileCompleted: !registrationRequired,
-      );
+      return AuthUser.fromJson({
+        ...(data['user'] as Map? ?? {}),
+        ...data,
+      });
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
@@ -142,17 +130,10 @@ class AuthRepository {
         refreshToken: data['refresh'] as String,
       );
 
-      final userObj = data['user'] as Map<String, dynamic>? ?? {};
-      final bool registrationRequired = data['registration_required'] == true;
-
-      return AuthUser(
-        id: userObj['id']?.toString() ?? '',
-        email: userObj['email']?.toString() ?? email,
-        username: userObj['username']?.toString() ?? email,
-        name: userObj['name']?.toString() ?? '',
-        role: userObj['role']?.toString() ?? 'resident',
-        isProfileCompleted: !registrationRequired,
-      );
+      return AuthUser.fromJson({
+        ...(data['user'] as Map? ?? {}),
+        ...data,
+      });
 
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();

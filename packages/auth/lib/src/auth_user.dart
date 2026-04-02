@@ -18,16 +18,35 @@ class AuthUser {
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
+    final role = json['role']?.toString() ?? 'resident';
     final registrationRequired = json['registration_required'] == true;
-    final isProfileCompletedValue = json['is_profile_completed'] as bool? ?? !registrationRequired;
+    
+    // Check for explicit completion flag
+    bool isCompleted = json['is_profile_completed'] as bool? ?? 
+                       json['user']?['is_profile_completed'] as bool? ?? 
+                       false;
+
+    // Fallback detection: If the user has a ward, their profile is effectively setup
+    final hasWard = json['ward'] != null || 
+                   json['ward_id'] != null || 
+                   json['user']?['ward'] != null ||
+                   json['user']?['ward_id'] != null;
+
+    // Logic: 
+    // 1. Admins don't need profile setup screens.
+    // 2. If registration was NOT required (already exists) AND they have a ward -> Completed.
+    // 3. Otherwise rely on explicit isCompleted flag.
+    final bool finalStatus = (role.toLowerCase() == 'admin') || 
+                             isCompleted || 
+                             (!registrationRequired && hasWard);
 
     return AuthUser(
-      id: json['id']?.toString() ?? '',
-      email: json['email']?.toString() ?? '',
+      id: json['id']?.toString() ?? json['user']?['id']?.toString() ?? '',
+      email: json['email']?.toString() ?? json['user']?['email']?.toString() ?? '',
       username: json['username']?.toString() ?? json['email']?.toString() ?? '',
-      name: json['name']?.toString() ?? json['username']?.toString() ?? json['email']?.toString() ?? '',
-      role: json['role']?.toString() ?? 'resident',
-      isProfileCompleted: isProfileCompletedValue,
+      name: json['name']?.toString() ?? json['username']?.toString() ?? '',
+      role: role,
+      isProfileCompleted: finalStatus,
     );
   }
 

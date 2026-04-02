@@ -190,6 +190,7 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Widget _buildCurrentStepView() {
+    if (_isLoadingInitial) return const Center(child: CircularProgressIndicator());
     switch (_currentStep) {
       case 1: return _stepWasteType();
       case 2: return _stepDateSelection();

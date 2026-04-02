@@ -89,20 +89,15 @@ class PickupRequest {
     required this.longitude,
   });
 
-  /// Aligns with POST /api/v1/pickups/ Feature format
+  /// Aligns with POST /api/v1/pickups/ standard REST format
   Map<String, dynamic> toJson() {
     return {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Point',
-        'coordinates': [longitude, latitude], // GeoJSON is [lng, lat]
-      },
-      'properties': {
-        'waste_type': wasteType.toJson(),
-        'scheduled_date': scheduledDate,
-        'slot': slot,
-        'address': address,
-      },
+      'waste_type': wasteType.toJson().toLowerCase(),
+      'scheduled_date': scheduledDate,
+      'slot': slot,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 }
