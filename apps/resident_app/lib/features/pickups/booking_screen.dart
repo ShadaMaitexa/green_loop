@@ -275,7 +275,7 @@ class _BookingScreenState extends State<BookingScreen> {
       itemCount: slotsToShow.length,
       itemBuilder: (context, index) {
         final slotObj = slotsToShow[index];
-        final isSelected = _selectedSlot == slotObj.slot;
+        final isSelected = _selectedSlot == slotObj.id;
 
         return GLCard(
           margin: const EdgeInsets.only(bottom: GLSpacing.md),
@@ -285,7 +285,7 @@ class _BookingScreenState extends State<BookingScreen> {
             trailing: isSelected 
                 ? const Icon(Icons.check_circle, color: Colors.green) 
                 : (!slotObj.isAvailable ? const Text('Full', style: TextStyle(color: Colors.red)) : null),
-            onTap: slotObj.isAvailable ? () => setState(() => _selectedSlot = slotObj.slot) : null,
+            onTap: slotObj.isAvailable ? () => setState(() => _selectedSlot = slotObj.id) : null,
           ),
         );
       },

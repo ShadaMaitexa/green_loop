@@ -89,15 +89,17 @@ class PickupRequest {
     required this.longitude,
   });
 
-  /// Aligns with POST /api/v1/pickups/ standard REST format
+  /// Aligns with project convention: Flat fields + GeoJSON 'location' object
   Map<String, dynamic> toJson() {
     return {
-      'waste_type': wasteType.toJson().toLowerCase(),
+      'waste_type': wasteType.toJson(), // DRY, WET, etc.
       'scheduled_date': scheduledDate,
       'slot': slot,
       'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
+      'location': {
+        'type': 'Point',
+        'coordinates': [longitude, latitude], // GeoJSON is [lng, lat]
+      },
     };
   }
 }

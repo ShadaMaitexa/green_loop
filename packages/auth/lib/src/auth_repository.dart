@@ -179,10 +179,28 @@ class AuthRepository {
   Future<List<Ward>> getWards() async {
     try {
       final response = await _apiClient.get(_wardsPath);
-      final list = response.data as List;
-      return list.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
+      final data = response.data;
+      
+      if (data is Map) {
+        if (data['type'] == 'FeatureCollection') {
+          final features = data['features'] as List? ?? [];
+          return features.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
+        }
+        if (data['results'] is List) {
+          final list = data['results'] as List;
+          return list.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
+        }
+      }
+      
+      if (data is List) {
+        return data.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      
+      return [];
     } on ApiException catch (e) {
       throw AuthException(e.message);
+    } catch (e) {
+      throw AuthException(e.toString());
     }
   }
 
