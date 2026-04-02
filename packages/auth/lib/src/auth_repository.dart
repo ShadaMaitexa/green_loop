@@ -207,16 +207,18 @@ class AuthRepository {
   /// Complete the resident profile with name and location.
   Future<AuthUser> completeProfile(ResidentProfile profile) async {
     try {
-      final response = await _apiClient.patch(
+      final response = await _apiClient.post(
         _completeProfilePath,
         data: profile.toJson(),
       );
       // The server response should reflect the updated profile/user state.
-      // Usually, it updates the user record or creates a profile object.
-      // We return the updated AuthUser to refresh the local state.
       return AuthUser.fromJson(response.data as Map<String, dynamic>);
+    } on UnauthorizedException {
+      throw const AuthException('Session expired. Please log in again.');
     } on ApiException catch (e) {
       throw AuthException(e.message);
+    } catch (e) {
+      throw AuthException('Failed to connect to server. Please try again.');
     }
   }
 

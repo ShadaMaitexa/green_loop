@@ -100,16 +100,25 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Future<void> _handleSave() async {
-    if (!_formKey.currentState!.validate() || _selectedWard == null) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    
+    if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all required fields')),
+        const SnackBar(content: Text('Please correct the validation errors below.')),
+      );
+      return;
+    }
+
+    if (_selectedWard == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a ward from the dropdown.')),
       );
       return;
     }
 
     if (_latitude == null || _longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please detect your location')),
+        const SnackBar(content: Text('Please detect your service location on the map.')),
       );
       return;
     }
@@ -125,13 +134,29 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       longitude: _longitude!,
     );
 
-    final success = await authState.completeProfile(profile);
-    if (success && mounted) {
-      // The AuthWrapper in main.dart will automatically switch to HomeScreen
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authState.errorMessage ?? 'Failed to save profile')),
-      );
+    try {
+      final success = await authState.completeProfile(profile);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile saved successfully!')),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authState.errorMessage ?? 'Failed to save profile. Please try again.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 

@@ -45,6 +45,7 @@ class ResidentProfile {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
+      'user_id': userId,
       'name_en': nameEn,
       'name_ml': nameMl,
       'ward_id': wardId,
