@@ -34,10 +34,18 @@ class HomeState extends ChangeNotifier {
         pickupRepository.getPickups(),
       ]);
 
-      _summary = results[0] as Map<String, dynamic>;
-      _recentPickups = (results[1] as List<PickupResponse>).take(3).toList();
+      final dynamic summaryData = results[0];
+      if (summaryData is Map<String, dynamic>) {
+        _summary = summaryData;
+      }
+
+      final dynamic pickupData = results[1];
+      if (pickupData is List<PickupResponse>) {
+        _recentPickups = pickupData.take(3).toList();
+      }
     } catch (e) {
       _error = e.toString();
+      debugPrint('Dashboard error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

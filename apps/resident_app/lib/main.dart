@@ -25,13 +25,18 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        Provider<PickupRepository>.value(value: pickupRepository),
+        Provider<ComplaintRepository>.value(value: complaintRepository),
+        Provider<ScheduleRepository>.value(value: scheduleRepository),
+        Provider<RewardRepository>.value(value: rewardRepository),
+        Provider<NpsService>.value(value: npsService),
         ChangeNotifierProvider(
           create: (_) => AuthState(repository: authRepository)..initialize(),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => HomeState(
-            pickupRepository: ctx.read<PickupRepository>(),
-            rewardRepository: ctx.read<RewardRepository>(),
+          create: (_) => HomeState(
+            pickupRepository: pickupRepository,
+            rewardRepository: rewardRepository,
           ),
         ),
         ChangeNotifierProvider(
@@ -40,11 +45,6 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => NpsState(service: npsService),
         ),
-        Provider<PickupRepository>.value(value: pickupRepository),
-        Provider<ComplaintRepository>.value(value: complaintRepository),
-        Provider<ScheduleRepository>.value(value: scheduleRepository),
-        Provider<RewardRepository>.value(value: rewardRepository),
-        Provider<NpsService>.value(value: npsService),
       ],
       child: const ResidentApp(),
     ),

@@ -30,7 +30,7 @@ class PickupState extends ChangeNotifier {
     }
   }
 
-  Future<void> cancelPickup(int id) async {
+  Future<void> cancelPickup(String id) async {
     try {
       await _service.cancelPickup(id);
       // Refresh list

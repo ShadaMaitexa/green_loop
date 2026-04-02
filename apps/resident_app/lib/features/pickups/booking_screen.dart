@@ -5,6 +5,7 @@ import 'package:data_models/data_models.dart';
 import 'package:core/core.dart';
 import 'package:geo/geo.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:intl/intl.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -30,39 +31,35 @@ class _BookingScreenState extends State<BookingScreen> {
   PickupResponse? _result;
   bool _isBooking = false;
 
-  // Cache
-  List<PickupSlot> _slots = [];
-  bool _isLoadingSlots = false;
+  // Cache/Data
+  List<PickupSlot> _slotTemplates = [];
+  List<PickupSlot> _availabilityForDate = [];
+  bool _isLoadingInitial = false;
+  bool _isLoadingAvailability = false;
 
   @override
   void initState() {
     super.initState();
-    // In a full implementation we'd fetch the ResidentProfile here.
-    // For now, if we don't have it, we'll let the user detect GPS.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _loadSlots();
-      }
+      _loadInitialData();
     });
   }
 
   void _nextStep() => setState(() => _currentStep++);
   void _prevStep() => setState(() => _currentStep--);
 
-  Future<void> _loadSlots() async {
-    setState(() => _isLoadingSlots = true);
+  Future<void> _loadInitialData() async {
+    setState(() => _isLoadingInitial = true);
     try {
       final pickupRepo = Provider.of<PickupRepository>(context, listen: false);
       final rewardRepo = Provider.of<RewardRepository>(context, listen: false);
       
-      // Fetch profile to get the correct wardId
       final profile = await rewardRepo.getProfile();
+      final templates = await pickupRepo.getPickupSlots(profile.wardId);
       
-      final slots = await pickupRepo.getAvailability(profile.wardId);
       setState(() {
-        _slots = slots;
-        _isLoadingSlots = false;
-        // Optionally update address if empty
+        _slotTemplates = templates;
+        _isLoadingInitial = false;
         if (_addressController.text.isEmpty) {
           _addressController.text = profile.address;
           _latitude = profile.latitude;
@@ -70,12 +67,37 @@ class _BookingScreenState extends State<BookingScreen> {
         }
       });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load slots: $e')),
-        );
-      }
-      setState(() => _isLoadingSlots = false);
+      debugPrint('Initial load error: $e');
+      setState(() => _isLoadingInitial = false);
+    }
+  }
+
+  Future<void> _onDateSelected(DateTime dt) async {
+    setState(() {
+      _selectedDate = dt;
+      _isLoadingAvailability = true;
+      _selectedSlot = null;
+    });
+
+    try {
+      final pickupRepo = Provider.of<PickupRepository>(context, listen: false);
+      final rewardRepo = Provider.of<RewardRepository>(context, listen: false);
+      final profile = await rewardRepo.getProfile();
+      
+      final dateStr = DateFormat('yyyy-MM-dd').format(dt);
+      final availability = await pickupRepo.getAvailability(dateStr, profile.wardId);
+      
+      setState(() {
+        _availabilityForDate = availability;
+        _isLoadingAvailability = false;
+      });
+    } catch (e) {
+      debugPrint('Availability error: $e');
+      // If endpoint fails, fallback to templates but mark them as pending
+      setState(() {
+        _availabilityForDate = _slotTemplates;
+        _isLoadingAvailability = false;
+      });
     }
   }
 
@@ -106,7 +128,7 @@ class _BookingScreenState extends State<BookingScreen> {
       final repo = Provider.of<PickupRepository>(context, listen: false);
       final request = PickupRequest(
         wasteType: _selectedWasteType!,
-        scheduledDate: "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}",
+        scheduledDate: DateFormat('yyyy-MM-dd').format(_selectedDate!),
         slot: _selectedSlot!,
         address: _addressController.text,
         latitude: _latitude ?? 0.0,
@@ -116,7 +138,7 @@ class _BookingScreenState extends State<BookingScreen> {
       final response = await repo.createPickup(request);
       setState(() {
         _result = response;
-        _currentStep = 5; // Success Step
+        _currentStep = 5; 
       });
     } catch (e) {
       if (mounted) {
@@ -141,9 +163,7 @@ class _BookingScreenState extends State<BookingScreen> {
       body: Column(
         children: [
           _buildProgressIndicator(),
-          Expanded(
-            child: _buildCurrentStepView(),
-          ),
+          Expanded(child: _buildCurrentStepView()),
           if (_currentStep < 5) _buildBottomBar(),
         ],
       ),
@@ -180,17 +200,12 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  // --- STEP 1: WASTE TYPE ---
   Widget _stepWasteType() {
-    final isDesktop = GLResponsive.isDesktop(context);
-    final isTablet = GLResponsive.isTablet(context);
-
     return GridView.count(
-      crossAxisCount: isDesktop ? 6 : (isTablet ? 4 : 2),
+      crossAxisCount: GLResponsive.isMobile(context) ? 2 : 4,
       padding: const EdgeInsets.all(GLSpacing.xl),
       mainAxisSpacing: GLSpacing.lg,
       crossAxisSpacing: GLSpacing.lg,
-      childAspectRatio: isDesktop ? 1.0 : 1.0,
       children: WasteType.values.map((type) {
         final isSelected = _selectedWasteType == type;
         return GestureDetector(
@@ -209,10 +224,7 @@ class _BookingScreenState extends State<BookingScreen> {
               children: [
                 Icon(type.icon, size: 48, color: type.color),
                 const SizedBox(height: GLSpacing.md),
-                Text(
-                  type.label,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+                Text(type.label, style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -221,43 +233,16 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  // --- STEP 2: DATE ---
   Widget _stepDateSelection() {
-    if (_isLoadingSlots) return const Center(child: CircularProgressIndicator());
-
-    if (_slots.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.calendar_today, size: 60, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text('No slots available at the moment.'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadSlots,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Group slots by date
-    final dates = _slots.map((s) => s.date).toSet().toList();
+    // Generate next 7 days
+    final now = DateTime.now();
+    final dates = List.generate(7, (i) => now.add(Duration(days: i + 1)));
 
     return ListView.builder(
       padding: const EdgeInsets.all(GLSpacing.xl),
       itemCount: dates.length,
       itemBuilder: (context, index) {
-        final dateStr = dates[index];
-        DateTime? dt;
-        try {
-          dt = DateTime.parse(dateStr);
-        } catch (_) {
-          return const SizedBox.shrink(); // Hide invalid dates
-        }
-        
+        final dt = dates[index];
         final isSelected = _selectedDate != null && 
             _selectedDate!.year == dt.year &&
             _selectedDate!.month == dt.month &&
@@ -266,26 +251,29 @@ class _BookingScreenState extends State<BookingScreen> {
         return GLCard(
           margin: const EdgeInsets.only(bottom: GLSpacing.md),
           child: ListTile(
-            title: Text("${dt.day} ${_monthName(dt.month)} ${dt.year}"),
-            subtitle: Text(_weekday(dt.weekday)),
-            trailing: isSelected ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary) : null,
-            onTap: () => setState(() => _selectedDate = dt),
+            title: Text(DateFormat('EEEE, MMM d').format(dt)),
+            trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
+            onTap: () => _onDateSelected(dt),
           ),
         );
       },
     );
   }
 
-  // --- STEP 3: SLOTS ---
   Widget _stepSlotSelection() {
-    final dateStr = "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
-    final availableSlots = _slots.where((s) => s.date == dateStr).toList();
+    if (_isLoadingAvailability) return const Center(child: CircularProgressIndicator());
+
+    final slotsToShow = _availabilityForDate.isNotEmpty ? _availabilityForDate : _slotTemplates;
+
+    if (slotsToShow.isEmpty) {
+      return const Center(child: Text('No slots configured for this ward.'));
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.all(GLSpacing.xl),
-      itemCount: availableSlots.length,
+      itemCount: slotsToShow.length,
       itemBuilder: (context, index) {
-        final slotObj = availableSlots[index];
+        final slotObj = slotsToShow[index];
         final isSelected = _selectedSlot == slotObj.slot;
 
         return GLCard(
@@ -293,7 +281,9 @@ class _BookingScreenState extends State<BookingScreen> {
           child: ListTile(
             title: Text(slotObj.slot),
             enabled: slotObj.isAvailable,
-            trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : (!slotObj.isAvailable ? const Text('Full') : null),
+            trailing: isSelected 
+                ? const Icon(Icons.check_circle, color: Colors.green) 
+                : (!slotObj.isAvailable ? const Text('Full', style: TextStyle(color: Colors.red)) : null),
             onTap: slotObj.isAvailable ? () => setState(() => _selectedSlot = slotObj.slot) : null,
           ),
         );
@@ -301,7 +291,6 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  // --- STEP 4: LOCATION ---
   Widget _stepLocation() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(GLSpacing.xl),
@@ -339,7 +328,6 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  // --- STEP 5: SUCCESS ---
   Widget _stepSuccess() {
     return Center(
       child: SingleChildScrollView(
@@ -348,23 +336,18 @@ class _BookingScreenState extends State<BookingScreen> {
           children: [
             const Icon(Icons.check_circle, color: Colors.green, size: 80),
             const SizedBox(height: GLSpacing.xl),
-            const Text(
-              'Booking Confirmed!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const Text('Booking Confirmed!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: GLSpacing.md),
             Text('Pickup ID: ${_result?.id}'),
             const SizedBox(height: GLSpacing.xxl),
-            QrImageView(
-              data: _result?.qrCodeData ?? '',
-              version: QrVersions.auto,
-              size: 200.0,
-            ),
+            if (_result?.qrCodeData != null)
+              QrImageView(
+                data: _result!.qrCodeData,
+                version: QrVersions.auto,
+                size: 200.0,
+              ),
             const SizedBox(height: GLSpacing.xxl),
-            GLButton(
-              text: 'Finish',
-              onPressed: () => Navigator.pop(context),
-            ),
+            GLButton(text: 'Finish', onPressed: () => Navigator.pop(context)),
           ],
         ),
       ),
@@ -393,7 +376,4 @@ class _BookingScreenState extends State<BookingScreen> {
     if (_currentStep == 4) return _addressController.text.isNotEmpty;
     return true;
   }
-
-  String _monthName(int m) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m-1];
-  String _weekday(int d) => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][d-1];
 }

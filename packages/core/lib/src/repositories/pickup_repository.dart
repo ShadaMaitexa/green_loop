@@ -4,17 +4,32 @@ import 'package:data_models/data_models.dart';
 class PickupRepository {
   final ApiClient _apiClient;
 
-  static const String _availabilityPath = '/api/v1/pickup-slots/';
+  static const String _slotsPath = '/api/v1/pickup-slots/';
+  static const String _availabilityPath = '/api/v1/pickups/availability/';
   static const String _pickupsPath = '/api/v1/pickups/';
 
   PickupRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Fetch available master slots for booking.
-  Future<List<PickupSlot>> getAvailability(int wardId) async {
+  /// Fetch all possible shifts/slots for a ward (The "Templates").
+  Future<List<PickupSlot>> getPickupSlots(int wardId) async {
+    try {
+      final response = await _apiClient.get(
+        _slotsPath,
+        queryParameters: {'ward_id': wardId, 'is_active': true},
+      );
+      final list = response.data as List;
+      return list.map((e) => PickupSlot.fromJson(e as Map<String, dynamic>)).toList();
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Fetch availability for a specific date (Checking if "Full").
+  Future<List<PickupSlot>> getAvailability(String date, int wardId) async {
     try {
       final response = await _apiClient.get(
         _availabilityPath,
-        queryParameters: {'ward_id': wardId, 'is_active': true},
+        queryParameters: {'date': date, 'ward_id': wardId},
       );
       final list = response.data as List;
       return list.map((e) => PickupSlot.fromJson(e as Map<String, dynamic>)).toList();

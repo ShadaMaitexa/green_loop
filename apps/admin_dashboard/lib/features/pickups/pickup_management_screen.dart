@@ -160,13 +160,13 @@ class _PickupCard extends StatelessWidget {
             onPressed: () => Navigator.pop(innerContext),
             child: const Text('No'),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(innerContext);
-              context.read<PickupState>().cancelPickup(int.parse(pickup.id));
-            },
-            child: const Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
-          ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(innerContext);
+                context.read<PickupState>().cancelPickup(pickup.id);
+              },
+              child: const Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
+            ),
         ],
       ),
     );

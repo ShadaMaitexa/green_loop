@@ -51,7 +51,7 @@ class PickupService {
     }
   }
 
-  Future<void> cancelPickup(int id) async {
+  Future<void> cancelPickup(String id) async {
     await _apiClient.patch('/api/v1/pickups/$id/cancel/');
   }
 }
