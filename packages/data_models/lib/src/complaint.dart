@@ -160,7 +160,7 @@ class ComplaintModel {
       // API uses `category`, fallback to `type` for legacy
       type: props['category']?.toString() ?? props['type']?.toString() ?? 'GENERAL',
       description: props['description']?.toString() ?? '',
-      imageUrl: props['image']?.toString() ?? props['image_url'] as String?,
+      imageUrl: props['image']?.toString() ?? props['image_url']?.toString(),
       latitude: lat,
       longitude: lng,
       status: ComplaintStatus.fromJson(props['status']?.toString() ?? 'submitted'),
@@ -204,9 +204,9 @@ class ComplaintHistory {
 
   factory ComplaintHistory.fromJson(Map<String, dynamic> json) {
     return ComplaintHistory(
-      status: json['status'] as String,
-      comment: json['comment'] as String? ?? '',
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      status: json['status']?.toString() ?? 'submitted',
+      comment: json['comment']?.toString() ?? '',
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 }
@@ -227,19 +227,16 @@ class ComplaintRequest {
     required this.longitude,
   });
 
-  /// Sends as GeoJSON Feature to match the POST /api/v1/complaints/ schema.
+  /// Sends as specified in resident API documentation.
   Map<String, dynamic> toJson() {
     return {
-      'type': 'Feature',
-      'geometry': {
+      'category': type,
+      'description': description,
+      'location': {
         'type': 'Point',
         'coordinates': [longitude, latitude],
       },
-      'properties': {
-        'category': type,
-        'description': description,
-        if (imageUrl != null) 'image': imageUrl,
-      },
+      if (imageUrl != null) 'image': imageUrl,
     };
   }
 }

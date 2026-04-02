@@ -251,8 +251,17 @@ class _BookingScreenState extends State<BookingScreen> {
       itemCount: dates.length,
       itemBuilder: (context, index) {
         final dateStr = dates[index];
-        final dt = DateTime.parse(dateStr);
-        final isSelected = _selectedDate != null && _selectedDate!.day == dt.day && _selectedDate!.month == dt.month;
+        DateTime? dt;
+        try {
+          dt = DateTime.parse(dateStr);
+        } catch (_) {
+          return const SizedBox.shrink(); // Hide invalid dates
+        }
+        
+        final isSelected = _selectedDate != null && 
+            _selectedDate!.year == dt.year &&
+            _selectedDate!.month == dt.month &&
+            _selectedDate!.day == dt.day;
 
         return GLCard(
           margin: const EdgeInsets.only(bottom: GLSpacing.md),

@@ -62,7 +62,11 @@ class PickupSlot {
       label: json['label']?.toString() ?? 'Time Slot',
       slot: (json['time_range'] ?? json['slot'])?.toString() ?? '00:00 - 00:00',
       isAvailable: json['is_active'] as bool? ?? json['is_available'] as bool? ?? true,
-      wards: (json['wards'] as List?)?.map((e) => e as int).toList() ?? [],
+      wards: (json['wards'] as List?)
+              ?.map((e) => int.tryParse(e.toString()) ?? 0)
+              .where((e) => e != 0)
+              .toList() ??
+          [],
       capacity: json['capacity'] as int? ?? 15,
     );
   }

@@ -65,7 +65,14 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                             return ListTile(
                               leading: const Icon(Icons.access_time_rounded),
                               title: Text('${slot.label} | ${slot.slot}'),
-                              subtitle: Text('Status: ${slot.isAvailable ? "Active" : "Inactive"}'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Status: ${slot.isAvailable ? "Active" : "Inactive"}'),
+                                  if (slot.wards.isNotEmpty)
+                                    Text('Wards: ${slot.wards.join(", ")}', style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline, color: Colors.red),
                                 onPressed: () {
@@ -83,10 +90,11 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
   }
 
   void _showAddSlotDialog(BuildContext context) {
-    final labelController = TextEditingController(text: 'Time Slot');
+    final labelController = TextEditingController(text: 'Morning Shift');
     final timeRangeController = TextEditingController(text: '09:00 - 12:00');
     final capacityController = TextEditingController(text: '15');
     bool isActive = true;
+    List<int> selectedWards = [];
 
     showDialog(
       context: context,
@@ -107,7 +115,7 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                 GLTextField(
                   label: 'Time Range (HH:mm - HH:mm)',
                   controller: timeRangeController,
-                  hint: 'e.g. 11:00 - 02:00',
+                  hint: 'e.g. 09:00 - 12:00',
                 ),
                 const SizedBox(height: GLSpacing.md),
                 GLTextField(
@@ -116,9 +124,33 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: GLSpacing.md),
+                const Text('Assign to Wards', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: GLSpacing.xs),
+                Wrap(
+                  spacing: 8,
+                  children: List.generate(10, (index) {
+                    final wardId = index + 1;
+                    final isSelected = selectedWards.contains(wardId);
+                    return FilterChip(
+                      label: Text('Ward $wardId'),
+                      selected: isSelected,
+                      onSelected: (val) {
+                        setDialogState(() {
+                          if (val) {
+                            selectedWards.add(wardId);
+                          } else {
+                            selectedWards.remove(wardId);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                ),
+                const SizedBox(height: GLSpacing.md),
                 SwitchListTile(
                   title: const Text('Is Active'),
                   value: isActive,
+                  contentPadding: EdgeInsets.zero,
                   onChanged: (val) => setDialogState(() => isActive = val),
                 ),
               ],
@@ -142,8 +174,9 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                   'time_range': timeRangeController.text,
                   'capacity': int.tryParse(capacityController.text) ?? 15,
                   'is_active': isActive,
+                  'wards': selectedWards,
                 });
-                if (success && mounted && context.mounted) Navigator.pop(context);
+                if (success) Navigator.pop(context);
               },
             ),
           ],

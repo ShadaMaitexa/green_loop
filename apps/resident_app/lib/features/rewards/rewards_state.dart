@@ -53,7 +53,7 @@ class RewardsState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await repository.redeemReward(reward.id);
+      final success = await repository.redeemReward(reward.id, reward.pointCost);
       if (success) {
         await fetchAll(); // Refresh data
         return true;

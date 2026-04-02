@@ -18,13 +18,16 @@ class AuthUser {
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
+    final registrationRequired = json['registration_required'] == true;
+    final isProfileCompletedValue = json['is_profile_completed'] as bool? ?? !registrationRequired;
+
     return AuthUser(
       id: json['id']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       username: json['username']?.toString() ?? json['email']?.toString() ?? '',
       name: json['name']?.toString() ?? json['username']?.toString() ?? json['email']?.toString() ?? '',
       role: json['role']?.toString() ?? 'resident',
-      isProfileCompleted: json['is_profile_completed'] as bool? ?? false,
+      isProfileCompleted: isProfileCompletedValue,
     );
   }
 

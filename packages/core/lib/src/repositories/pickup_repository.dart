@@ -4,17 +4,17 @@ import 'package:data_models/data_models.dart';
 class PickupRepository {
   final ApiClient _apiClient;
 
-  static const String _availabilityPath = '/api/v1/pickups/availability/';
+  static const String _availabilityPath = '/api/v1/pickup-slots/';
   static const String _pickupsPath = '/api/v1/pickups/';
 
   PickupRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Fetch availability (dates and their slots) for a specific ward.
+  /// Fetch available master slots for booking.
   Future<List<PickupSlot>> getAvailability(int wardId) async {
     try {
       final response = await _apiClient.get(
         _availabilityPath,
-        queryParameters: {'ward_id': wardId},
+        queryParameters: {'ward_id': wardId, 'is_active': true},
       );
       final list = response.data as List;
       return list.map((e) => PickupSlot.fromJson(e as Map<String, dynamic>)).toList();

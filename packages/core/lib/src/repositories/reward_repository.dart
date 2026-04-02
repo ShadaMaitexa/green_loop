@@ -39,14 +39,21 @@ class RewardRepository {
 
   /// Fetches the resident's reward and earning history.
   Future<List<RewardHistoryEntry>> getHistory() async {
-    final response = await apiClient.get('/api/v1/rewards/history/');
-    return (response.data as List).map((e) => RewardHistoryEntry.fromJson(e as Map<String, dynamic>)).toList();
+    final response = await apiClient.get('/api/v1/rewards/');
+    final data = response.data;
+    if (data is Map && data['results'] != null) {
+       return (data['results'] as List).map((e) => RewardHistoryEntry.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return (data as List).map((e) => RewardHistoryEntry.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   /// Redeems a specific reward.
-  Future<bool> redeemReward(String rewardId) async {
+  Future<bool> redeemReward(String rewardId, int points) async {
     try {
-      await apiClient.post('/api/v1/rewards/redeem/', data: {'reward_id': rewardId});
+      await apiClient.post('/api/v1/reward-redemptions/', data: {
+        'reward_item': rewardId,
+        'points_spent': points,
+      });
       return true;
     } catch (e) {
       return false;

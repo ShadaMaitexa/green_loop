@@ -98,7 +98,9 @@ class ComplaintRepository {
     try {
       final payload = request.toJson();
       if (finalImageUrl != null) {
-        (payload['properties'] as Map<String, dynamic>)['image'] = finalImageUrl;
+        final props = Map<String, dynamic>.from(payload['properties'] as Map);
+        props['image'] = finalImageUrl;
+        payload['properties'] = props;
       }
 
       final response = await _apiClient.post(_complaintsPath, data: payload);
@@ -111,7 +113,7 @@ class ComplaintRepository {
   /// Helper to get pre-signed URL and PUT the file to S3.
   Future<String> _uploadImageToS3(File file) async {
     try {
-      final fileName = file.path.split('/').last;
+      final fileName = file.path.split(RegExp(r'[/\\]')).last;
       final response = await _apiClient.get(
         _presignedUrlPath,
         queryParameters: {'file_name': fileName},

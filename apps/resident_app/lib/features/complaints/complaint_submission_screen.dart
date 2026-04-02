@@ -28,13 +28,13 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
   bool _isSubmitting = false;
   bool _isDetectingLocation = false;
 
-  final List<String> _complaintTypes = [
-    'Missed Pickup',
-    'Damaged Collection Bin',
-    'Overflowing Point',
-    'Rude Behavior by Staff',
-    'Other Service Issue'
-  ];
+  final Map<String, String> _typeMapping = {
+    'Missed Pickup': 'MISSED_PICKUP',
+    'Damaged Collection Bin': 'DAMAGED_BIN',
+    'Overflowing Point': 'OVERFLOW',
+    'Rude Behavior by Staff': 'STAFF_BEHAVIOR',
+    'Other Service Issue': 'OTHER'
+  };
 
   @override
   void initState() {
@@ -82,8 +82,9 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
     setState(() => _isSubmitting = true);
     try {
       final repo = context.read<ComplaintRepository>();
+      final backendType = _typeMapping[_selectedType] ?? 'OTHER';
       final request = ComplaintRequest(
-        type: _selectedType!,
+        type: backendType,
         description: _descriptionController.text,
         latitude: _latitude ?? 0.0,
         longitude: _longitude ?? 0.0,
@@ -133,8 +134,9 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(GLRadius.md)),
                   prefixIcon: const Icon(Icons.report_problem_outlined),
                 ),
-                items: _complaintTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                items: _typeMapping.keys.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (val) => setState(() => _selectedType = val),
+                validator: (val) => val == null ? 'Please select complaint type' : null,
               ),
               const SizedBox(height: GLSpacing.lg),
               
