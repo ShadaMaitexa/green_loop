@@ -190,6 +190,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     );
                   }).toList(),
                   onChanged: (ward) => setState(() => _selectedWard = ward),
+                  validator: (value) => value == null ? 'Please select a ward' : null,
                 ),
               const SizedBox(height: GLSpacing.xl),
               Text(
