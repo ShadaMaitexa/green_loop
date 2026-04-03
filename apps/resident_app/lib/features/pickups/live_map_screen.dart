@@ -8,6 +8,7 @@ import 'package:core/core.dart';
 import 'package:geo/geo.dart';
 import 'package:data_models/data_models.dart';
 import 'package:intl/intl.dart';
+import 'pickup_history_screen.dart';
 
 class LiveMapScreen extends StatefulWidget {
   const LiveMapScreen({super.key});
@@ -115,6 +116,28 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       return;
     }
 
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmation'),
+          content: const Text('pickup will come soon asre u sure'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
     setState(() => _isBooking = true);
     try {
       final repo = context.read<PickupRepository>();
@@ -135,11 +158,15 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Instant Booking Confirmed! Truck dispatched. (ID: ${response.id})')),
         );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PickupHistoryScreen()),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to book instant pickup: \$e')),
+          SnackBar(content: Text('Failed to book instant pickup: $e')),
         );
       }
     } finally {
