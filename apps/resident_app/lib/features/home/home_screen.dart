@@ -4,10 +4,11 @@ import 'package:ui_kit/ui_kit.dart';
 import 'package:auth/auth.dart';
 import 'package:intl/intl.dart';
 import '../pickups/booking_screen.dart';
-import '../complaints/complaint_submission_screen.dart';
+import '../complaints/complaint_history_screen.dart';
 import '../rewards/rewards_screen.dart';
 import '../schedule/schedule_screen.dart';
 import '../profile_setup/profile_setup_screen.dart';
+import '../pickups/pickup_history_screen.dart';
 import 'home_state.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -68,9 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text('Recent Pickups', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                   TextButton(
-                    onPressed: () {
-                      // Navigate to full list
-                    },
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PickupHistoryScreen())),
                     child: const Text('View All'),
                   ),
                 ],
@@ -178,10 +177,10 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BookingScreen())),
         ),
         _ActionItem(
-          label: 'File Complaint',
+          label: 'My Complaints',
           icon: Icons.report_problem_outlined,
           color: Colors.orange,
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplaintSubmissionScreen())),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplaintHistoryScreen())),
         ),
         _ActionItem(
           label: 'Schedule',
@@ -193,9 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'History',
           icon: Icons.history_edu_outlined,
           color: Colors.purple,
-          onTap: () {
-             // To be implemented
-          },
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PickupHistoryScreen())),
         ),
         _ActionItem(
           label: 'My Profile',

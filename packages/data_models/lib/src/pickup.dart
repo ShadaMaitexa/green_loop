@@ -18,19 +18,20 @@ enum WasteType {
 
   String toJson() {
     switch (this) {
-      case WasteType.dry: return 'DRY';
-      case WasteType.wet: return 'WET';
-      case WasteType.eWaste: return 'E_WASTE';
-      case WasteType.biomedical: return 'BIOMEDICAL';
+      case WasteType.dry: return 'dry';
+      case WasteType.wet: return 'wet';
+      case WasteType.eWaste: return 'e-waste';
+      case WasteType.biomedical: return 'biomedical';
     }
   }
   
   static WasteType fromJson(String json) {
-    switch (json.toUpperCase()) {
-      case 'DRY': return WasteType.dry;
-      case 'WET': return WasteType.wet;
-      case 'E_WASTE': return WasteType.eWaste;
-      case 'BIOMEDICAL': return WasteType.biomedical;
+    switch (json.toLowerCase()) {
+      case 'dry': return WasteType.dry;
+      case 'wet': return WasteType.wet;
+      case 'e-waste': 
+      case 'e_waste': return WasteType.eWaste;
+      case 'biomedical': return WasteType.biomedical;
       default: return WasteType.dry;
     }
   }

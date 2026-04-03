@@ -29,10 +29,8 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
   bool _isDetectingLocation = false;
 
   final Map<String, String> _typeMapping = {
-    'Missed Pickup': 'MISSED_PICKUP',
-    'Damaged Collection Bin': 'DAMAGED_BIN',
-    'Overflowing Point': 'OVERFLOW',
-    'Rude Behavior by Staff': 'STAFF_BEHAVIOR',
+    'Missed Pickup': 'PICKUP',
+    'Bin Issue / Cleanliness': 'CLEANLINESS',
     'Other Service Issue': 'OTHER'
   };
 
@@ -42,13 +40,18 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
     _detectLocation();
   }
 
+  String? _addressText;
+
   Future<void> _detectLocation() async {
     setState(() => _isDetectingLocation = true);
     try {
       final pos = await LocationService().getCurrentPosition();
+      final address = await LocationService().getAddressFromLatLng(pos.latitude, pos.longitude);
       setState(() {
         _latitude = pos.latitude;
         _longitude = pos.longitude;
+        _addressText = address;
+
       });
     } catch (e) {
       if (mounted) {
@@ -194,9 +197,11 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
                     const SizedBox(width: GLSpacing.md),
                     Expanded(
                       child: Text(
-                        _latitude != null 
-                          ? 'Coordinates: ${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)}'
-                          : 'Detecting location...',
+                        _addressText != null
+                          ? _addressText!
+                          : (_latitude != null 
+                              ? 'Coordinates: ${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)}'
+                              : 'Detecting location...'),
                       ),
                     ),
                     if (_isDetectingLocation)

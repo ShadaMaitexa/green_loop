@@ -6,6 +6,8 @@ import 'package:core/core.dart';
 import 'package:geo/geo.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -94,10 +96,12 @@ class _BookingScreenState extends State<BookingScreen> {
     } catch (e) {
       debugPrint('Availability error: $e');
       // If endpoint fails, fallback to templates but mark them as pending
-      setState(() {
-        _availabilityForDate = _slotTemplates;
-        _isLoadingAvailability = false;
-      });
+      if (mounted) {
+        setState(() {
+          _availabilityForDate = _slotTemplates;
+          _isLoadingAvailability = false;
+        });
+      }
     }
   }
 
@@ -106,11 +110,13 @@ class _BookingScreenState extends State<BookingScreen> {
     try {
       final position = await locationService.getCurrentPosition();
       final address = await locationService.getAddressFromLatLng(position.latitude, position.longitude);
-      setState(() {
-        _latitude = position.latitude;
-        _longitude = position.longitude;
-        if (address != null) _addressController.text = address;
-      });
+      if (mounted) {
+        setState(() {
+          _latitude = position.latitude;
+          _longitude = position.longitude;
+          if (address != null) _addressController.text = address;
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -301,20 +307,49 @@ class _BookingScreenState extends State<BookingScreen> {
           Container(
             height: 200,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(GLRadius.md),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
-            child: Stack(
-              children: [
-                const Center(child: Icon(Icons.map_rounded, size: 80, color: Colors.grey)),
-                Positioned(
-                  bottom: 12, right: 12,
-                  child: FloatingActionButton.small(
-                    onPressed: _handleLocationDetection,
-                    child: const Icon(Icons.my_location),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(GLRadius.md),
+              child: Stack(
+                children: [
+                  if (_latitude != null && _longitude != null)
+                    FlutterMap(
+                      options: MapOptions(
+                        initialCenter: LatLng(_latitude!, _longitude!),
+                        initialZoom: 15.0,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.greenloop.resident',
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: LatLng(_latitude!, _longitude!),
+                              width: 40, height: 40,
+                              child: Icon(Icons.location_on, color: Theme.of(context).colorScheme.primary, size: 40),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  else
+                    const Center(child: CircularProgressIndicator()),
+                  
+                  Positioned(
+                    bottom: GLSpacing.sm,
+                    right: GLSpacing.sm,
+                    child: FloatingActionButton.small(
+                      onPressed: _handleLocationDetection,
+                      child: const Icon(Icons.my_location),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: GLSpacing.xl),
@@ -374,7 +409,7 @@ class _BookingScreenState extends State<BookingScreen> {
     if (_currentStep == 1) return _selectedWasteType != null;
     if (_currentStep == 2) return _selectedDate != null;
     if (_currentStep == 3) return _selectedSlot != null;
-    if (_currentStep == 4) return _addressController.text.isNotEmpty;
+    if (_currentStep == 4) return _addressController.text.isNotEmpty && _latitude != null && _longitude != null;
     return true;
   }
 }

@@ -23,7 +23,15 @@ class ScheduleRepository {
   Future<List<PickupResponse>> getMyUpcomingPickups() async {
     try {
       final response = await _apiClient.get(_myPickupsPath);
-      final list = response.data as List;
+      final dynamic rawData = response.data;
+      List<dynamic> list;
+      if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
+        list = rawData['results'] as List<dynamic>? ?? [];
+      } else if (rawData is List) {
+        list = rawData;
+      } else {
+        list = [];
+      }
       return list.map((e) => PickupResponse.fromJson(e as Map<String, dynamic>)).toList();
     } on ApiException catch (e) {
       throw Exception(e.message);

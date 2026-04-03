@@ -12,9 +12,9 @@ class AuthRepository {
   static const String _adminLoginPath = '/api/v1/auth/admin-login/';
   static const String _workerLoginPath = '/api/v1/auth/worker-login/';
   static const String _logoutPath = '/api/v1/auth/logout/';
-  static const String _profilePath = '/api/users/me/';
+  static const String _profilePath = '/api/v1/users/me/';
   static const String _wardsPath = '/api/v1/wards/';
-  static const String _completeProfilePath = '/api/users/me/';
+  static const String _completeProfilePath = '/api/v1/users/me/';
 
   AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 

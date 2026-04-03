@@ -8,7 +8,7 @@ class ComplaintRepository {
   final Dio _uploadDio;
 
   static const String _complaintsPath = '/api/v1/complaints/';
-  static const String _presignedUrlPath = '/api/v1/complaints/presigned-url/';
+  static const String _presignedUrlPath = '/api/v1/complaints/get-upload-url/';
 
   ComplaintRepository({required ApiClient apiClient})
       : _apiClient = apiClient,
@@ -96,11 +96,11 @@ class ComplaintRepository {
     }
 
     try {
+      // ComplaintRequest.toJson() returns a FLAT dict: {category, description, location, ...}
+      // NOT GeoJSON, so we add image directly at the top level.
       final payload = request.toJson();
       if (finalImageUrl != null) {
-        final props = Map<String, dynamic>.from(payload['properties'] as Map);
-        props['image'] = finalImageUrl;
-        payload['properties'] = props;
+        payload['image'] = finalImageUrl;
       }
 
       final response = await _apiClient.post(_complaintsPath, data: payload);
@@ -178,6 +178,20 @@ class ComplaintRepository {
   Future<void> deleteComplaint(String id) async {
     try {
       await _apiClient.delete('$_complaintsPath$id/');
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Fetch complaint heatmap for admins.
+  Future<List<Map<String, dynamic>>> getHeatmap() async {
+    try {
+      final res = await _apiClient.get('/api/v1/complaints/heatmap/');
+      if (res.data is Map && res.data['type'] == 'FeatureCollection') {
+        final features = res.data['features'] as List? ?? [];
+        return features.map((e) => e as Map<String, dynamic>).toList();
+      }
+      return (res.data as List).map((e) => e as Map<String, dynamic>).toList();
     } on ApiException catch (e) {
       throw Exception(e.message);
     }

@@ -49,6 +49,9 @@ class PickupRepository {
     } on ConflictException catch (e) {
       // Specifically catch conflict to handle "Suggested Next Date" if provided by backend
       throw e;
+    } on ValidationException catch (e) {
+      final errorMsg = e.errors != null ? '${e.message} ${e.errors}' : e.message;
+      throw Exception(errorMsg);
     } on ApiException catch (e) {
       throw Exception(e.message);
     }
@@ -62,7 +65,15 @@ class PickupRepository {
       if (date != null) query['date'] = date;
 
       final response = await _apiClient.get(_pickupsPath, queryParameters: query);
-      final list = response.data as List? ?? [];
+      final dynamic rawData = response.data;
+      List<dynamic> list;
+      if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
+        list = rawData['results'] as List<dynamic>? ?? [];
+      } else if (rawData is List) {
+        list = rawData;
+      } else {
+        list = [];
+      }
       return list.map((e) => PickupResponse.fromJson(e as Map<String, dynamic>)).toList();
     } on ApiException catch (e) {
       throw Exception(e.message);
