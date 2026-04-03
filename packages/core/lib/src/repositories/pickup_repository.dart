@@ -67,8 +67,14 @@ class PickupRepository {
       final response = await _apiClient.get(_pickupsPath, queryParameters: query);
       final dynamic rawData = response.data;
       List<dynamic> list;
-      if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-        list = rawData['results'] as List<dynamic>? ?? [];
+      if (rawData is Map<String, dynamic>) {
+        if (rawData.containsKey('results')) {
+          list = rawData['results'] as List<dynamic>? ?? [];
+        } else if (rawData['type'] == 'FeatureCollection' && rawData.containsKey('features')) {
+          list = rawData['features'] as List<dynamic>? ?? [];
+        } else {
+          list = [];
+        }
       } else if (rawData is List) {
         list = rawData;
       } else {

@@ -18,7 +18,6 @@ void main() {
   final authRepository = AuthRepository(apiClient: apiClient);
   final pickupRepository = PickupRepository(apiClient: apiClient);
   final complaintRepository = ComplaintRepository(apiClient: apiClient);
-  final scheduleRepository = ScheduleRepository(apiClient: apiClient);
   final rewardRepository = RewardRepository(apiClient: apiClient);
   final npsService = NpsService(apiClient: apiClient);
 
@@ -27,7 +26,6 @@ void main() {
       providers: [
         Provider<PickupRepository>.value(value: pickupRepository),
         Provider<ComplaintRepository>.value(value: complaintRepository),
-        Provider<ScheduleRepository>.value(value: scheduleRepository),
         Provider<RewardRepository>.value(value: rewardRepository),
         Provider<NpsService>.value(value: npsService),
         ChangeNotifierProvider(

@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../pickups/booking_screen.dart';
 import '../complaints/complaint_history_screen.dart';
 import '../rewards/rewards_screen.dart';
-import '../schedule/schedule_screen.dart';
 import '../profile_setup/profile_setup_screen.dart';
 import '../pickups/pickup_history_screen.dart';
 import 'home_state.dart';
@@ -181,12 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.report_problem_outlined,
           color: Colors.orange,
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplaintHistoryScreen())),
-        ),
-        _ActionItem(
-          label: 'Schedule',
-          icon: Icons.calendar_today_outlined,
-          color: Colors.blue,
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScheduleScreen())),
         ),
         _ActionItem(
           label: 'History',

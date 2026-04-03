@@ -5,14 +5,10 @@ import 'package:data_models/data_models.dart';
 
 class ComplaintRepository {
   final ApiClient _apiClient;
-  final Dio _uploadDio;
 
   static const String _complaintsPath = '/api/v1/complaints/';
-  static const String _presignedUrlPath = '/api/v1/complaints/get-upload-url/';
 
-  ComplaintRepository({required ApiClient apiClient})
-      : _apiClient = apiClient,
-        _uploadDio = Dio();
+  ComplaintRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Fetches a list of complaints for the current user.
   /// API returns a GeoJSON FeatureCollection.
@@ -83,62 +79,41 @@ class ComplaintRepository {
     }
   }
 
-  /// Handles the multi-step image upload and complaint creation.
-  /// Sends as GeoJSON Feature to match POST /api/v1/complaints/ schema.
+  /// Handles complaint creation with optional image attachment.
+  /// Sends as multipart/form-data so the image is submitted inline with the complaint.
   Future<ComplaintModel> submitComplaint({
     required ComplaintRequest request,
     File? imageFile,
   }) async {
-    String? finalImageUrl;
-
-    if (imageFile != null) {
-      finalImageUrl = await _uploadImageToS3(imageFile);
-    }
-
     try {
-      // ComplaintRequest.toJson() returns a FLAT dict: {category, description, location, ...}
-      // NOT GeoJSON, so we add image directly at the top level.
-      final payload = request.toJson();
-      if (finalImageUrl != null) {
-        payload['image'] = finalImageUrl;
+      final Map<String, dynamic> fields = {
+        'category': request.type,
+        'description': request.description,
+        // Django REST Framework GIS field accepts JSON string for location
+        'location': '{"type":"Point","coordinates":[${request.longitude},${request.latitude}]}',
+      };
+
+      dynamic postData;
+
+      if (imageFile != null) {
+        // Use multipart form if image is attached
+        final multipartFile = await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.path.split(RegExp(r'[/\\]')).last,
+        );
+        postData = FormData.fromMap({
+          ...fields,
+          'image': multipartFile,
+        });
+      } else {
+        // Plain JSON if no image
+        postData = fields;
       }
 
-      final response = await _apiClient.post(_complaintsPath, data: payload);
+      final response = await _apiClient.post(_complaintsPath, data: postData);
       return ComplaintModel.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
       throw Exception(e.message);
-    }
-  }
-
-  /// Helper to get pre-signed URL and PUT the file to S3.
-  Future<String> _uploadImageToS3(File file) async {
-    try {
-      final fileName = file.path.split(RegExp(r'[/\\]')).last;
-      final response = await _apiClient.get(
-        _presignedUrlPath,
-        queryParameters: {'file_name': fileName},
-      );
-
-      final uploadUrl = response.data['upload_url'] as String;
-      final downloadUrl = response.data['download_url'] as String;
-
-      final fileBytes = await file.readAsBytes();
-      await _uploadDio.put(
-        uploadUrl,
-        data: Stream.fromIterable([fileBytes]),
-        options: Options(
-          headers: {
-            Headers.contentLengthHeader: fileBytes.length,
-            'Content-Type': 'image/jpeg',
-          },
-        ),
-      );
-
-      return downloadUrl;
-    } on ApiException catch (e) {
-      throw Exception('Failed to get upload URL: ${e.message}');
-    } catch (e) {
-      throw Exception('S3 Upload failed: $e');
     }
   }
 

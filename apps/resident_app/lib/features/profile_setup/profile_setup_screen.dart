@@ -203,7 +203,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Complete Your Profile'),
+        title: Text(authState.user?.isProfileCompleted == true ? 'Update Profile' : 'Complete Your Profile'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -389,7 +389,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               ),
               const SizedBox(height: GLSpacing.xxl),
               GLButton(
-                text: 'Save & Continue',
+                text: authState.user?.isProfileCompleted == true ? 'Update Profile' : 'Complete Profile',
                 onPressed: _handleSave,
                 isLoading: authState.status == AuthStatus.loading,
               ),
