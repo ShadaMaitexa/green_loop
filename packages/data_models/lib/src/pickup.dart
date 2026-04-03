@@ -80,6 +80,7 @@ class PickupRequest {
   final String address;
   final double latitude;
   final double longitude;
+  final bool isInstant;
 
   const PickupRequest({
     required this.wasteType,
@@ -88,6 +89,7 @@ class PickupRequest {
     required this.address,
     required this.latitude,
     required this.longitude,
+    this.isInstant = false,
   });
 
   /// Aligns with project convention: Flat fields + GeoJSON 'location' object
@@ -101,6 +103,7 @@ class PickupRequest {
         'type': 'Point',
         'coordinates': [longitude, latitude], // GeoJSON is [lng, lat]
       },
+      'is_instant': isInstant,
     };
   }
 }

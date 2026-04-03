@@ -4,6 +4,7 @@ import 'package:auth/auth.dart';
 import 'package:network/network.dart';
 import 'package:core/core.dart';
 import 'package:ui_kit/ui_kit.dart';
+import 'package:geo/geo.dart';
 import 'features/route_map/route_map_screen.dart';
 import 'features/route_map/route_map_state.dart';
 import 'features/attendance/attendance_dashboard.dart';
@@ -97,6 +98,28 @@ class HksHome extends StatefulWidget {
 
 class _HksHomeState extends State<HksHome> {
   int _tab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestLocationPermission();
+  }
+
+  Future<void> _requestLocationPermission() async {
+    try {
+      final locationService = LocationService();
+      await locationService.getCurrentPosition();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enable location services so residents can track the truck.'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
 
   static const _tabs = [
     NavigationDestination(

@@ -4,6 +4,7 @@ import 'package:ui_kit/ui_kit.dart';
 import 'package:auth/auth.dart';
 import 'package:intl/intl.dart';
 import '../pickups/booking_screen.dart';
+import '../pickups/live_map_screen.dart';
 import '../complaints/complaint_history_screen.dart';
 import '../rewards/rewards_screen.dart';
 import '../profile_setup/profile_setup_screen.dart';
@@ -174,6 +175,12 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.local_shipping_outlined,
           color: Colors.green,
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BookingScreen())),
+        ),
+        _ActionItem(
+          label: 'Live Map',
+          icon: Icons.map_rounded,
+          color: Colors.blue,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveMapScreen())),
         ),
         _ActionItem(
           label: 'My Complaints',
