@@ -7,6 +7,7 @@ import '../pickups/booking_screen.dart';
 import '../complaints/complaint_submission_screen.dart';
 import '../rewards/rewards_screen.dart';
 import '../schedule/schedule_screen.dart';
+import '../profile_setup/profile_setup_screen.dart';
 import 'home_state.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -195,6 +196,12 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
              // To be implemented
           },
+        ),
+        _ActionItem(
+          label: 'My Profile',
+          icon: Icons.account_circle_outlined,
+          color: Colors.teal,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileSetupScreen())),
         ),
       ],
     );

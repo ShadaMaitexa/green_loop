@@ -12,9 +12,9 @@ class AuthRepository {
   static const String _adminLoginPath = '/api/v1/auth/admin-login/';
   static const String _workerLoginPath = '/api/v1/auth/worker-login/';
   static const String _logoutPath = '/api/v1/auth/logout/';
-  static const String _profilePath = '/api/v1/users/me/';
+  static const String _profilePath = '/api/users/me/';
   static const String _wardsPath = '/api/v1/wards/';
-  static const String _completeProfilePath = '/api/v1/users/me/';
+  static const String _completeProfilePath = '/api/users/me/';
 
   AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
@@ -130,11 +130,17 @@ class AuthRepository {
         refreshToken: data['refresh'] as String,
       );
 
-      return AuthUser.fromJson({
-        ...(data['user'] as Map? ?? {}),
-        ...data,
-      });
-
+      // The OTP verify response may only have minimal user info.
+      // Re-fetch the full profile to get ward, profile details, is_profile_completed, etc.
+      try {
+        return await getProfile();
+      } catch (_) {
+        // Fallback: parse whatever was in the response if profile fetch fails
+        return AuthUser.fromJson({
+          ...(data['user'] as Map? ?? {}),
+          ...data,
+        });
+      }
     } on UnauthorizedException catch (_) {
       throw const InvalidCredentialsException();
     } on ApiException catch (e) {
@@ -155,17 +161,17 @@ class AuthRepository {
       return await getProfile();
     } on UnauthorizedException {
       // Refresh token is also expired/invalid. The interceptor already cleared the storage.
+      await _apiClient.tokenStorage.clearAll();
       return null;
     } catch (_) {
-      // If offline, we might want to return a cached user.
-      // For this simplified logic, we just return null on failure,
-      // or optionally throw a specific error.
-      // If we assume a valid session exists, we can return a dummy user and load later.
+      // On non-auth errors (e.g. offline/timeout), return null.
+      // Tokens remain intact — user will retry on next cold start.
       return null;
     }
   }
 
   /// Get current user profile details using the saved valid token.
+  /// Fetches /api/users/me/ which returns: id, email, name, role, ward, points_balance.
   Future<AuthUser> getProfile() async {
     try {
       final response = await _apiClient.get(_profilePath);
@@ -204,15 +210,28 @@ class AuthRepository {
     }
   }
 
-  /// Complete the resident profile with name and location.
+  /// Complete/update the resident profile.
+  /// Sends user-compatible fields (name, ward) via PATCH to /api/users/me/.
+  /// Then re-fetches the full profile to ensure all fields are up-to-date.
   Future<AuthUser> completeProfile(ResidentProfile profile) async {
     try {
-      final response = await _apiClient.post(
-        _completeProfilePath,
-        data: profile.toJson(),
-      );
-      // The server response should reflect the updated profile/user state.
-      return AuthUser.fromJson(response.data as Map<String, dynamic>);
+      // Build the payload matching what /api/users/me/ accepts:
+      // name (display name), ward (ward ID as int), address, latitude, longitude, name_en, name_ml
+      final payload = <String, dynamic>{
+        'name': profile.nameEn,
+        'ward': profile.wardId,
+        'name_en': profile.nameEn,
+        'name_ml': profile.nameMl,
+        'address': profile.address,
+        'latitude': profile.latitude,
+        'longitude': profile.longitude,
+      };
+
+      await _apiClient.patch(_completeProfilePath, data: payload);
+
+      // Always re-fetch the full profile after update so we get the accurate
+      // server-side state (including any computed fields like is_profile_completed).
+      return await getProfile();
     } on UnauthorizedException {
       throw const AuthException('Session expired. Please log in again.');
     } on ApiException catch (e) {

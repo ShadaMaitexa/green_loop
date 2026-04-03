@@ -74,6 +74,16 @@ class AuthWrapper extends StatelessWidget {
     final status = context.select<AuthState, AuthStatus>((s) => s.status);
     final user = context.select<AuthState, AuthUser?>((s) => s.user);
 
+    // If we have a user object, they are in an authenticated session.
+    // We stay in this branch even during 'loading' or 'error' states to prevent
+    // yanking the user back to the login screen while they are performing actions.
+    if (user != null) {
+      if (!user.isProfileCompleted) {
+        return const ProfileSetupScreen();
+      }
+      return const HomeScreen();
+    }
+
     switch (status) {
       case AuthStatus.initial:
       case AuthStatus.checking:
@@ -81,9 +91,7 @@ class AuthWrapper extends StatelessWidget {
           body: Center(child: CircularProgressIndicator()),
         );
       case AuthStatus.authenticated:
-        if (user != null && !user.isProfileCompleted) {
-          return const ProfileSetupScreen();
-        }
+        // Already handled by user != null check, but here for completeness
         return const HomeScreen();
       case AuthStatus.loading:
       case AuthStatus.unauthenticated:

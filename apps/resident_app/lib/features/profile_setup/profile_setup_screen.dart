@@ -32,8 +32,24 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   void initState() {
     super.initState();
+    _populateExistingData();
     _loadWards();
-    _autoDetectLocation();
+    // Only auto-detect if we don't have location data yet
+    if (_latitude == null || _longitude == null) {
+      _autoDetectLocation();
+    }
+  }
+
+  void _populateExistingData() {
+    final user = context.read<AuthState>().user;
+    if (user != null) {
+      _nameEnController.text = user.nameEn ?? user.name;
+      _nameMlController.text = user.nameMl ?? '';
+      _addressController.text = user.address ?? '';
+      _latitude = user.latitude;
+      _longitude = user.longitude;
+      // _selectedWard will be matched in _loadWards
+    }
   }
 
   @override
@@ -52,9 +68,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       final seenIds = <int>{};
       final uniqueWards = allWards.where((w) => seenIds.add(w.id)).toList();
       
+      final currentUser = context.read<AuthState>().user;
+
       setState(() {
         _wards = uniqueWards;
         _isLoadingWards = false;
+        
+        // Match existing ward if available
+        if (currentUser?.wardId != null) {
+          try {
+            _selectedWard = _wards.firstWhere((w) => w.id == currentUser!.wardId);
+          } catch (_) {
+            // Ward not found in current list
+          }
+        }
       });
     } catch (e) {
       if (mounted) {
@@ -140,6 +167,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile saved successfully!')),
         );
+        
+        // Note: We no longer do manual navigation here.
+        // AuthWrapper in main.dart watches AuthState, and when isProfileCompleted
+        // becomes true, it will automatically switch the UI to HomeScreen.
+        // This preserves the widget tree structure for logout to work correctly.
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -170,6 +205,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       appBar: AppBar(
         title: const Text('Complete Your Profile'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Logout',
+            onPressed: () => context.read<AuthState>().logout(),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(GLSpacing.xl),

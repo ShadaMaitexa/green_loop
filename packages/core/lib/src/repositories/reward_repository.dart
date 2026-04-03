@@ -15,7 +15,7 @@ class RewardRepository {
 
   /// Fetches the resident's core profile information (including points).
   Future<ResidentProfile> getProfile() async {
-    final response = await apiClient.get('/api/v1/users/me/');
+    final response = await apiClient.get('/api/users/me/');
     return ResidentProfile.fromJson(response.data as Map<String, dynamic>);
   }
 
