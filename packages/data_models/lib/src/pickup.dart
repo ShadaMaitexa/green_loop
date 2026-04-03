@@ -117,6 +117,8 @@ class PickupResponse {
   final WasteType wasteType;
   final double? latitude;
   final double? longitude;
+  final bool isInstant;
+  final String bookingType;
 
   const PickupResponse({
     required this.id,
@@ -127,6 +129,8 @@ class PickupResponse {
     required this.wasteType,
     this.latitude,
     this.longitude,
+    this.isInstant = false,
+    this.bookingType = 'Scheduled Slot',
   });
 
   factory PickupResponse.fromJson(Map<String, dynamic> json) {
@@ -144,6 +148,8 @@ class PickupResponse {
       wasteType: WasteType.fromJson(properties['waste_type']?.toString() ?? 'DRY'),
       longitude: coords != null && coords.isNotEmpty ? (coords[0] as num).toDouble() : (json['longitude'] as num?)?.toDouble(),
       latitude: coords != null && coords.length > 1 ? (coords[1] as num).toDouble() : (json['latitude'] as num?)?.toDouble(),
+      isInstant: properties['is_instant'] as bool? ?? false,
+      bookingType: properties['booking_type']?.toString() ?? 'Scheduled Slot',
     );
   }
 }

@@ -141,11 +141,13 @@ class _PickupHistoryScreenState extends State<PickupHistoryScreen> {
             margin: const EdgeInsets.only(bottom: GLSpacing.sm),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: _getStatusColor(pickup.status).withOpacity(0.1),
-                child: Icon(Icons.recycling, color: _getStatusColor(pickup.status)),
+                backgroundColor: pickup.isInstant ? Colors.orange.withOpacity(0.1) : _getStatusColor(pickup.status).withOpacity(0.1),
+                child: pickup.isInstant 
+                    ? const Icon(Icons.bolt, color: Colors.orange)
+                    : Icon(Icons.recycling, color: _getStatusColor(pickup.status)),
               ),
               title: Text(pickup.wasteType.label),
-              subtitle: Text('Date: ${DateFormat('EEE, MMM d, yyyy').format(date)}\nSlot: ${pickup.slot}'),
+              subtitle: Text('Date: ${DateFormat('EEE, MMM d, yyyy').format(date)}\n${pickup.bookingType}${pickup.isInstant ? '' : ' - ${pickup.slot}'}'),
               isThreeLine: true,
               trailing: Chip(
                 label: Text(
