@@ -259,4 +259,24 @@ class AuthRepository {
   Future<String?> getAccessToken() async {
     return _apiClient.tokenStorage.getAccessToken();
   }
+
+  /// System health check.
+  Future<bool> ping() async {
+    try {
+      final response = await _apiClient.get('/api/v1/auth/ping/');
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Check for account migration status.
+  Future<Map<String, dynamic>> checkMigration() async {
+    try {
+      final response = await _apiClient.get('/api/v1/auth/migrate/');
+      return response.data as Map<String, dynamic>;
+    } on ApiException catch (e) {
+      throw AuthException(e.message);
+    }
+  }
 }

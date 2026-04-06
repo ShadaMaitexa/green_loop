@@ -17,3 +17,7 @@ export 'src/recycler.dart';
 export 'src/compliance_report.dart';
 export 'src/notification.dart';
 export 'src/nps.dart';
+export 'src/dashboard.dart';
+export 'src/sync.dart';
+export 'src/report.dart';
+export 'src/route_admin.dart';

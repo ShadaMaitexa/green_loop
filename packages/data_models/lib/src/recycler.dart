@@ -37,7 +37,7 @@ class MaterialType {
   int get hashCode => id.hashCode;
 }
 
-class RecyclerCertificate {
+class RecyclingCertificate {
   final int id;
   final String status;
   final String? recyclerName;
@@ -45,7 +45,7 @@ class RecyclerCertificate {
   final DateTime? dateRequested;
   final DateTime? dateVerified;
 
-  const RecyclerCertificate({
+  const RecyclingCertificate({
     required this.id,
     required this.status,
     this.recyclerName,
@@ -54,8 +54,8 @@ class RecyclerCertificate {
     this.dateVerified,
   });
 
-  factory RecyclerCertificate.fromJson(Map<String, dynamic> json) {
-    return RecyclerCertificate(
+  factory RecyclingCertificate.fromJson(Map<String, dynamic> json) {
+    return RecyclingCertificate(
       id: json['id'] as int? ?? 0,
       status: json['status']?.toString() ?? 'PENDING',
       recyclerName: json['recycler_name']?.toString(),

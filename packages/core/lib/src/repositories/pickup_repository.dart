@@ -7,6 +7,7 @@ class PickupRepository {
   static const String _slotsPath = '/api/v1/pickup-slots/';
   static const String _availabilityPath = '/api/v1/pickups/availability/';
   static const String _pickupsPath = '/api/v1/pickups/';
+  static const String _reviewQueuePath = '/api/review-queue/';
 
   PickupRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
@@ -161,18 +162,41 @@ class PickupRepository {
     }
   }
 
-  /// Fetch live routes for the map (Resident Side).
-  Future<List<Map<String, dynamic>>> getLiveRoutes() async {
+  /// Fetch the review queue for contamination review.
+  Future<List<PickupResponse>> getReviewQueue() async {
     try {
-      final response = await _apiClient.get('/api/v1/routes/ward_live/');
-      // Assume returning raw list of features or similar Map to parse in UI
-      final dynamic rawData = response.data;
-      if (rawData is Map<String, dynamic> && rawData['type'] == 'FeatureCollection') {
-        return (rawData['features'] as List).cast<Map<String, dynamic>>();
-      } else if (rawData is List) {
-        return rawData.cast<Map<String, dynamic>>();
-      }
-      return [];
+      final response = await _apiClient.get(_reviewQueuePath);
+      final list = (response.data is Map ? response.data['results'] : response.data) as List? ?? [];
+      return list.map((e) => PickupResponse.fromJson(e as Map<String, dynamic>)).toList();
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Admin: Create a new pickup slot template.
+  Future<PickupSlot> createPickupSlot(Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.post(_slotsPath, data: data);
+      return PickupSlot.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Admin: Update an existing pickup slot template.
+  Future<PickupSlot> updatePickupSlot(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_slotsPath$id/', data: data);
+      return PickupSlot.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Admin: Delete a pickup slot template (Deactivate).
+  Future<void> deletePickupSlot(String id) async {
+    try {
+      await _apiClient.delete('$_slotsPath$id/');
     } on ApiException catch (e) {
       throw Exception(e.message);
     }
