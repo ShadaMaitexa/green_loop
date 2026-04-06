@@ -26,11 +26,11 @@ class RecyclerService {
     }
   }
 
-  Future<List<RecyclerCertificate>> getPendingCertificates() async {
+  Future<List<RecyclingCertificate>> getPendingCertificates() async {
     try {
       final response = await _api.get('/api/v1/recycler/certificates/admin_pending/');
       final List data = response.data;
-      return data.map((json) => RecyclerCertificate.fromJson(json)).toList();
+      return data.map((json) => RecyclingCertificate.fromJson(json)).toList();
     } catch (e) {
       rethrow;
     }

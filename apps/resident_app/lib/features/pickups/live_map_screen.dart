@@ -121,7 +121,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmation'),
-          content: const Text('pickup will come soon asre u sure'),
+          content: const Text('A pickup will arrive soon. Are you sure?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

@@ -201,4 +201,18 @@ class PickupRepository {
       throw Exception(e.message);
     }
   }
+
+  /// Fetch live routes for the map (Resident Side).
+  Future<List<Map<String, dynamic>>> getLiveRoutes() async {
+    try {
+      final response = await _apiClient.get('/api/v1/routes/ward_live/');
+      if (response.data is Map && response.data['type'] == 'FeatureCollection') {
+        final features = response.data['features'] as List? ?? [];
+        return features.map((e) => e as Map<String, dynamic>).toList();
+      }
+      return (response.data as List).cast<Map<String, dynamic>>();
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }

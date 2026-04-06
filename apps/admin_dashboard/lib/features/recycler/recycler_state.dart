@@ -7,7 +7,7 @@ class RecyclerState extends ChangeNotifier {
 
   List<MaterialType> _materialTypes = [];
   List<RecyclerPurchase> _purchases = [];
-  List<RecyclerCertificate> _pendingCertificates = [];
+  List<RecyclingCertificate> _pendingCertificates = [];
   bool _isLoading = false;
   String? _error;
 
@@ -15,7 +15,7 @@ class RecyclerState extends ChangeNotifier {
 
   List<MaterialType> get materialTypes => _materialTypes;
   List<RecyclerPurchase> get purchases => _purchases;
-  List<RecyclerCertificate> get pendingCertificates => _pendingCertificates;
+  List<RecyclingCertificate> get pendingCertificates => _pendingCertificates;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -32,7 +32,7 @@ class RecyclerState extends ChangeNotifier {
       ]);
       _materialTypes = futures[0] as List<MaterialType>;
       _purchases = futures[1] as List<RecyclerPurchase>;
-      _pendingCertificates = futures[2] as List<RecyclerCertificate>;
+      _pendingCertificates = futures[2] as List<RecyclingCertificate>;
     } catch (e) {
       _error = e.toString();
     } finally {
