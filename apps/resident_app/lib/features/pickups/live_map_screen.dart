@@ -116,22 +116,52 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       return;
     }
 
+    WasteType selectedType = WasteType.dry;
+
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmation'),
-          content: const Text('A pickup will arrive soon. Are you sure?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('OK'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Instant Booking'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('A pickup will arrive soon. Please select the waste type:'),
+                  const SizedBox(height: 16),
+                  ...WasteType.values.map((type) => RadioListTile<WasteType>(
+                    title: Row(
+                      children: [
+                        Icon(type.icon, color: type.color),
+                        const SizedBox(width: 8),
+                        Text(type.label),
+                      ],
+                    ),
+                    value: type,
+                    groupValue: selectedType,
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => selectedType = val);
+                      }
+                    },
+                    contentPadding: EdgeInsets.zero,
+                  )),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          }
         );
       },
     );
@@ -143,7 +173,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       final repo = context.read<PickupRepository>();
       
       final request = PickupRequest(
-        wasteType: WasteType.dry, // Or ask user
+        wasteType: selectedType,
         scheduledDate: DateFormat('yyyy-MM-dd').format(DateTime.now()),
         slot: 'INSTANT',
         address: 'Live Location GPS',
