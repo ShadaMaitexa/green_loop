@@ -18,10 +18,10 @@ enum WasteType {
 
   String toJson() {
     switch (this) {
-      case WasteType.dry: return 'dry';
-      case WasteType.wet: return 'wet';
-      case WasteType.eWaste: return 'e-waste';
-      case WasteType.biomedical: return 'biomedical';
+      case WasteType.dry: return 'DRY';
+      case WasteType.wet: return 'WET';
+      case WasteType.eWaste: return 'E_WASTE';
+      case WasteType.biomedical: return 'BIOMEDICAL';
     }
   }
   
