@@ -9,6 +9,7 @@ import '../sync/sync_manager.dart';
 import 'package:core/core.dart';
 import 'pickup_completion_state.dart';
 import 'services/ai_classification_service.dart';
+import '../route_map/route_map_state.dart';
 
 /// The multi-step flow for completing a pickup.
 class PickupCompletionFlow extends StatefulWidget {
@@ -676,6 +677,7 @@ class _FinalizeStepState extends State<_FinalizeStep> {
               GLButton(
                 text: 'Return to Route',
                 onPressed: () {
+                  context.read<RouteMapState>().fetchRoute(); // Refresh map/stats
                   Navigator.pop(ctx);    // Close dialog
                   Navigator.pop(context); // Return to map/list
                 },

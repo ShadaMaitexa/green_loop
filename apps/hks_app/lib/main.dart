@@ -12,6 +12,7 @@ import 'features/attendance/attendance_state.dart';
 import 'features/sync/sync_manager.dart';
 import 'features/resources/resources_screen.dart';
 import 'features/auth/hks_login_screen.dart';
+import 'features/dashboard/hks_dashboard_screen.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -149,6 +150,11 @@ class _HksHomeState extends State<HksHome> {
 
   static const _tabs = [
     NavigationDestination(
+      icon: Icon(Icons.dashboard_outlined),
+      selectedIcon: Icon(Icons.dashboard_rounded),
+      label: 'Home',
+    ),
+    NavigationDestination(
       icon: Icon(Icons.map_outlined),
       selectedIcon: Icon(Icons.map_rounded),
       label: 'Route',
@@ -171,6 +177,7 @@ class _HksHomeState extends State<HksHome> {
       body: IndexedStack(
         index: _tab,
         children: const [
+          HksDashboardScreen(),
           RouteMapScreen(),
           AttendanceDashboard(),
           HksResourcesScreen(),

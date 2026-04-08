@@ -45,97 +45,161 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = context.watch<AuthState>().status == AuthStatus.loading;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              Theme.of(context).colorScheme.surface,
-            ],
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.primary.withOpacity(0.8),
+                  colorScheme.surface,
+                ],
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: GLSpacing.xl),
-              child: Form(
-                key: _formKey,
+          
+          // Background decorative circles
+          Positioned(
+            top: -100,
+            right: -100,
+            child: CircleAvatar(
+              radius: 150,
+              backgroundColor: Colors.white.withOpacity(0.1),
+            ),
+          ),
+          
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: GLSpacing.xl),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(
-                      Icons.cleaning_services_rounded,
-                      size: 80,
-                      color: Colors.green,
-                    ),
-                    const SizedBox(height: GLSpacing.lg),
-                    Text(
-                      'HKS Worker Portal',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade800,
-                          ),
-                    ),
-                    const SizedBox(height: GLSpacing.xs),
-                    Text(
-                      'Sign in with your shared credentials',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
-                    ),
-                    const SizedBox(height: GLSpacing.xxl),
-                    GLTextField(
-                      controller: _usernameController,
-                      label: 'Username',
-                      prefixIcon: const Icon(Icons.person_outline_rounded),
-                      hint: 'Enter worker username',
-                      validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                      enabled: !isLoading,
-                    ),
-                    const SizedBox(height: GLSpacing.md),
-                    GLTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline_rounded),
-                      hint: 'Enter shared password',
-                      obscureText: _obscurePassword,
-                      enabled: !isLoading,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.grey,
+                    // Brand Section
+                    Hero(
+                      tag: 'app_logo',
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                            ),
+                          ],
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        child: const Icon(
+                          Icons.cleaning_services_rounded,
+                          size: 64,
+                          color: Colors.green,
+                        ),
                       ),
-                      validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: GLSpacing.xxl),
-                    GLButton(
-                      text: 'LOGIN',
-                      isLoading: isLoading,
-                      onPressed: _handleLogin,
                     ),
                     const SizedBox(height: GLSpacing.xl),
                     Text(
-                      'Contact your Admin if you forgot your password',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade500,
+                      'GreenLoop HKS',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Text(
+                      'Harit Karma Sena Worker Portal',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                    const SizedBox(height: GLSpacing.xxl),
+
+                    // Glassmorphism Login Card
+                    Container(
+                      padding: const EdgeInsets.all(GLSpacing.xl),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(32),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Sign In',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: GLSpacing.lg),
+                            GLTextField(
+                              controller: _usernameController,
+                              label: 'Username',
+                              prefixIcon: const Icon(Icons.person_outline_rounded),
+                              hint: 'Enter your username',
+                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              enabled: !isLoading,
+                            ),
+                            const SizedBox(height: GLSpacing.md),
+                            GLTextField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              prefixIcon: const Icon(Icons.lock_outline_rounded),
+                              hint: 'Enter your password',
+                              obscureText: _obscurePassword,
+                              enabled: !isLoading,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              ),
+                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            const SizedBox(height: GLSpacing.xl),
+                            GLButton(
+                              text: 'LOGIN',
+                              size: GLButtonSize.large,
+                              isLoading: isLoading,
+                              onPressed: _handleLogin,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: GLSpacing.xxl),
+                    Text(
+                      'Need help? Contact your administrator',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.7),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -65,6 +65,7 @@ class HksPickup {
   final double latitude;
   final double longitude;
   final String? phoneNumber;
+  final String status;
 
   HksPickup({
     required this.id,
@@ -75,7 +76,10 @@ class HksPickup {
     required this.latitude,
     required this.longitude,
     this.phoneNumber,
+    this.status = 'PENDING',
   });
+
+  bool get isCompleted => status.toUpperCase() == 'COMPLETED';
 
   factory HksPickup.fromJson(Map<String, dynamic> json) {
     return HksPickup(
@@ -87,6 +91,7 @@ class HksPickup {
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
       phoneNumber: json['phone_number'] as String?,
+      status: json['status']?.toString() ?? 'PENDING',
     );
   }
 }

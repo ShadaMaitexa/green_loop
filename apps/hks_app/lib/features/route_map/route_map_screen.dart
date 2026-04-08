@@ -375,8 +375,8 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             child: Tooltip(
               message: '${i + 1}. ${p.residentName}',
               child: Icon(
-                Icons.location_on,
-                color: p.wasteType.color,
+                p.isCompleted ? Icons.check_circle_rounded : Icons.location_on,
+                color: p.isCompleted ? Colors.grey : p.wasteType.color,
                 size: 30,
               ),
             ),
