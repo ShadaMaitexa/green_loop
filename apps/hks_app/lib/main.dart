@@ -11,6 +11,7 @@ import 'features/attendance/attendance_dashboard.dart';
 import 'features/attendance/attendance_state.dart';
 import 'features/sync/sync_manager.dart';
 import 'features/resources/resources_screen.dart';
+import 'features/auth/hks_login_screen.dart';
 
 void main() {
   final environment = Environment.dev;
@@ -76,15 +77,40 @@ class AuthWrapper extends StatelessWidget {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       case AuthStatus.authenticated:
         if (user != null && user.role != 'hks') {
-          // For demo, we just show a lock screen or similar if roles don't match
+          return const InvalidRolePlaceholder();
         }
         return const HksHome();
       case AuthStatus.loading:
       case AuthStatus.unauthenticated:
       case AuthStatus.otpRequested:
       case AuthStatus.error:
-        return const HksLoginPlaceholder();
+        return const HksLoginScreen();
     }
+  }
+}
+
+class InvalidRolePlaceholder extends StatelessWidget {
+  const InvalidRolePlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.lock_rounded, size: 64, color: Colors.orange),
+            const SizedBox(height: GLSpacing.md),
+            const Text('Access Denied. HKS Worker account required.'),
+            const SizedBox(height: GLSpacing.lg),
+            GLButton(
+              text: 'Logout',
+              onPressed: () => context.read<AuthState>().logout(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -154,33 +180,6 @@ class _HksHomeState extends State<HksHome> {
         selectedIndex: _tab,
         destinations: _tabs,
         onDestinationSelected: (i) => setState(() => _tab = i),
-      ),
-    );
-  }
-}
-
-class HksLoginPlaceholder extends StatelessWidget {
-  const HksLoginPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.cleaning_services_rounded, size: 64, color: Colors.green),
-            const SizedBox(height: GLSpacing.md),
-            const Text('HKS Worker Login'),
-            const SizedBox(height: GLSpacing.lg),
-            GLButton(
-              text: 'Request OTP (Email)',
-              onPressed: () {
-                // In a full implementation, this uses the OTP flow
-              },
-            ),
-          ],
-        ),
       ),
     );
   }

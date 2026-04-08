@@ -19,6 +19,7 @@ class GLTextField extends StatefulWidget {
   final void Function(String)? onChanged;
   final VoidCallback? onTap;
   final String? Function(String?)? validator;
+  final bool enabled;
 
   const GLTextField({
     super.key,
@@ -37,6 +38,7 @@ class GLTextField extends StatefulWidget {
     this.onChanged,
     this.onTap,
     this.validator,
+    this.enabled = true,
   });
 
   @override
@@ -112,6 +114,7 @@ class _GLTextFieldState extends State<GLTextField> {
           onChanged: widget.onChanged,
           onTap: widget.onTap,
           validator: widget.validator,
+          enabled: widget.enabled,
           style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: widget.hint,
