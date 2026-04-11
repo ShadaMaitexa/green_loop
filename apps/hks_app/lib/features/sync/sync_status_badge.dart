@@ -89,3 +89,80 @@ class SyncStatusTitle extends StatelessWidget {
     );
   }
 }
+
+class SyncStatusBadge extends StatelessWidget {
+  const SyncStatusBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SyncManager>(
+      builder: (context, syncManager, child) {
+        final status = syncManager.status;
+        final count = syncManager.pendingCount;
+
+        if (status == SyncStatus.online && count == 0) {
+          return const SizedBox.shrink();
+        }
+
+        Color statusColor;
+        IconData statusIcon;
+
+        switch (status) {
+          case SyncStatus.offline:
+            statusColor = Colors.orange;
+            statusIcon = Icons.wifi_off_rounded;
+            break;
+          case SyncStatus.syncing:
+            statusColor = Colors.blue;
+            statusIcon = Icons.sync_rounded;
+            break;
+          case SyncStatus.synced:
+            statusColor = Colors.green;
+            statusIcon = Icons.cloud_done_rounded;
+            break;
+          case SyncStatus.online:
+            statusColor = Colors.grey;
+            statusIcon = Icons.cloud_queue_rounded;
+            break;
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: statusColor.withOpacity(0.2)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (status == SyncStatus.syncing)
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: statusColor,
+                  ),
+                )
+              else
+                Icon(statusIcon, size: 14, color: statusColor),
+              if (count > 0) ...[
+                const SizedBox(width: 4),
+                Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

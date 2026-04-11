@@ -580,42 +580,47 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       return const Center(child: Text('No pickups assigned for today.'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: route.pickups.length,
-      itemBuilder: (context, index) {
-        final pickup = route.pickups[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  backgroundColor: pickup.wasteType.color.withOpacity(0.1),
-                  child: Text('${index + 1}', style: TextStyle(color: pickup.wasteType.color)),
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: GLBreakpoints.mobile),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: route.pickups.length,
+          itemBuilder: (context, index) {
+            final pickup = route.pickups[index];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(16),
+                leading: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                      child: Text('${index + 1}', style: TextStyle(color: pickup.wasteType.color)),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            title: Text(pickup.residentName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(pickup.address, maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 4),
-                GLStatusBadge.custom(
-                  status: pickup.wasteType.label,
-                  backgroundColor: pickup.wasteType.color.withOpacity(0.1),
-                  textColor: pickup.wasteType.color,
+                title: Text(pickup.residentName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(pickup.address, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 4),
+                    GLStatusBadge.custom(
+                      status: pickup.wasteType.label,
+                      backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                      textColor: pickup.wasteType.color,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _showPickupDetails(pickup),
-          ),
-        );
-      },
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => _showPickupDetails(pickup),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 

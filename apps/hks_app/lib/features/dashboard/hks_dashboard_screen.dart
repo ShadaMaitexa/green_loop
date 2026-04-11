@@ -4,6 +4,7 @@ import 'package:auth/auth.dart';
 import 'package:ui_kit/ui_kit.dart';
 import '../route_map/route_map_state.dart';
 import '../attendance/attendance_state.dart';
+import '../sync/sync_status_badge.dart';
 
 class HksDashboardScreen extends StatelessWidget {
   const HksDashboardScreen({super.key});
@@ -21,42 +22,52 @@ class HksDashboardScreen extends StatelessWidget {
     final completedPickups = route?.pickups.where((p) => p.isCompleted).length ?? 0;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: const Text('GreenLoop HKS'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(GLSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   _buildWelcomeHeader(context, user?.name ?? 'Worker'),
-                   const SizedBox(height: GLSpacing.xl),
-                   _buildAttendanceSummary(context, attendanceState),
-                   const SizedBox(height: GLSpacing.xl),
-                   Text(
-                     'Today\'s Progress',
-                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                   ),
-                   const SizedBox(height: GLSpacing.md),
-                   _buildProgressGrid(context, totalPickups, completedPickups),
-                   const SizedBox(height: GLSpacing.xl),
-                   _buildQuickActions(context),
-                   const SizedBox(height: GLSpacing.xxl),
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1000), // Optimal width for readability
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar.large(
+                title: const Text('GreenLoop HKS'),
+                centerTitle: GLResponsive.isMobile(context),
+                actions: [
+                  const SyncStatusBadge(),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {},
+                  ),
+                  const SizedBox(width: 8),
                 ],
               ),
-            ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: GLResponsive.isMobile(context) ? GLSpacing.lg : GLSpacing.xl,
+                  vertical: GLSpacing.lg,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                       _buildWelcomeHeader(context, user?.name ?? 'Worker'),
+                       const SizedBox(height: GLSpacing.xl),
+                       _buildAttendanceSummary(context, attendanceState),
+                       const SizedBox(height: GLSpacing.xl),
+                       Text(
+                         'Today\'s Progress',
+                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                       ),
+                       const SizedBox(height: GLSpacing.md),
+                       _buildProgressGrid(context, totalPickups, completedPickups),
+                       const SizedBox(height: GLSpacing.xl),
+                       _buildQuickActions(context),
+                       const SizedBox(height: GLSpacing.xxl),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

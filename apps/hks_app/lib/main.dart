@@ -173,21 +173,44 @@ class _HksHomeState extends State<HksHome> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isWide = !GLResponsive.isMobile(context);
+
     return Scaffold(
-      body: IndexedStack(
-        index: _tab,
-        children: const [
-          HksDashboardScreen(),
-          RouteMapScreen(),
-          AttendanceDashboard(),
-          HksResourcesScreen(),
+      body: Row(
+        children: [
+          if (isWide)
+            NavigationRail(
+              selectedIndex: _tab,
+              onDestinationSelected: (i) => setState(() => _tab = i),
+              labelType: NavigationRailLabelType.all,
+              destinations: _tabs
+                  .map((t) => NavigationRailDestination(
+                        icon: t.icon,
+                        selectedIcon: t.selectedIcon,
+                        label: Text(t.label),
+                      ))
+                  .toList(),
+            ),
+          Expanded(
+            child: IndexedStack(
+              index: _tab,
+              children: const [
+                HksDashboardScreen(),
+                RouteMapScreen(),
+                AttendanceDashboard(),
+                HksResourcesScreen(),
+              ],
+            ),
+          ),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        destinations: _tabs,
-        onDestinationSelected: (i) => setState(() => _tab = i),
-      ),
+      bottomNavigationBar: isWide
+          ? null
+          : NavigationBar(
+              selectedIndex: _tab,
+              destinations: _tabs,
+              onDestinationSelected: (i) => setState(() => _tab = i),
+            ),
     );
   }
 }
