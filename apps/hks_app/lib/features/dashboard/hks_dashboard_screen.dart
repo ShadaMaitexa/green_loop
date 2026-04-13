@@ -79,16 +79,20 @@ class HksDashboardScreen extends StatelessWidget {
 
   Widget _buildWelcomeHeader(BuildContext context, String name) {
     final theme = Theme.of(context);
+    final isMobile = GLResponsive.isMobile(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Good morning,',
-          style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey),
+          style: (isMobile ? theme.textTheme.bodyLarge : theme.textTheme.headlineSmall)
+              ?.copyWith(color: Colors.grey),
         ),
         Text(
           name,
-          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: (isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge)
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -97,6 +101,7 @@ class HksDashboardScreen extends StatelessWidget {
   Widget _buildAttendanceSummary(BuildContext context, AttendanceState state) {
     final theme = Theme.of(context);
     final isIn = state.today?.isCheckedIn ?? false;
+    final isMobile = GLResponsive.isMobile(context);
 
     return Container(
       padding: const EdgeInsets.all(GLSpacing.lg),
@@ -107,66 +112,121 @@ class HksDashboardScreen extends StatelessWidget {
           color: isIn ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
         ),
       ),
-      child: Row(
-        children: [
-          Icon(
-            isIn ? Icons.check_circle_rounded : Icons.warning_amber_rounded,
-            color: isIn ? Colors.green : Colors.orange,
-            size: 32,
-          ),
-          const SizedBox(width: GLSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isIn ? 'Shift Active' : 'Attendance Required',
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  isIn 
-                    ? 'Check-in confirmed at ${state.today?.checkInTime ?? "N/A"}'
-                    : 'Please log your attendance to start receiving requests.',
-                  style: theme.textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          if (!isIn)
-            TextButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceDashboard()));
-                },
-                child: const Text('LOG NOW'),
+      child: isMobile && !isIn 
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 32,
+                  ),
+                  const SizedBox(width: GLSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Attendance Required',
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Please log your attendance to start receiving requests.',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-          ],
-        ),
-    
+              const SizedBox(height: GLSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.orange.withValues(alpha: 0.1),
+                  ),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceDashboard()));
+                  },
+                  child: const Text('LOG NOW'),
+                ),
+              ),
+            ],
+          )
+        : Row(
+            children: [
+              Icon(
+                isIn ? Icons.check_circle_rounded : Icons.warning_amber_rounded,
+                color: isIn ? Colors.green : Colors.orange,
+                size: 32,
+              ),
+              const SizedBox(width: GLSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isIn ? 'Shift Active' : 'Attendance Required',
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      isIn 
+                        ? 'Check-in confirmed at ${state.today?.checkInTime ?? "N/A"}'
+                        : 'Please log your attendance to start receiving requests.',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              if (!isIn)
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceDashboard()));
+                  },
+                  child: const Text('LOG NOW'),
+                ),
+            ],
+          ),
     );
   }
 
   Widget _buildProgressGrid(BuildContext context, int total, int completed) {
+    final isMobile = GLResponsive.isMobile(context);
+    
+    final pickupCard = _buildProgressCard(
+      context,
+      'Pickups',
+      '$completed/$total',
+      completed / (total > 0 ? total : 1),
+      Colors.blue,
+    );
+    
+    final collectionsCard = _buildProgressCard(
+      context,
+      'Collections',
+      '₹ 1,240', // Hardcoded for demo
+      0.7,
+      Colors.green,
+    );
+
+    if (isMobile) {
+      return Column(
+        children: [
+          pickupCard,
+          const SizedBox(height: GLSpacing.md),
+          collectionsCard,
+        ],
+      );
+    }
+
     return Row(
       children: [
-        Expanded(
-          child: _buildProgressCard(
-            context,
-            'Pickups',
-            '$completed/$total',
-            completed / (total > 0 ? total : 1),
-            Colors.blue,
-          ),
-        ),
+        Expanded(child: pickupCard),
         const SizedBox(width: GLSpacing.md),
-        Expanded(
-          child: _buildProgressCard(
-            context,
-            'Collections',
-            '₹ 1,240', // Hardcoded for demo
-            0.7,
-            Colors.green,
-          ),
-        ),
+        Expanded(child: collectionsCard),
       ],
     );
   }
@@ -212,6 +272,23 @@ class HksDashboardScreen extends StatelessWidget {
 
   Widget _buildQuickActions(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = GLResponsive.isMobile(context);
+
+    final actionItems = [
+      _buildActionItem(context, Icons.map_rounded, 'View Route', Colors.blue, onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const RouteMapScreen()));
+      }),
+      _buildActionItem(context, Icons.report_problem_rounded, 'Report Issue', Colors.orange, onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const HksIssueListScreen()));
+      }),
+      _buildActionItem(context, Icons.account_balance_wallet_rounded, 'Collections', Colors.purple, onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const FeeSummaryScreen()));
+      }),
+      _buildActionItem(context, Icons.history_rounded, 'History', Colors.teal, onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()));
+      }),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -220,26 +297,20 @@ class HksDashboardScreen extends StatelessWidget {
           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: GLSpacing.md),
-        SizedBox(
-          height: 100,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildActionItem(context, Icons.map_rounded, 'View Route', Colors.blue, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const RouteMapScreen()));
-              }),
-              _buildActionItem(context, Icons.report_problem_rounded, 'Report Issue', Colors.orange, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const HksIssueListScreen()));
-              }),
-              _buildActionItem(context, Icons.account_balance_wallet_rounded, 'Collections', Colors.purple, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const FeeSummaryScreen()));
-              }),
-              _buildActionItem(context, Icons.history_rounded, 'History', Colors.teal, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()));
-              }),
-            ],
+        if (isMobile)
+          SizedBox(
+            height: 100,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: actionItems,
+            ),
+          )
+        else
+          Wrap(
+            spacing: GLSpacing.xl,
+            runSpacing: GLSpacing.xl,
+            children: actionItems,
           ),
-        ),
       ],
     );
   }

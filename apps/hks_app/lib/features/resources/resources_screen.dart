@@ -40,19 +40,42 @@ class HksResourcesScreen extends StatelessWidget {
       },
     ];
 
+    final isMobile = GLResponsive.isMobile(context);
+    final isDesktop = GLResponsive.isDesktop(context);
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Resources'),
         elevation: 0,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(GLSpacing.lg),
-        itemCount: resources.length,
-        itemBuilder: (context, index) {
-          final res = resources[index];
-          return _buildResourceCard(context, res);
-        },
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: isMobile 
+            ? ListView.builder(
+                padding: const EdgeInsets.all(GLSpacing.lg),
+                itemCount: resources.length,
+                itemBuilder: (context, index) {
+                  final res = resources[index];
+                  return _buildResourceCard(context, res);
+                },
+              )
+            : GridView.builder(
+                padding: const EdgeInsets.all(GLSpacing.lg),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isDesktop ? 3 : 2,
+                  crossAxisSpacing: GLSpacing.lg,
+                  mainAxisSpacing: GLSpacing.lg,
+                  mainAxisExtent: 100,
+                ),
+                itemCount: resources.length,
+                itemBuilder: (context, index) {
+                  final res = resources[index];
+                  return _buildResourceCard(context, res);
+                },
+              ),
+        ),
       ),
     );
   }
@@ -68,7 +91,10 @@ class HksResourcesScreen extends StatelessWidget {
         contentPadding: const EdgeInsets.all(GLSpacing.md),
         leading: Container(
           padding: const EdgeInsets.all(GLSpacing.sm),
-          decoration: BoxDecoration(color: theme.colorScheme.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(GLRadius.md)),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(GLRadius.md),
+          ),
           child: Icon(iconData, color: theme.colorScheme.primary),
         ),
         title: Text(res['title']!, style: const TextStyle(fontWeight: FontWeight.bold)),

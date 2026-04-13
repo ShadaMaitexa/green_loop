@@ -50,19 +50,24 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatusCard(context, state),
-                const SizedBox(height: 24),
-                _buildTimeline(context, state),
-                const SizedBox(height: 32),
-                _buildActions(context, state),
-                const SizedBox(height: 24),
-                _buildHistoryTeaser(context),
-              ],
+          return Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildStatusCard(context, state),
+                    const SizedBox(height: 24),
+                    _buildTimeline(context, state),
+                    const SizedBox(height: 32),
+                    _buildActions(context, state),
+                    const SizedBox(height: 24),
+                    _buildHistoryTeaser(context),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -110,7 +115,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
         gradient: LinearGradient(colors: [gradientStart, gradientEnd], begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: gradientStart.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6)),
+          BoxShadow(color: gradientStart.withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6)),
         ],
       ),
       child: Row(
@@ -118,7 +123,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: Colors.white, size: 32),
@@ -130,7 +135,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
               children: [
                 Text(headline, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text(subline, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 13)),
+                Text(subline, style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13)),
               ],
             ),
           ),
@@ -190,7 +195,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: isDone ? color.withOpacity(0.1) : Colors.grey[100],
+            color: isDone ? color.withValues(alpha: 0.1) : Colors.grey[100],
             shape: BoxShape.circle,
             border: Border.all(color: isDone ? color : Colors.grey[300]!, width: 2),
           ),
