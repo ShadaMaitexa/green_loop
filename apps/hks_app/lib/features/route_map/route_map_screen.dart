@@ -220,8 +220,8 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                   polygons: [
                     Polygon(
                       points: route.wardBoundary!.map((e) => LatLng(e[0], e[1])).toList(),
-                      color: theme.colorScheme.primary.withOpacity(0.08),
-                      borderColor: theme.colorScheme.primary.withOpacity(0.3),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      borderColor: theme.colorScheme.primary.withValues(alpha: 0.3),
                       borderStrokeWidth: 2,
                       isFilled: true,
                     ),
@@ -400,7 +400,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 spreadRadius: 5,
               ),
@@ -596,7 +596,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircleAvatar(
-                      backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                      backgroundColor: pickup.wasteType.color.withValues(alpha: 0.1),
                       child: Text('${index + 1}', style: TextStyle(color: pickup.wasteType.color)),
                     ),
                   ],
@@ -609,7 +609,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                     const SizedBox(height: 4),
                     GLStatusBadge.custom(
                       status: pickup.wasteType.label,
-                      backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                      backgroundColor: pickup.wasteType.color.withValues(alpha: 0.1),
                       textColor: pickup.wasteType.color,
                     ),
                   ],

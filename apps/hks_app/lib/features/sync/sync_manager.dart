@@ -122,9 +122,13 @@ Future<SyncTaskResult> _runSyncProcess(SyncTaskConfig config) async {
       final results = syncRes.data['results'] as List;
       final status = results.first['status'];
       
-      if (status == 'success') successful.add(item.id);
-      else if (status == 'conflict') conflicts.add(item.id);
-      else failed.add(item.id);
+      if (status == 'success') {
+        successful.add(item.id);
+      } else if (status == 'conflict') {
+        conflicts.add(item.id);
+      } else {
+        failed.add(item.id);
+      }
 
     } catch (e) {
       failed.add(item.id);

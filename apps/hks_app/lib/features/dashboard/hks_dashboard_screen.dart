@@ -5,6 +5,11 @@ import 'package:ui_kit/ui_kit.dart';
 import '../route_map/route_map_state.dart';
 import '../attendance/attendance_state.dart';
 import '../sync/sync_status_badge.dart';
+import '../attendance/attendance_dashboard.dart';
+import '../attendance/attendance_history_screen.dart';
+import '../route_map/route_map_screen.dart';
+import '../issues/hks_issue_list_screen.dart';
+import '../fee_collection/fee_summary_screen.dart';
 
 class HksDashboardScreen extends StatelessWidget {
   const HksDashboardScreen({super.key});
@@ -96,10 +101,10 @@ class HksDashboardScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(GLSpacing.lg),
       decoration: BoxDecoration(
-        color: isIn ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+        color: isIn ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(GLRadius.lg),
         border: Border.all(
-          color: isIn ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+          color: isIn ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -129,13 +134,14 @@ class HksDashboardScreen extends StatelessWidget {
           ),
           if (!isIn)
             TextButton(
-              onPressed: () {
-                // Navigate to attendance tab
-              },
-              child: const Text('LOG NOW'),
-            ),
-        ],
-      ),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceDashboard()));
+                },
+                child: const Text('LOG NOW'),
+              ),
+          ],
+        ),
+    
     );
   }
 
@@ -180,7 +186,7 @@ class HksDashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(GLRadius.lg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -195,7 +201,7 @@ class HksDashboardScreen extends StatelessWidget {
           const SizedBox(height: GLSpacing.md),
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             color: color,
             borderRadius: BorderRadius.circular(2),
           ),
@@ -219,10 +225,18 @@ class HksDashboardScreen extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _buildActionItem(context, Icons.map_rounded, 'View Route', Colors.blue),
-              _buildActionItem(context, Icons.report_problem_rounded, 'Report Issue', Colors.orange),
-              _buildActionItem(context, Icons.help_outline_rounded, 'Resources', Colors.purple),
-              _buildActionItem(context, Icons.history_rounded, 'History', Colors.teal),
+              _buildActionItem(context, Icons.map_rounded, 'View Route', Colors.blue, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const RouteMapScreen()));
+              }),
+              _buildActionItem(context, Icons.report_problem_rounded, 'Report Issue', Colors.orange, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HksIssueListScreen()));
+              }),
+              _buildActionItem(context, Icons.account_balance_wallet_rounded, 'Collections', Colors.purple, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const FeeSummaryScreen()));
+              }),
+              _buildActionItem(context, Icons.history_rounded, 'History', Colors.teal, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()));
+              }),
             ],
           ),
         ),
@@ -230,27 +244,31 @@ class HksDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionItem(BuildContext context, IconData icon, String label, Color color) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.only(right: GLSpacing.md),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
+  Widget _buildActionItem(BuildContext context, IconData icon, String label, Color color, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 100,
+        margin: const EdgeInsets.only(right: GLSpacing.md),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color),
             ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label, 
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              label, 
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
       ),
     );
   }
