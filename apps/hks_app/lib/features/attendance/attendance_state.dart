@@ -75,6 +75,13 @@ class AttendanceState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleAllPpe(bool checked) {
+    for (var item in _ppeItems) {
+      item.isChecked = checked;
+    }
+    notifyListeners();
+  }
+
   void resetChecklist() {
     _ppeItems = PpeItem.defaultChecklist();
     notifyListeners();

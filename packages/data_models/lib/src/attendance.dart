@@ -32,7 +32,10 @@ class AttendanceRecord {
       date: properties['date']?.toString() ?? '',
       checkInTime: properties['check_in']?.toString() ?? properties['check_in_time']?.toString(),
       checkOutTime: properties['check_out']?.toString() ?? properties['check_out_time']?.toString(),
-      ppeConfirmed: properties['has_gloves'] == true && properties['has_mask'] == true, // Derived from detail PPE flags
+      ppeConfirmed: properties['has_gloves'] == true && 
+                    properties['has_mask'] == true && 
+                    properties['has_vest'] == true && 
+                    properties['has_boots'] == true, 
       selfieUrl: properties['ppe_photo_url']?.toString() ?? properties['ppe_selfie']?.toString(),
       status: properties['status']?.toString() ?? 'absent',
     );

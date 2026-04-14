@@ -29,7 +29,7 @@ class HksDashboardScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 1000), // Optimal width for readability
+          constraints: const BoxConstraints(maxWidth: 1000), 
           child: CustomScrollView(
             slivers: [
               SliverAppBar.large(
@@ -45,7 +45,7 @@ class HksDashboardScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
               ),
-              
+
               SliverPadding(
                 padding: EdgeInsets.symmetric(
                   horizontal: GLResponsive.isMobile(context) ? GLSpacing.lg : GLSpacing.xl,
@@ -56,9 +56,10 @@ class HksDashboardScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                        _buildWelcomeHeader(context, user?.name ?? 'Worker'),
-                       const SizedBox(height: GLSpacing.xl),
-                       _buildAttendanceSummary(context, attendanceState),
-                       const SizedBox(height: GLSpacing.xl),
+                        _buildAttendanceSummary(context, attendanceState),
+                        const SizedBox(height: GLSpacing.lg),
+                        _buildAssignedWork(context, routeState),
+                        const SizedBox(height: GLSpacing.xl),
                        Text(
                          'Today\'s Progress',
                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -120,7 +121,7 @@ class HksDashboardScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.warning_amber_rounded,
                     color: Colors.orange,
                     size: 32,
@@ -192,6 +193,160 @@ class HksDashboardScreen extends StatelessWidget {
                 ),
             ],
           ),
+    );
+  }
+
+  Widget _buildAssignedWork(BuildContext context, RouteMapState state) {
+    if (state.loading) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Checking for assignments...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final route = state.route;
+    if (route == null) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.grey.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(GLRadius.lg),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.assignment_late_rounded, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'No work assigned for today yet.',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const Text(
+              'Contact your supervisor if this is unexpected.',
+              style: TextStyle(color: Colors.grey, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            GLButton(
+              text: 'REFRESH',
+              variant: GLButtonVariant.outline,
+              onPressed: () => state.fetchRoute(),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(GLSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(GLRadius.lg),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.assignment_turned_in_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                'Assigned Work',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              GLStatusBadge.custom(
+                status: 'TODAY',
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                textColor: Colors.white,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Target Ward Area',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+                    ),
+                    const Text(
+                      'Ward 12 (Central)', // Fallback since ward name is not in model yet
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 30,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Pickups',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+                    ),
+                    Text(
+                      '${route.pickups.length} points',
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // Navigate to Route page
+                // Assuming HksHome parent handles tab change via provider or similar
+                // But specifically for now, we push the screen
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const RouteMapScreen()));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: theme.colorScheme.primary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(GLRadius.md)),
+              ),
+              child: const Text('VIEW ROUTE & START', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

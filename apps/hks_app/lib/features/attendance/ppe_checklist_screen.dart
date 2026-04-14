@@ -49,10 +49,10 @@ class PpeChecklistScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Confirm all PPE is properly worn before starting your shift.',
-                              style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13),
-                            ),
+                              Text(
+                                'Confirm all PPE is properly worn before starting your shift.',
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13),
+                              ),
                           ],
                         ),
                       ),
@@ -78,8 +78,22 @@ class PpeChecklistScreen extends StatelessWidget {
                 ],
 
                 // Checklist
-                const Text('Confirm each item is worn:', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Confirm each item is worn:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextButton.icon(
+                      onPressed: () => state.toggleAllPpe(!state.allPpeChecked),
+                      icon: Icon(state.allPpeChecked ? Icons.remove_done_rounded : Icons.done_all_rounded, size: 18),
+                      label: Text(state.allPpeChecked ? 'Clear All' : 'Select All'),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 ...state.ppeItems.map((item) => _PpeCheckTile(
                   item: item,
                   onToggle: () => state.togglePpe(item.id),
@@ -201,7 +215,7 @@ class _PpeCheckTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: item.isChecked
-              ? Colors.green.withOpacity(0.08)
+              ? Colors.green.withValues(alpha: 0.08)
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
