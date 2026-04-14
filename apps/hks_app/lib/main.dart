@@ -77,8 +77,19 @@ class AuthWrapper extends StatelessWidget {
       case AuthStatus.checking:
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       case AuthStatus.authenticated:
-        if (user != null && user.role != 'hks') {
-          return const InvalidRolePlaceholder();
+        final role = user?.role.toLowerCase() ?? '';
+        final isWorker = role.contains('hks') || 
+                         role.contains('worker') || 
+                         role.contains('staff') ||
+                         role.contains('collector') ||
+                         role.contains('agent') ||
+                         role.contains('official') ||
+                         role.contains('supervisor') ||
+                         role == 'admin' ||
+                         (role.isNotEmpty && role != 'resident' && role != 'recycler');
+
+        if (user != null && !isWorker) {
+          return InvalidRolePlaceholder(role: user.role);
         }
         return const HksHome();
       case AuthStatus.loading:
@@ -91,24 +102,68 @@ class AuthWrapper extends StatelessWidget {
 }
 
 class InvalidRolePlaceholder extends StatelessWidget {
-  const InvalidRolePlaceholder({super.key});
+  final String role;
+  const InvalidRolePlaceholder({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_rounded, size: 64, color: Colors.orange),
-            const SizedBox(height: GLSpacing.md),
-            const Text('Access Denied. HKS Worker account required.'),
-            const SizedBox(height: GLSpacing.lg),
-            GLButton(
-              text: 'Logout',
-              onPressed: () => context.read<AuthState>().logout(),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(GLSpacing.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.lock_person_rounded, size: 64, color: Colors.orange),
+              ),
+              const SizedBox(height: GLSpacing.xl),
+              Text(
+                'Access Denied',
+                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: GLSpacing.sm),
+              const Text(
+                'This account does not have HKS Worker permissions.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: GLSpacing.lg),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(GLRadius.md),
+                ),
+                child: Text(
+                  'Detected Role: ${role.toUpperCase()}',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: Colors.grey[700],
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+              const SizedBox(height: GLSpacing.xxl),
+              SizedBox(
+                width: 200,
+                child: GLButton(
+                  text: 'LOGOUT',
+                  onPressed: () => context.read<AuthState>().logout(),
+                ),
+              ),
+              const SizedBox(height: GLSpacing.md),
+              TextButton(
+                onPressed: () => context.read<AuthState>().initialize(),
+                child: const Text('RETRY CHECK'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -130,6 +185,16 @@ class _HksHomeState extends State<HksHome> {
   void initState() {
     super.initState();
     _requestLocationPermission();
+    _fetchInitialData();
+  }
+
+  void _fetchInitialData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AttendanceState>().fetchTodayAttendance();
+        context.read<RouteMapState>().fetchRoute();
+      }
+    });
   }
 
   Future<void> _requestLocationPermission() async {

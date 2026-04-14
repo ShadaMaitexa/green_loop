@@ -61,8 +61,8 @@ class GLButton extends StatelessWidget {
     }
 
     if (_isDisabled) {
-      bg = (backgroundColor ?? (isDark ? Colors.white12 : Colors.black12)).withOpacity(0.5);
-      fg = (textColor ?? (isDark ? Colors.white38 : Colors.black38)).withOpacity(0.5);
+      bg = (backgroundColor ?? (isDark ? Colors.white12 : Colors.black12)).withValues(alpha: 0.5);
+      fg = (textColor ?? (isDark ? Colors.white38 : Colors.black38)).withValues(alpha: 0.5);
       if (variant == GLButtonVariant.outline) {
         bg = Colors.transparent;
         border = BorderSide(color: fg);

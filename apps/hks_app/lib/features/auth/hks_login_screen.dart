@@ -57,7 +57,7 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
                 end: Alignment.bottomRight,
                 colors: [
                   colorScheme.primary,
-                  colorScheme.primary.withOpacity(0.8),
+                  colorScheme.primary.withValues(alpha: 0.8),
                   colorScheme.surface,
                 ],
               ),
@@ -70,7 +70,7 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
             right: -100,
             child: CircleAvatar(
               radius: 150,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
             ),
           ),
           
@@ -94,7 +94,7 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   spreadRadius: 5,
                                 ),
@@ -119,7 +119,7 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
                         Text(
                           'Harit Karma Sena Worker Portal',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                         const SizedBox(height: GLSpacing.xxl),
@@ -128,11 +128,11 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(GLSpacing.xl),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.95),
+                            color: Colors.white.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(32),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -193,7 +193,7 @@ class _HksLoginScreenState extends State<HksLoginScreen> {
                         Text(
                           'Need help? Contact your administrator',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                       ],

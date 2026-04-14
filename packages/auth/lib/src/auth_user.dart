@@ -34,7 +34,9 @@ class AuthUser {
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
-    final role = json['role']?.toString() ?? 'resident';
+    final role = json['role']?.toString() ?? 
+                 json['user']?['role']?.toString() ?? 
+                 'resident';
     
     // Extract profile details using a fallback hierarchy
     // Priority: 

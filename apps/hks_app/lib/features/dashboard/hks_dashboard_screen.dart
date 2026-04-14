@@ -38,12 +38,14 @@ class HksDashboardScreen extends StatelessWidget {
                 actions: [
                   const SyncStatusBadge(),
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {},
+                    icon: const Icon(Icons.logout_rounded),
+                    onPressed: () => context.read<AuthState>().logout(),
+                    tooltip: 'Logout',
                   ),
                   const SizedBox(width: 8),
                 ],
               ),
+              
               SliverPadding(
                 padding: EdgeInsets.symmetric(
                   horizontal: GLResponsive.isMobile(context) ? GLSpacing.lg : GLSpacing.xl,
