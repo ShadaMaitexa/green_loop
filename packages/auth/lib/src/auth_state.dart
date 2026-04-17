@@ -79,6 +79,21 @@ class AuthState extends ChangeNotifier {
     }
   }
 
+  /// Perform username & password login (Recycler).
+  Future<bool> loginRecycler(String username, String password) async {
+    _setStatus(AuthStatus.loading);
+    try {
+      final user = await _repository.loginRecycler(username, password);
+      _user = user;
+      _setStatus(AuthStatus.authenticated);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _setStatus(AuthStatus.error);
+      return false;
+    }
+  }
+
   /// Request OTP (User).
   Future<bool> requestOtp(String email) async {
     _setStatus(AuthStatus.loading);

@@ -11,6 +11,7 @@ class AuthRepository {
   static const String _otpVerifyPath = '/api/v1/auth/otp/verify/';
   static const String _adminLoginPath = '/api/v1/auth/admin-login/';
   static const String _workerLoginPath = '/api/v1/auth/worker-login/';
+  static const String _recyclerLoginPath = '/api/v1/auth/recycler-login/';
   static const String _logoutPath = '/api/v1/auth/logout/';
   static const String _profilePath = '/api/v1/users/me/';
   static const String _wardsPath = '/api/v1/wards/';
@@ -62,6 +63,43 @@ class AuthRepository {
     try {
       final response = await _apiClient.postPublic(
         _workerLoginPath,
+        data: {
+          'username': username,
+          'password': password,
+        },
+      );
+      
+      final data = response.data;
+      if (data == null || data['access'] == null || data['refresh'] == null) {
+        throw const AuthException('Invalid server response format.');
+      }
+
+      await _apiClient.tokenStorage.saveTokens(
+        accessToken: data['access'] as String,
+        refreshToken: data['refresh'] as String,
+      );
+
+      return AuthUser.fromJson({
+        ...(data['user'] as Map? ?? {}),
+        ...data,
+      });
+    } on UnauthorizedException catch (_) {
+      throw const InvalidCredentialsException();
+    } on ApiException catch (e) {
+      if (e.message.toLowerCase().contains('disabled')) {
+        throw const AccountDisabledException();
+      }
+      throw AuthException(e.message);
+    } catch (e) {
+      throw AuthException(e.toString());
+    }
+  }
+
+  /// Authenticate recycler with username/password.
+  Future<AuthUser> loginRecycler(String username, String password) async {
+    try {
+      final response = await _apiClient.postPublic(
+        _recyclerLoginPath,
         data: {
           'username': username,
           'password': password,

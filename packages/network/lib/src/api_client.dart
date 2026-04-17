@@ -336,10 +336,38 @@ class ApiClient {
     }
   }
 
-  /// Extracts the `detail` field that DRF commonly returns in error bodies.
+  /// Extracts a human-readable message from DRF error bodies.
+  ///
+  /// DRF can return several shapes:
+  ///   - `{"detail": "..."}` — generic error
+  ///   - `{"non_field_errors": ["..."]}` — non-field validation error
+  ///   - `{"field_name": ["error msg"]}` — per-field validation errors
+  ///   - A plain string (rare)
   String? _extractDetail(dynamic data) {
-    if (data is Map) return data['detail']?.toString();
     if (data is String && data.isNotEmpty) return data;
+    if (data is! Map) return null;
+
+    // 1. Plain detail field (most common for 401/403/404)
+    if (data['detail'] != null) return data['detail'].toString();
+
+    // 2. Non-field errors
+    final nonField = data['non_field_errors'];
+    if (nonField is List && nonField.isNotEmpty) {
+      return nonField.first.toString();
+    }
+
+    // 3. Field-level validation errors — collect first message from each field
+    final messages = <String>[];
+    for (final entry in data.entries) {
+      final val = entry.value;
+      if (val is List && val.isNotEmpty) {
+        messages.add('${entry.key}: ${val.first}');
+      } else if (val is String) {
+        messages.add('${entry.key}: $val');
+      }
+    }
+    if (messages.isNotEmpty) return messages.join(' | ');
+
     return null;
   }
 

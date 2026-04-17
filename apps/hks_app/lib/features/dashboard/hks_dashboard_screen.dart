@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auth/auth.dart';
 import 'package:ui_kit/ui_kit.dart';
+import 'package:data_models/data_models.dart';
 import '../route_map/route_map_state.dart';
 import '../attendance/attendance_state.dart';
 import '../sync/sync_status_badge.dart';
@@ -65,10 +66,10 @@ class HksDashboardScreen extends StatelessWidget {
                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                        ),
                        const SizedBox(height: GLSpacing.md),
-                       _buildProgressGrid(context, totalPickups, completedPickups),
-                       const SizedBox(height: GLSpacing.xl),
-                       _buildQuickActions(context),
-                       const SizedBox(height: GLSpacing.xxl),
+                        _buildProgressGrid(context, totalPickups, completedPickups, routeState.feeSummary),
+                        const SizedBox(height: GLSpacing.xl),
+                        _buildQuickActions(context),
+                        const SizedBox(height: GLSpacing.xxl),
                     ],
                   ),
                 ),
@@ -285,7 +286,7 @@ class HksDashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 20),          
           Row(
             children: [
               Expanded(
@@ -350,22 +351,25 @@ class HksDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressGrid(BuildContext context, int total, int completed) {
+  Widget _buildProgressGrid(BuildContext context, int total, int completed, DailyFeeSummary? summary) {
     final isMobile = GLResponsive.isMobile(context);
     
     final pickupCard = _buildProgressCard(
       context,
       'Pickups',
       '$completed/$total',
-      completed / (total > 0 ? total : 1),
+      total > 0 ? completed / total : 0,
       Colors.blue,
     );
+    
+    final collectionAmount = summary?.totalCollected ?? 0;
+    final households = summary?.numberHouseholds ?? 0;
     
     final collectionsCard = _buildProgressCard(
       context,
       'Collections',
-      '₹ 1,240', // Hardcoded for demo
-      0.7,
+      '₹ ${collectionAmount.toStringAsFixed(0)}',
+      households > 0 ? (collectionAmount / (households * 100)).clamp(0.0, 1.0) : 0.0, // Assuming 100 per HH target
       Colors.green,
     );
 

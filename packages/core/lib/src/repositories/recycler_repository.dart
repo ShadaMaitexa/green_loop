@@ -108,11 +108,30 @@ class RecyclerRepository {
     }
   }
 
+  /// Get details for a specific certificate.
+  Future<RecyclingCertificate> getCertificate(String id) async {
+    try {
+      final response = await _apiClient.get('$_certificatesPath$id/');
+      return RecyclingCertificate.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   /// Create a new recycling certificate.
   Future<RecyclingCertificate> createCertificate(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.post(_certificatesPath, data: data);
       return RecyclingCertificate.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Delete a recycling certificate.
+  Future<void> deleteCertificate(String id) async {
+    try {
+      await _apiClient.delete('$_certificatesPath$id/');
     } on ApiException catch (e) {
       throw Exception(e.message);
     }
@@ -151,11 +170,30 @@ class RecyclerRepository {
     }
   }
 
+  /// Get details for a specific purchase.
+  Future<RecyclerPurchase> getPurchase(String id) async {
+    try {
+      final response = await _apiClient.get('$_purchasesPath$id/');
+      return RecyclerPurchase.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   /// Create a new recycler purchase (Recording a transaction).
   Future<RecyclerPurchase> createPurchase(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.post(_purchasesPath, data: data);
       return RecyclerPurchase.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Delete a purchase record.
+  Future<void> deletePurchase(String id) async {
+    try {
+      await _apiClient.delete('$_purchasesPath$id/');
     } on ApiException catch (e) {
       throw Exception(e.message);
     }
@@ -174,11 +212,30 @@ class RecyclerRepository {
     }
   }
 
+  /// Get details for a specific material type.
+  Future<MaterialType> getMaterial(String id) async {
+    try {
+      final response = await _apiClient.get('$_materialsPath$id/');
+      return MaterialType.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   /// Add a new material type.
   Future<MaterialType> createMaterial(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.post(_materialsPath, data: data);
       return MaterialType.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Delete a material type.
+  Future<void> deleteMaterial(String id) async {
+    try {
+      await _apiClient.delete('$_materialsPath$id/');
     } on ApiException catch (e) {
       throw Exception(e.message);
     }

@@ -98,31 +98,133 @@ class InvalidRolePlaceholder extends StatelessWidget {
   }
 }
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final success = await context.read<AuthState>().loginRecycler(
+          _usernameController.text.trim(),
+          _passwordController.text,
+        );
+
+    if (!success && mounted) {
+      final error = context.read<AuthState>().errorMessage ?? 'Login failed';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isLoading = context.watch<AuthState>().status == AuthStatus.loading;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Scaffold(
-      appBar: AppBar(title: const Text('Recycler Login')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(GLSpacing.xl),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.recycling_rounded, size: 64, color: Colors.green),
-              const SizedBox(height: GLSpacing.lg),
-              const Text('Welcome to GreenLoop Recycler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: GLSpacing.xxl),
-              GLButton(
-                text: 'Login with OTP',
-                onPressed: () {
-                  // Navigation simulation
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login logic shared with auth module.')));
-                },
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary,
+              colorScheme.primary.withOpacity(0.8),
+              colorScheme.surface,
             ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(GLSpacing.xl),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                padding: const EdgeInsets.all(GLSpacing.xl),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.recycling_rounded, size: 64, color: Colors.green),
+                      const SizedBox(height: GLSpacing.lg),
+                      Text(
+                        'Recycler Portal',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: GLSpacing.xxl),
+                      GLTextField(
+                        controller: _usernameController,
+                        label: 'Username',
+                        prefixIcon: const Icon(Icons.person_outline_rounded),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        enabled: !isLoading,
+                      ),
+                      const SizedBox(height: GLSpacing.md),
+                      GLTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        obscureText: _obscurePassword,
+                        enabled: !isLoading,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                            size: 20,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                      ),
+                      const SizedBox(height: GLSpacing.xl),
+                      GLButton(
+                        text: 'SIGN IN',
+                        isLoading: isLoading,
+                        onPressed: _handleLogin,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

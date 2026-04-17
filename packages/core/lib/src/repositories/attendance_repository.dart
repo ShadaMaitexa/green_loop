@@ -31,24 +31,19 @@ class AttendanceRepository {
   }) async {
     try {
       final response = await _apiClient.post(_attendancePath, data: {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'Point',
-          'coordinates': [longitude, latitude],
-        },
-        'properties': {
-          'ppe_photo_url': selfieUrl,
-          'has_gloves': ppeConfirmed,
-          'has_mask': ppeConfirmed,
-          'has_vest': ppeConfirmed,
-          'has_boots': ppeConfirmed,
-          'status': 'PRESENT',
-        },
+        'latitude': latitude,
+        'longitude': longitude,
+        'ppe_photo_url': selfieUrl,
+        'has_gloves': ppeConfirmed,
+        'has_mask': ppeConfirmed,
+        'has_vest': ppeConfirmed,
+        'has_boots': ppeConfirmed,
+        'status': 'PRESENT',
       });
       return AttendanceRecord.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
-      if (e.statusCode == 400) {
-        throw Exception(e.message); // e.g. "Already checked in" or "Outside ward"
+      if (e.statusCode == 409) {
+        throw Exception('You have already checked in today.');
       }
       if (e.statusCode == 403) {
         throw Exception('You are outside your assigned ward boundary.');
@@ -61,10 +56,8 @@ class AttendanceRepository {
   Future<AttendanceRecord> checkOut() async {
     try {
       final response = await _apiClient.patch(_attendancePath, data: {
-        'properties': {
-          'status': 'LOGGED_OUT',
-          'checkout_time': DateTime.now().toIso8601String(),
-        },
+        'status': 'LOGGED_OUT',
+        'checkout_time': DateTime.now().toIso8601String(),
       });
       return AttendanceRecord.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {

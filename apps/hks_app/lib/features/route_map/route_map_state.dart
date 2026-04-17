@@ -21,6 +21,9 @@ class RouteMapState extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  DailyFeeSummary? _feeSummary;
+  DailyFeeSummary? get feeSummary => _feeSummary;
+
   StreamSubscription<Position>? _positionSubscription;
 
   RouteMapState({required HksRouteRepository repository})
@@ -33,7 +36,12 @@ class RouteMapState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _route = await _repository.getTodayRoute();
+      final results = await Future.wait([
+        _repository.getTodayRoute(),
+        _repository.getFeeSummary(),
+      ]);
+      _route = results[0] as HksRoute;
+      _feeSummary = results[1] as DailyFeeSummary;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     } finally {
