@@ -179,13 +179,20 @@ class HksHome extends StatefulWidget {
 }
 
 class _HksHomeState extends State<HksHome> {
-  int _tab = 0;
+  late final ValueNotifier<int> _tabNotifier;
 
   @override
   void initState() {
     super.initState();
+    _tabNotifier = ValueNotifier<int>(0);
     _requestLocationPermission();
     _fetchInitialData();
+  }
+
+  @override
+  void dispose() {
+    _tabNotifier.dispose();
+    super.dispose();
   }
 
   void _fetchInitialData() {
@@ -240,42 +247,47 @@ class _HksHomeState extends State<HksHome> {
   Widget build(BuildContext context) {
     final bool isWide = !GLResponsive.isMobile(context);
 
-    return Scaffold(
-      body: Row(
-        children: [
-          if (isWide)
-            NavigationRail(
-              selectedIndex: _tab,
-              onDestinationSelected: (i) => setState(() => _tab = i),
-              labelType: NavigationRailLabelType.all,
-              destinations: _tabs
-                  .map((t) => NavigationRailDestination(
-                        icon: t.icon,
-                        selectedIcon: t.selectedIcon,
-                        label: Text(t.label),
-                      ))
-                  .toList(),
-            ),
-          Expanded(
-            child: IndexedStack(
-              index: _tab,
-              children: const [
-                HksDashboardScreen(),
-                RouteMapScreen(),
-                AttendanceDashboard(),
-                HksResourcesScreen(),
-              ],
-            ),
+    return ValueListenableBuilder<int>(
+      valueListenable: _tabNotifier,
+      builder: (context, tabIndex, _) {
+        return Scaffold(
+          body: Row(
+            children: [
+              if (isWide)
+                NavigationRail(
+                  selectedIndex: tabIndex,
+                  onDestinationSelected: (i) => _tabNotifier.value = i,
+                  labelType: NavigationRailLabelType.all,
+                  destinations: _tabs
+                      .map((t) => NavigationRailDestination(
+                            icon: t.icon,
+                            selectedIcon: t.selectedIcon,
+                            label: Text(t.label),
+                          ))
+                      .toList(),
+                ),
+              Expanded(
+                child: IndexedStack(
+                  index: tabIndex,
+                  children: [
+                    HksDashboardScreen(onTabSwitch: (index) => _tabNotifier.value = index),
+                    const RouteMapScreen(),
+                    const AttendanceDashboard(),
+                    const HksResourcesScreen(),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: isWide
-          ? null
-          : NavigationBar(
-              selectedIndex: _tab,
-              destinations: _tabs,
-              onDestinationSelected: (i) => setState(() => _tab = i),
-            ),
+          bottomNavigationBar: isWide
+              ? null
+              : NavigationBar(
+                  selectedIndex: tabIndex,
+                  destinations: _tabs,
+                  onDestinationSelected: (i) => _tabNotifier.value = i,
+                ),
+        );
+      },
     );
   }
 }

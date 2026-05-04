@@ -190,7 +190,7 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget _buildProgressIndicator() {
     return LinearProgressIndicator(
       value: _currentStep / 5.0,
-      backgroundColor: Colors.grey.withOpacity(0.1),
+      backgroundColor: Colors.grey.withValues(alpha: 0.1),
       valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
     );
   }
@@ -219,10 +219,10 @@ class _BookingScreenState extends State<BookingScreen> {
           onTap: () => setState(() => _selectedWasteType = type),
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected ? type.color.withOpacity(0.1) : Colors.transparent,
+              color: isSelected ? type.color.withValues(alpha: 0.1) : Colors.transparent,
               borderRadius: BorderRadius.circular(GLRadius.md),
               border: Border.all(
-                color: isSelected ? type.color : Colors.grey.withOpacity(0.3),
+                color: isSelected ? type.color : Colors.grey.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
             ),

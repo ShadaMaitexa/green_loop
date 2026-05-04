@@ -101,7 +101,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
             colors: [
-              colorScheme.primaryContainer.withOpacity(0.3),
+              colorScheme.primaryContainer.withValues(alpha: 0.3),
               colorScheme.surface,
             ],
           ),

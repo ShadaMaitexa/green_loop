@@ -114,7 +114,7 @@ class _ComplaintHistoryScreenState extends State<ComplaintHistoryScreen> {
                       });
                     },
                     leading: CircleAvatar(
-                      backgroundColor: complaint.status.color.withOpacity(0.1),
+                      backgroundColor: complaint.status.color.withValues(alpha: 0.1),
                       child: Icon(complaint.status.icon, color: complaint.status.color),
                     ),
                     title: Text(complaint.type, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -129,7 +129,7 @@ class _ComplaintHistoryScreenState extends State<ComplaintHistoryScreen> {
                         complaint.status.label.toUpperCase(),
                         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                       ),
-                      backgroundColor: complaint.status.color.withOpacity(0.1),
+                      backgroundColor: complaint.status.color.withValues(alpha: 0.1),
                       side: BorderSide(color: complaint.status.color),
                     ),
                   ),

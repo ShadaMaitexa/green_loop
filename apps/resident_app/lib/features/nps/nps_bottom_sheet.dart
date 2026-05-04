@@ -105,13 +105,17 @@ class _NpsBottomSheetState extends State<NpsBottomSheet> {
                 text: 'Submit Feedback',
                 isLoading: state.isSubmitting,
                 onPressed: () async {
-                  final success = await context.read<NpsState>().submitNps(
+                  final messenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
+                  final npsState = context.read<NpsState>();
+                  
+                  final success = await npsState.submitNps(
                         _selectedRating!,
                         _commentController.text.trim(),
                       );
                   if (success && mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    navigator.pop();
+                    messenger.showSnackBar(
                       const SnackBar(content: Text('Thank you for your feedback!')),
                     );
                   }

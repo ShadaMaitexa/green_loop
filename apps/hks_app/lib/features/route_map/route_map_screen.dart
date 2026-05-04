@@ -223,7 +223,6 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                       color: theme.colorScheme.primary.withValues(alpha: 0.08),
                       borderColor: theme.colorScheme.primary.withValues(alpha: 0.3),
                       borderStrokeWidth: 2,
-                      isFilled: true,
                     ),
                   ],
                 ),

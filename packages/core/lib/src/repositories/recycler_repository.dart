@@ -128,6 +128,26 @@ class RecyclerRepository {
     }
   }
 
+  /// Fully update a recycling certificate.
+  Future<RecyclingCertificate> updateCertificate(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put('$_certificatesPath$id/', data: data);
+      return RecyclingCertificate.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Partially update a recycling certificate.
+  Future<RecyclingCertificate> patchCertificate(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_certificatesPath$id/', data: data);
+      return RecyclingCertificate.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   /// Delete a recycling certificate.
   Future<void> deleteCertificate(String id) async {
     try {
@@ -190,6 +210,26 @@ class RecyclerRepository {
     }
   }
 
+  /// Fully update a recycler purchase.
+  Future<RecyclerPurchase> updatePurchase(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put('$_purchasesPath$id/', data: data);
+      return RecyclerPurchase.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Partially update a recycler purchase.
+  Future<RecyclerPurchase> patchPurchase(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_purchasesPath$id/', data: data);
+      return RecyclerPurchase.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   /// Delete a purchase record.
   Future<void> deletePurchase(String id) async {
     try {
@@ -226,6 +266,26 @@ class RecyclerRepository {
   Future<MaterialType> createMaterial(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.post(_materialsPath, data: data);
+      return MaterialType.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Fully update a material type.
+  Future<MaterialType> putMaterial(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put('$_materialsPath$id/', data: data);
+      return MaterialType.fromJson(response.data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  /// Partially update a material type.
+  Future<MaterialType> patchMaterial(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.patch('$_materialsPath$id/', data: data);
       return MaterialType.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
       throw Exception(e.message);

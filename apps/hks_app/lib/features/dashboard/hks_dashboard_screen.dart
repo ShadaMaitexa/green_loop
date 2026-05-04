@@ -6,14 +6,12 @@ import 'package:data_models/data_models.dart';
 import '../route_map/route_map_state.dart';
 import '../attendance/attendance_state.dart';
 import '../sync/sync_status_badge.dart';
-import '../attendance/attendance_dashboard.dart';
-import '../attendance/attendance_history_screen.dart';
-import '../route_map/route_map_screen.dart';
 import '../issues/hks_issue_list_screen.dart';
 import '../fee_collection/fee_summary_screen.dart';
 
 class HksDashboardScreen extends StatelessWidget {
-  const HksDashboardScreen({super.key});
+  final Function(int)? onTabSwitch;
+  const HksDashboardScreen({super.key, this.onTabSwitch});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +20,6 @@ class HksDashboardScreen extends StatelessWidget {
     final attendanceState = context.watch<AttendanceState>();
     final theme = Theme.of(context);
     final user = authState.user;
-
     final route = routeState.route;
     final totalPickups = route?.pickups.length ?? 0;
     final completedPickups = route?.pickups.where((p) => p.isCompleted).length ?? 0;
@@ -57,6 +54,7 @@ class HksDashboardScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                        _buildWelcomeHeader(context, user?.name ?? 'Worker'),
+                       const SizedBox(height: GLSpacing.lg),
                         _buildAttendanceSummary(context, attendanceState),
                         const SizedBox(height: GLSpacing.lg),
                         _buildAssignedWork(context, routeState),
@@ -152,9 +150,7 @@ class HksDashboardScreen extends StatelessWidget {
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.orange.withValues(alpha: 0.1),
                   ),
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceDashboard()));
-                  },
+                  onPressed: () => onTabSwitch?.call(2), // Attendance tab
                   child: const Text('LOG NOW'),
                 ),
               ),
@@ -187,9 +183,7 @@ class HksDashboardScreen extends StatelessWidget {
               ),
               if (!isIn)
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceDashboard()));
-                  },
+                  onPressed: () => onTabSwitch?.call(2), // Attendance tab
                   child: const Text('LOG NOW'),
                 ),
             ],
@@ -199,14 +193,14 @@ class HksDashboardScreen extends StatelessWidget {
 
   Widget _buildAssignedWork(BuildContext context, RouteMapState state) {
     if (state.loading) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Checking for assignments...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text('Checking for assignments...'),
             ],
           ),
         ),
@@ -224,13 +218,13 @@ class HksDashboardScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            const Icon(Icons.assignment_late_rounded, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
+             Icon(Icons.assignment_late_rounded, size: 48, color: Colors.grey),
+             SizedBox(height: 16),
+             Text(
               'No work assigned for today yet.',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const Text(
+            Text(
               'Contact your supervisor if this is unexpected.',
               style: TextStyle(color: Colors.grey, fontSize: 13),
               textAlign: TextAlign.center,
@@ -331,12 +325,7 @@ class HksDashboardScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                // Navigate to Route page
-                // Assuming HksHome parent handles tab change via provider or similar
-                // But specifically for now, we push the screen
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const RouteMapScreen()));
-              },
+              onPressed: () => onTabSwitch?.call(1), // Route tab
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: theme.colorScheme.primary,
@@ -437,7 +426,7 @@ class HksDashboardScreen extends StatelessWidget {
 
     final actionItems = [
       _buildActionItem(context, Icons.map_rounded, 'View Route', Colors.blue, onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const RouteMapScreen()));
+        onTabSwitch?.call(1);
       }),
       _buildActionItem(context, Icons.report_problem_rounded, 'Report Issue', Colors.orange, onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const HksIssueListScreen()));
@@ -445,8 +434,8 @@ class HksDashboardScreen extends StatelessWidget {
       _buildActionItem(context, Icons.account_balance_wallet_rounded, 'Collections', Colors.purple, onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const FeeSummaryScreen()));
       }),
-      _buildActionItem(context, Icons.history_rounded, 'History', Colors.teal, onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()));
+      _buildActionItem(context, Icons.menu_book_rounded, 'Resources', Colors.teal, onTap: () {
+        onTabSwitch?.call(3);
       }),
     ];
 

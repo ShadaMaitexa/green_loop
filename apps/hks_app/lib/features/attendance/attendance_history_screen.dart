@@ -185,9 +185,9 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -264,11 +264,11 @@ class _DayCell extends StatelessWidget {
         margin: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           color: isToday
-              ? theme.colorScheme.primary.withOpacity(0.15)
+              ? theme.colorScheme.primary.withValues(alpha: 0.15)
               : record?.status == 'present'
-                  ? Colors.green.withOpacity(0.12)
+                  ? Colors.green.withValues(alpha: 0.12)
                   : record?.status == 'partial'
-                      ? Colors.orange.withOpacity(0.12)
+                      ? Colors.orange.withValues(alpha: 0.12)
                       : null,
           shape: BoxShape.circle,
           border: isToday
@@ -339,10 +339,10 @@ class _DayDetailSheet extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: record.status == 'present'
-                  ? Colors.green.withOpacity(0.1)
+                  ? Colors.green.withValues(alpha: 0.1)
                   : record.status == 'partial'
-                      ? Colors.orange.withOpacity(0.1)
-                      : Colors.red.withOpacity(0.1),
+                      ? Colors.orange.withValues(alpha: 0.1)
+                      : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -404,7 +404,7 @@ class _DayDetailSheet extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: color, size: 20),
         ),
         const SizedBox(width: 12),

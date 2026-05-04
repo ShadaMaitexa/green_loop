@@ -122,7 +122,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(GLRadius.xl),
         border: Border.all(color: statusColor, width: 1.5),
       ),

@@ -143,27 +143,27 @@ class _FeeCollectionSheetState extends State<FeeCollectionSheet> {
 
           Text('Payment Mode', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: RadioListTile<PaymentMode>(
-                  title: const Text('Cash'),
-                  value: PaymentMode.cash,
-                  groupValue: _paymentMode,
-                  onChanged: (val) => setState(() => _paymentMode = val!),
-                  contentPadding: EdgeInsets.zero,
+          RadioGroup<PaymentMode>(
+            groupValue: _paymentMode,
+            onChanged: (val) => setState(() => _paymentMode = val!),
+            child: Row(
+              children: [
+                Expanded(
+                  child: RadioListTile<PaymentMode>(
+                    title: const Text('Cash'),
+                    value: PaymentMode.cash,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: RadioListTile<PaymentMode>(
-                  title: const Text('UPI'),
-                  value: PaymentMode.upi,
-                  groupValue: _paymentMode,
-                  onChanged: (val) => setState(() => _paymentMode = val!),
-                  contentPadding: EdgeInsets.zero,
+                Expanded(
+                  child: RadioListTile<PaymentMode>(
+                    title: const Text('UPI'),
+                    value: PaymentMode.upi,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           if (_error != null) ...[

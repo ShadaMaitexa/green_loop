@@ -64,6 +64,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     setState(() => _isLoadingWards = true);
     try {
       final allWards = await context.read<AuthState>().getWards();
+      if (!mounted) return;
+
       // Ensure unique wards by ID
       final seenIds = <int>{};
       final uniqueWards = allWards.where((w) => seenIds.add(w.id)).toList();
@@ -259,9 +261,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     Container(
                       padding: const EdgeInsets.all(GLSpacing.md),
                       decoration: BoxDecoration(
-                        color: colorScheme.errorContainer.withOpacity(0.2),
+                        color: colorScheme.errorContainer.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(GLRadius.md),
-                        border: Border.all(color: colorScheme.error.withOpacity(0.3)),
+                        border: Border.all(color: colorScheme.error.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -283,7 +285,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   else
                     DropdownButtonFormField<int>(
                       key: ValueKey('ward_dropdown_${_wards.length}'),
-                      value: (_selectedWard != null && _wards.any((w) => w.id == _selectedWard!.id)) 
+                      initialValue: (_selectedWard != null && _wards.any((w) => w.id == _selectedWard!.id)) 
                           ? _selectedWard!.id 
                           : null,
                       isExpanded: true,
@@ -418,7 +420,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           width: 40,
           height: 3,
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(2),
           ),
         ),

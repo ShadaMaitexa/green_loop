@@ -131,7 +131,7 @@ class _ComplaintSubmissionScreenState extends State<ComplaintSubmissionScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: InputDecoration(
                   labelText: 'Complaint Type',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(GLRadius.md)),

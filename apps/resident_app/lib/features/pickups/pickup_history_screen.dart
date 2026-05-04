@@ -141,7 +141,7 @@ class _PickupHistoryScreenState extends State<PickupHistoryScreen> {
             margin: const EdgeInsets.only(bottom: GLSpacing.sm),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: pickup.isInstant ? Colors.orange.withOpacity(0.1) : _getStatusColor(pickup.status).withOpacity(0.1),
+                backgroundColor: pickup.isInstant ? Colors.orange.withValues(alpha: 0.1) : _getStatusColor(pickup.status).withValues(alpha: 0.1),
                 child: pickup.isInstant 
                     ? const Icon(Icons.bolt, color: Colors.orange)
                     : Icon(Icons.recycling, color: _getStatusColor(pickup.status)),
@@ -154,7 +154,7 @@ class _PickupHistoryScreenState extends State<PickupHistoryScreen> {
                   pickup.status.toUpperCase(),
                   style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 ),
-                backgroundColor: _getStatusColor(pickup.status).withOpacity(0.1),
+                backgroundColor: _getStatusColor(pickup.status).withValues(alpha: 0.1),
                 side: BorderSide(color: _getStatusColor(pickup.status)),
               ),
             ),

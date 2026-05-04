@@ -31,8 +31,10 @@ class AttendanceRepository {
   }) async {
     try {
       final response = await _apiClient.post(_attendancePath, data: {
-        'latitude': latitude,
-        'longitude': longitude,
+        'check_in_location': {
+          'type': 'Point',
+          'coordinates': [longitude, latitude],
+        },
         'ppe_photo_url': selfieUrl,
         'has_gloves': ppeConfirmed,
         'has_mask': ppeConfirmed,

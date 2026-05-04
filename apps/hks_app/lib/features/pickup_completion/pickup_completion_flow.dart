@@ -125,7 +125,7 @@ class _SummaryStep extends StatelessWidget {
                     const SizedBox(width: 8),
                     GLStatusBadge.custom(
                       status: pickup.wasteType.label,
-                      backgroundColor: pickup.wasteType.color.withOpacity(0.1),
+                      backgroundColor: pickup.wasteType.color.withValues(alpha: 0.1),
                       textColor: pickup.wasteType.color,
                     ),
                   ],

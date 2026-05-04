@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              colorScheme.primaryContainer.withOpacity(0.5),
+              colorScheme.primaryContainer.withValues(alpha: 0.5),
               colorScheme.surface,
             ],
           ),
@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(GLSpacing.lg),
                         decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.1),
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Secure OTP-based login • No password required',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                       textAlign: TextAlign.center,
                     ),

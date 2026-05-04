@@ -60,6 +60,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
     try {
       final repo = context.read<PickupRepository>();
       final features = await repo.getLiveRoutes();
+      if (!mounted) return;
       
       final theme = Theme.of(context);
       List<Polyline> paths = [];
@@ -131,23 +132,27 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
                 children: [
                   const Text('A pickup will arrive soon. Please select the waste type:'),
                   const SizedBox(height: 16),
-                  ...WasteType.values.map((type) => RadioListTile<WasteType>(
-                    title: Row(
-                      children: [
-                        Icon(type.icon, color: type.color),
-                        const SizedBox(width: 8),
-                        Text(type.label),
-                      ],
-                    ),
-                    value: type,
+                  RadioGroup<WasteType>(
                     groupValue: selectedType,
                     onChanged: (val) {
                       if (val != null) {
                         setState(() => selectedType = val);
                       }
                     },
-                    contentPadding: EdgeInsets.zero,
-                  )),
+                    child: Column(
+                      children: WasteType.values.map((type) => RadioListTile<WasteType>(
+                        title: Row(
+                          children: [
+                            Icon(type.icon, color: type.color),
+                            const SizedBox(width: 8),
+                            Text(type.label),
+                          ],
+                        ),
+                        value: type,
+                        contentPadding: EdgeInsets.zero,
+                      )).toList(),
+                    ),
+                  ),
                 ],
               ),
               actions: [
@@ -166,7 +171,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       },
     );
 
-    if (confirm != true) return;
+    if (confirm != true || !mounted) return;
 
     setState(() => _isBooking = true);
     try {

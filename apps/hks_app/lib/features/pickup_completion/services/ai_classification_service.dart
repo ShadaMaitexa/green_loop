@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:image/image.dart' as img;
-
 /// Result of AI classification for waste contamination.
 class ClassificationResult {
   final String label;
@@ -16,7 +14,6 @@ class ClassificationResult {
 /// Service to handle on-device AI classification using TFLite.
 class AiClassificationService {
   Interpreter? _interpreter;
-  List<String>? _labels;
 
   Future<void> initialize() async {
     try {

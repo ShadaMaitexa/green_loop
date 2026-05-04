@@ -35,10 +35,12 @@ class _SelfieCaptureScreenState extends State<SelfieCaptureScreen> {
       await _controller!.initialize();
       if (mounted) setState(() => _initializing = false);
     } catch (e) {
-      if (mounted) setState(() {
-        _cameraError = 'Could not open camera: $e';
-        _initializing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _cameraError = 'Could not open camera: $e';
+          _initializing = false;
+        });
+      }
     }
   }
 
@@ -195,7 +197,7 @@ class _OvalGuidePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.25)
+      ..color = Colors.white.withValues(alpha: 0.25)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     final rect = Rect.fromCenter(

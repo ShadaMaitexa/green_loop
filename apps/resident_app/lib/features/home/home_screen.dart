@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(GLRadius.xl),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.3),
+            color: colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     'Balance Points',
-                    style: theme.textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary.withOpacity(0.8)),
+                    style: theme.textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary.withValues(alpha: 0.8)),
                   ),
                   Text(
                     '${state.pointsBalance}',
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: GLSpacing.md, vertical: GLSpacing.sm),
                 decoration: BoxDecoration(
-                  color: colorScheme.onPrimary.withOpacity(0.2),
+                  color: colorScheme.onPrimary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return Container(
         padding: const EdgeInsets.all(GLSpacing.xxl),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(GLRadius.md),
           border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
@@ -230,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
           margin: const EdgeInsets.only(bottom: GLSpacing.sm),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: _getStatusColor(pickup.status).withOpacity(0.1),
+              backgroundColor: _getStatusColor(pickup.status).withValues(alpha: 0.1),
               child: Icon(Icons.recycling, color: _getStatusColor(pickup.status)),
             ),
             title: Text(pickup.wasteType.label),
@@ -240,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 pickup.status.toUpperCase(),
                 style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
-              backgroundColor: _getStatusColor(pickup.status).withOpacity(0.1),
+              backgroundColor: _getStatusColor(pickup.status).withValues(alpha: 0.1),
               side: BorderSide(color: _getStatusColor(pickup.status)),
             ),
           ),

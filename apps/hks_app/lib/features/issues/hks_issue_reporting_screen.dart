@@ -150,7 +150,7 @@ class _HksIssueReportingScreenState extends State<HksIssueReportingScreen> {
               Text('Issue Type', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: GLSpacing.xs),
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: InputDecoration(
                   labelText: 'Select Category',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(GLRadius.md)),
