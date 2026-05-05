@@ -87,7 +87,7 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
   Widget _buildMaterialDropdown(List<MaterialType> materials) {
     return DropdownButtonFormField<MaterialType>(
       decoration: const InputDecoration(labelText: 'Material Type'),
-      value: _selectedMaterial,
+      initialValue: _selectedMaterial,
       items: materials.map((m) => DropdownMenuItem(
         value: m,
         child: Text(m.name),
@@ -103,7 +103,7 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
   Widget _buildWardDropdown(List<Ward> wards) {
     return DropdownButtonFormField<Ward>(
       decoration: const InputDecoration(labelText: 'Source Ward'),
-      value: _selectedWard,
+      initialValue: _selectedWard,
       items: wards.map((w) => DropdownMenuItem(
         value: w,
         child: Text('${w.id} - ${w.nameEn}'),

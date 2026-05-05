@@ -73,8 +73,11 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                     gradient: LinearGradient(
                       colors: [
                         theme.colorScheme.primary,
-                        theme.colorScheme.primary.withGreen(
+                        Color.fromARGB(
+                          theme.colorScheme.primary.alpha,
+                          theme.colorScheme.primary.red,
                           (theme.colorScheme.primary.green * 1.3).clamp(0, 255).toInt(),
+                          theme.colorScheme.primary.blue,
                         ),
                       ],
                       begin: Alignment.topLeft,
@@ -92,7 +95,7 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                             children: [
                               CircleAvatar(
                                 backgroundColor:
-                                    Colors.white.withOpacity(0.3),
+                                    Colors.white.withValues(alpha: 0.3),
                                 child: const Icon(Icons.recycling_rounded,
                                     color: Colors.white),
                               ),
@@ -442,8 +445,8 @@ class _ActionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(GLSpacing.md),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          border: Border.all(color: color.withOpacity(0.2)),
+          color: color.withValues(alpha: 0.08),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
           borderRadius: BorderRadius.circular(GLRadius.lg),
         ),
         child: Column(

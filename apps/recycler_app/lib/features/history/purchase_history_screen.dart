@@ -109,7 +109,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(
           horizontal: GLSpacing.lg, vertical: GLSpacing.sm),
-      color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Row(
         children: [
           Icon(Icons.filter_alt_rounded,
@@ -202,7 +202,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: GLSpacing.lg),
                   decoration: BoxDecoration(
-                    color: Theme.of(ctx).colorScheme.outline.withOpacity(0.4),
+                    color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -243,10 +243,10 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                       horizontal: GLSpacing.lg, vertical: GLSpacing.md),
                   decoration: BoxDecoration(
                     border: Border.all(
-                        color: Theme.of(ctx).colorScheme.outline.withOpacity(0.5)),
+                        color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.5)),
                     borderRadius: BorderRadius.circular(GLRadius.md),
                     color: tempDate != null
-                        ? Theme.of(ctx).colorScheme.primaryContainer.withOpacity(0.3)
+                        ? Theme.of(ctx).colorScheme.primaryContainer.withValues(alpha: 0.3)
                         : null,
                   ),
                   child: Row(
@@ -282,7 +282,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
               Text('Material Type', style: Theme.of(ctx).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: GLSpacing.sm),
               DropdownButtonFormField<MaterialType>(
-                value: tempMaterial,
+                initialValue: tempMaterial,
                 decoration: const InputDecoration(
                   hintText: 'All materials',
                   prefixIcon: Icon(Icons.category_rounded),
@@ -305,7 +305,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
               Text('Source Ward', style: Theme.of(ctx).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: GLSpacing.sm),
               DropdownButtonFormField<Ward>(
-                value: tempWard,
+                initialValue: tempWard,
                 decoration: const InputDecoration(
                   hintText: 'All wards',
                   prefixIcon: Icon(Icons.map_rounded),
@@ -363,7 +363,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: GLSpacing.lg),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
