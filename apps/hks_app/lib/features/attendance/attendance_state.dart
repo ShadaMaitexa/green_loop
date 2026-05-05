@@ -158,9 +158,9 @@ class AttendanceState extends ChangeNotifier {
   // Monthly History
   // ─────────────────────────────────────────────────────────────────────────
 
-  Future<List<AttendanceRecord>> fetchMonthHistory(DateTime month) async {
+  Future<List<AttendanceRecord>> fetchMonthHistory(DateTime month, {bool forceRefresh = false}) async {
     final key = '${month.year}-${month.month.toString().padLeft(2, '0')}';
-    if (_historyCache.containsKey(key)) return _historyCache[key]!;
+    if (!forceRefresh && _historyCache.containsKey(key)) return _historyCache[key]!;
 
     try {
       final records = await _repository.getMonthlyHistory(key);

@@ -24,10 +24,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     _loadMonth(_focusedMonth);
   }
 
-  Future<void> _loadMonth(DateTime month) async {
+  Future<void> _loadMonth(DateTime month, {bool forceRefresh = false}) async {
     setState(() => _loading = true);
     final state = context.read<AttendanceState>();
-    final records = await state.fetchMonthHistory(month);
+    final records = await state.fetchMonthHistory(month, forceRefresh: forceRefresh);
     
     // Include today's local record if it matches the month and isn't in the list
     final todayRec = state.today;
@@ -68,110 +68,120 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Attendance History')),
-      body: Column(
-        children: [
-          // Month navigator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left_rounded),
-                  onPressed: () {
-                    final prev = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
-                    setState(() => _focusedMonth = prev);
-                    _loadMonth(prev);
-                  },
-                ),
-                Text(
-                  _monthLabel(_focusedMonth),
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right_rounded),
-                  onPressed: _focusedMonth.year == DateTime.now().year &&
-                          _focusedMonth.month == DateTime.now().month
-                      ? null
-                      : () {
-                          final next = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
-                          setState(() => _focusedMonth = next);
-                          _loadMonth(next);
-                        },
-                ),
-              ],
-            ),
-          ),
-
-          // Day-of-week headers
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                  .map((d) => Expanded(
-                        child: Center(
-                          child: Text(
-                            d,
-                            style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Calendar grid
-          _loading
-              ? const Expanded(child: Center(child: CircularProgressIndicator()))
-              : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 7,
-                      childAspectRatio: 1,
+      body: RefreshIndicator(
+        onRefresh: () => _loadMonth(_focusedMonth, forceRefresh: true),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              // Month navigator
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      onPressed: () {
+                        final prev = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+                        setState(() => _focusedMonth = prev);
+                        _loadMonth(prev);
+                      },
                     ),
-                    itemCount: firstWeekday + daysInMonth,
-                    itemBuilder: (context, index) {
-                      if (index < firstWeekday) return const SizedBox.shrink();
-                      final day = index - firstWeekday + 1;
-                      final record = _recordForDay(day);
-                      final isToday = DateTime.now().day == day &&
-                          DateTime.now().month == _focusedMonth.month &&
-                          DateTime.now().year == _focusedMonth.year;
-
-                      return _DayCell(
-                        day: day,
-                        record: record,
-                        isToday: isToday,
-                        onTap: record != null ? () => _showDayDetail(context, record) : null,
-                      );
-                    },
-                  ),
+                    Text(
+                      _monthLabel(_focusedMonth),
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      onPressed: _focusedMonth.year == DateTime.now().year &&
+                              _focusedMonth.month == DateTime.now().month
+                          ? null
+                          : () {
+                              final next = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+                              setState(() => _focusedMonth = next);
+                              _loadMonth(next);
+                            },
+                    ),
+                  ],
                 ),
-
-          const SizedBox(height: 24),
-
-          // Legend
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _legend(Colors.green, 'Present'),
-                _legend(Colors.orange, 'Partial'),
-                _legend(Colors.grey[300]!, 'Absent'),
-              ],
-            ),
+              ),
+    
+              // Day-of-week headers
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                      .map((d) => Expanded(
+                            child: Center(
+                              child: Text(
+                                d,
+                                style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 8),
+    
+              // Calendar grid
+              _loading
+                  ? SizedBox(
+                      height: 300,
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 7,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: firstWeekday + daysInMonth,
+                        itemBuilder: (context, index) {
+                          if (index < firstWeekday) return const SizedBox.shrink();
+                          final day = index - firstWeekday + 1;
+                          final record = _recordForDay(day);
+                          final isToday = DateTime.now().day == day &&
+                              DateTime.now().month == _focusedMonth.month &&
+                              DateTime.now().year == _focusedMonth.year;
+    
+                          return _DayCell(
+                            day: day,
+                            record: record,
+                            isToday: isToday,
+                            onTap: record != null ? () => _showDayDetail(context, record) : null,
+                          );
+                        },
+                      ),
+                    ),
+    
+              const SizedBox(height: 24),
+    
+              // Legend
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _legend(Colors.green, 'Present'),
+                    _legend(Colors.orange, 'Partial'),
+                    _legend(Colors.grey[300]!, 'Absent'),
+                  ],
+                ),
+              ),
+    
+              const SizedBox(height: 24),
+    
+              // Monthly summary
+              _buildSummary(theme, daysInMonth),
+              const SizedBox(height: 32),
+            ],
           ),
-
-          const SizedBox(height: 24),
-
-          // Monthly summary
-          _buildSummary(theme, daysInMonth),
-        ],
+        ),
       ),
     );
   }
