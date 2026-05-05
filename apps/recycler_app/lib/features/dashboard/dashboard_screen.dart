@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:auth/auth.dart';
 import 'package:ui_kit/ui_kit.dart';
 import '../recycler_state.dart';
 import '../materials/materials_screen.dart';
 import '../purchases/new_purchase_screen.dart';
 import '../history/purchase_history_screen.dart';
+import '../certificates/certificates_screen.dart';
 
 class RecyclerDashboardScreen extends StatefulWidget {
   const RecyclerDashboardScreen({super.key});
@@ -19,11 +21,31 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RecyclerState>().fetchDashboard();
-      context.read<RecyclerState>().fetchMaterials();
-      context.read<RecyclerState>().fetchWards();
-      context.read<RecyclerState>().fetchHistory();
+      _initData();
     });
+  }
+
+  Future<void> _initData() async {
+    final s = context.read<RecyclerState>();
+    await Future.wait([
+      s.fetchHistory(),   // dashboard stats are derived from history
+      s.fetchMaterials(),
+      s.fetchWards(),
+      s.fetchCertificates(),
+    ]);
+    // Compute dashboard from loaded history
+    await s.fetchDashboard();
+
+    // Show API error if any
+    if (mounted && s.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('⚠️ ${s.error}'),
+          backgroundColor: Colors.red.shade700,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 
   @override
@@ -111,7 +133,13 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                 ),
                 title: const Text('Dashboard'),
               ),
-              actions: const [],
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                  tooltip: 'Logout',
+                  onPressed: () => context.read<AuthState>().logout(),
+                ),
+              ],
             ),
 
             SliverPadding(
@@ -256,7 +284,7 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
             onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => const PurchaseHistoryScreen())),
+                    builder: (_) => const CertificatesScreen())),
           ),
         ),
       ],

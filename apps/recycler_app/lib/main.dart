@@ -59,8 +59,11 @@ class AuthWrapper extends StatelessWidget {
           body: Center(child: CircularProgressIndicator()),
         );
       case AuthStatus.authenticated:
-        if (user != null && user.role != 'recycler') {
-          return const InvalidRolePlaceholder();
+        final role = user?.role.toLowerCase() ?? '';
+        final isRecycler = role == 'recycler' || role == 'admin';
+
+        if (user != null && !isRecycler) {
+          return InvalidRolePlaceholder(role: user.role);
         }
         return const RecyclerDashboardScreen();
       case AuthStatus.loading:
@@ -74,24 +77,46 @@ class AuthWrapper extends StatelessWidget {
 }
 
 class InvalidRolePlaceholder extends StatelessWidget {
-  const InvalidRolePlaceholder({super.key});
+  final String role;
+  const InvalidRolePlaceholder({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_rounded, size: 64, color: Colors.orange),
-            const SizedBox(height: GLSpacing.md),
-            const Text('Access Denied. Recycler account required.'),
-            const SizedBox(height: GLSpacing.lg),
-            GLButton(
-              text: 'Logout',
-              onPressed: () => context.read<AuthState>().logout(),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(GLSpacing.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.lock_rounded, size: 64, color: Colors.orange),
+              const SizedBox(height: GLSpacing.md),
+              const Text(
+                'Access Denied. Recycler account required.',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: GLSpacing.md),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(GLRadius.md),
+                ),
+                child: Text(
+                  'Detected Role: ${role.toUpperCase()}',
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: GLSpacing.lg),
+              GLButton(
+                text: 'Logout',
+                onPressed: () => context.read<AuthState>().logout(),
+              ),
+            ],
+          ),
         ),
       ),
     );

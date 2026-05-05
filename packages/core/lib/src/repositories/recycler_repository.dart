@@ -67,17 +67,35 @@ class RecyclerRepository {
     }
   }
 
-  /// Compatibility alias for dashboard stats.
+  /// Computes dashboard stats locally from the purchases list.
+  /// There is no dedicated recycler dashboard stats endpoint.
   Future<RecyclerDashboardData> getDashboardData() async {
     try {
-      final response = await _apiClient.get('/api/v1/dashboard/stats/');
-      return RecyclerDashboardData.fromJson(response.data as Map<String, dynamic>);
+      final purchases = await getPurchaseHistory();
+      final now = DateTime.now();
+      double totalWeight = 0;
+      double totalSpent = 0;
+      int certsThisMonth = 0;
+      for (final p in purchases) {
+        totalWeight += p.weightKg;
+        totalSpent += p.totalAmount;
+        if (p.certificateUrl != null &&
+            p.date.year == now.year &&
+            p.date.month == now.month) {
+          certsThisMonth++;
+        }
+      }
+      return RecyclerDashboardData(
+        totalWeightPurchased: totalWeight,
+        totalSpent: totalSpent,
+        certificatesIssuedThisMonth: certsThisMonth,
+      );
     } on ApiException catch (e) {
       throw Exception(e.message);
     }
   }
 
-  /// Compatibility alias for fetching wards.
+  /// Fetch the list of wards.
   Future<List<Ward>> getWards() async {
     try {
       final response = await _apiClient.get('/api/v1/wards/');
@@ -85,6 +103,11 @@ class RecyclerRepository {
       if (data is Map && data['type'] == 'FeatureCollection') {
         final features = data['features'] as List? ?? [];
         return features.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      if (data is Map && data['results'] is List) {
+        return (data['results'] as List)
+            .map((e) => Ward.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       if (data is List) {
         return data.map((e) => Ward.fromJson(e as Map<String, dynamic>)).toList();
