@@ -16,3 +16,4 @@ export 'src/repositories/sync_repository.dart';
 export 'src/repositories/report_repository.dart';
 export 'src/repositories/dashboard_repository.dart';
 export 'src/repositories/route_repository.dart';
+export 'src/utils/time_utils.dart';

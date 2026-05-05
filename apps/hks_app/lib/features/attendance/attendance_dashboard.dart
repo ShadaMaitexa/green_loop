@@ -5,6 +5,7 @@ import 'package:ui_kit/ui_kit.dart';
 import 'attendance_state.dart';
 import 'selfie_capture_screen.dart';
 import 'ppe_checklist_screen.dart';
+import 'package:core/core.dart';
 import 'attendance_history_screen.dart';
 
 /// Main attendance dashboard widget. Intended to be embedded in the HKS home
@@ -378,15 +379,5 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
     );
   }
 
-  String _formatTime(String iso) {
-    try {
-      final dt = DateTime.parse(iso).toLocal();
-      final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-      final m = dt.minute.toString().padLeft(2, '0');
-      final ampm = dt.hour < 12 ? 'AM' : 'PM';
-      return '$h:$m $ampm';
-    } catch (_) {
-      return iso;
-    }
-  }
+  String _formatTime(String? timeStr) => GLTimeUtils.formatTime(timeStr);
 }

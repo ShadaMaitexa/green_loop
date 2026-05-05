@@ -110,11 +110,13 @@ class AttendanceState extends ChangeNotifier {
       final mockSelfieUrl =
           'https://storage.greenloop.app/attendance/${DateTime.now().millisecondsSinceEpoch}_selfie.jpg';
 
+      final ppeStatus = {for (var item in _ppeItems) item.id: item.isChecked};
+
       _today = await _repository.checkIn(
         selfieUrl: mockSelfieUrl,
         latitude: position.latitude,
         longitude: position.longitude,
-        ppeConfirmed: true,
+        ppeStatus: ppeStatus,
       );
 
       _selfieFile = null;

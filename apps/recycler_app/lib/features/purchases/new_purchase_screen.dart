@@ -126,6 +126,7 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
       );
       
       context.read<RecyclerState>().addPurchase(purchase).then((success) {
+        if (!mounted) return;
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Purchase record saved successfully!')),

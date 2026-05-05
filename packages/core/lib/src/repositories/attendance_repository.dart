@@ -22,25 +22,29 @@ class AttendanceRepository {
     }
   }
 
-  /// Submits worker check-in with selfie URL, GPS, and PPE status.
+  /// Submits worker check-in with selfie URL, GPS, and individual PPE status.
   Future<AttendanceRecord> checkIn({
     required String selfieUrl,
     required double latitude,
     required double longitude,
-    required bool ppeConfirmed,
+    required Map<String, bool> ppeStatus,
   }) async {
     try {
       final response = await _apiClient.post(_attendancePath, data: {
-        'check_in_location': {
+        'type': 'Feature',
+        'geometry': {
           'type': 'Point',
-          'coordinates': [longitude, latitude],
+          'coordinates': [longitude, latitude], // GeoJSON [lng, lat]
         },
-        'ppe_photo_url': selfieUrl,
-        'has_gloves': ppeConfirmed,
-        'has_mask': ppeConfirmed,
-        'has_vest': ppeConfirmed,
-        'has_boots': ppeConfirmed,
-        'status': 'PRESENT',
+        'properties': {
+          'ppe_photo_url': selfieUrl,
+          'has_gloves': ppeStatus['gloves'] ?? false,
+          'has_mask': ppeStatus['mask'] ?? false,
+          'has_vest': ppeStatus['vest'] ?? false,
+          'has_boots': ppeStatus['boots'] ?? false,
+          'status': 'PRESENT',
+          'check_in_time': DateTime.now().toIso8601String(),
+        },
       });
       return AttendanceRecord.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
@@ -48,7 +52,7 @@ class AttendanceRepository {
         throw Exception('You have already checked in today.');
       }
       if (e.statusCode == 403) {
-        throw Exception('You are outside your assigned ward boundary.');
+        throw Exception('Check-in Location is outside the assigned ward boundary.');
       }
       throw Exception(e.message);
     }

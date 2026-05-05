@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:data_models/data_models.dart';
 import 'package:ui_kit/ui_kit.dart';
+import 'package:core/core.dart';
 import 'attendance_state.dart';
 
 /// Monthly attendance history with a custom calendar grid and day detail sheet.
@@ -27,7 +28,25 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     setState(() => _loading = true);
     final state = context.read<AttendanceState>();
     final records = await state.fetchMonthHistory(month);
-    if (mounted) setState(() { _records = records; _loading = false; });
+    
+    // Include today's local record if it matches the month and isn't in the list
+    final todayRec = state.today;
+    if (todayRec != null) {
+      final now = DateTime.now();
+      if (now.year == month.year && now.month == month.month) {
+        final alreadyIn = records.any((r) => r.date == todayRec.date);
+        if (!alreadyIn) {
+          records.add(todayRec);
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _records = records;
+        _loading = false;
+      });
+    }
   }
 
   AttendanceRecord? _recordForDay(int day) {
@@ -158,12 +177,19 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   }
 
   Widget _buildSummary(ThemeData theme, int daysInMonth) {
-    final present = _records.where((r) => r.status == 'present').length;
+    final present = _records.where((r) => r.status == 'present' || (r.isCheckedIn && !r.isCheckedOut)).length;
     final partial = _records.where((r) => r.status == 'partial').length;
     final today = DateTime.now();
-    final workingDaysPassed = _focusedMonth.month < today.month || _focusedMonth.year < today.year
-        ? daysInMonth
-        : today.day;
+    final isPastMonth = _focusedMonth.month < today.month || _focusedMonth.year < today.year;
+    final lastDayToCount = isPastMonth ? daysInMonth : today.day;
+    
+    int workingDaysPassed = 0;
+    for (int i = 1; i <= lastDayToCount; i++) {
+      final date = DateTime(_focusedMonth.year, _focusedMonth.month, i);
+      if (date.weekday != DateTime.sunday) {
+        workingDaysPassed++;
+      }
+    }
     final absent = workingDaysPassed - present - partial;
 
     return Padding(
@@ -244,6 +270,7 @@ class _DayCell extends StatelessWidget {
 
   Color get _statusColor {
     if (record == null) return Colors.transparent;
+    if (record!.isCheckedIn && !record!.isCheckedOut) return Colors.green;
     switch (record!.status) {
       case 'present': return Colors.green;
       case 'partial': return Colors.orange;
@@ -360,9 +387,9 @@ class _DayDetailSheet extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Times
-          _timeRow(Icons.login_rounded, 'Check-In', record.checkInTime ?? '—', Colors.green),
+          _timeRow(Icons.login_rounded, 'Check-In', GLTimeUtils.formatTime(record.checkInTime), Colors.green),
           const SizedBox(height: 12),
-          _timeRow(Icons.logout_rounded, 'Check-Out', record.checkOutTime ?? '—', Colors.blue),
+          _timeRow(Icons.logout_rounded, 'Check-Out', GLTimeUtils.formatTime(record.checkOutTime), Colors.blue),
 
           // PPE status
           const SizedBox(height: 16),
