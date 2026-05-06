@@ -8,6 +8,7 @@ import '../attendance/attendance_state.dart';
 import '../sync/sync_status_badge.dart';
 import '../issues/hks_issue_list_screen.dart';
 import '../fee_collection/fee_summary_screen.dart';
+import 'package:core/core.dart';
 
 class HksDashboardScreen extends StatelessWidget {
   final Function(int)? onTabSwitch;
@@ -174,7 +175,7 @@ class HksDashboardScreen extends StatelessWidget {
                     ),
                     Text(
                       isIn 
-                        ? 'Check-in confirmed at ${state.today?.checkInTime ?? "N/A"}'
+                        ? 'Check-in confirmed at ${_formatTime(state.today?.checkInTime)}'
                         : 'Please log your attendance to start receiving requests.',
                       style: theme.textTheme.bodySmall,
                     ),
@@ -291,9 +292,9 @@ class HksDashboardScreen extends StatelessWidget {
                       'Target Ward Area',
                       style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
                     ),
-                    const Text(
-                      'Ward 12 (Central)', // Fallback since ward name is not in model yet
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    Text(
+                      'Ward ${context.read<AuthState>().user?.wardId ?? "12"} (Central)', 
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -493,4 +494,6 @@ class HksDashboardScreen extends StatelessWidget {
       ),
     );
   }
+
+  String _formatTime(String? timeStr) => GLTimeUtils.formatTime(timeStr);
 }

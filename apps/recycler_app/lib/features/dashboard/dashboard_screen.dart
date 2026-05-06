@@ -27,16 +27,12 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
 
   Future<void> _initData() async {
     final s = context.read<RecyclerState>();
-    // fetchHistory() automatically recomputes the dashboard when it completes.
-    // Run all fetches in parallel to minimise load time.
     await Future.wait([
       s.fetchHistory(),
       s.fetchMaterials(),
       s.fetchWards(),
       s.fetchCertificates(),
     ]);
-
-    // Show API error if any
     if (mounted && s.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -47,13 +43,11 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final state = context.watch<RecyclerState>();
     final dash = state.dashboardData;
     final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: RefreshIndicator(
@@ -64,7 +58,6 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
         ]),
         child: CustomScrollView(
           slivers: [
-            // ── Gradient Header SliverAppBar ─────────────────────────────
             SliverAppBar(
               expandedHeight: 200,
               pinned: true,

@@ -39,7 +39,10 @@ class SyncTaskResult {
 
 /// The actual heavy lifter that runs in a background Isolate
 /// Helper for background compression
-Future<String> _compressAndSave(String originalPath) async {
+Future<String> _compressAndSaveInIsolate(Map<String, dynamic> data) async {
+  final String originalPath = data['path'];
+  final String tempDirPath = data['tempDir'];
+  
   final file = File(originalPath);
   final bytes = await file.readAsBytes();
   final image = img.decodeImage(bytes);
@@ -49,9 +52,8 @@ Future<String> _compressAndSave(String originalPath) async {
   final resized = img.copyResize(image, width: image.width > 1024 ? 1024 : null, height: image.height > 1024 ? 1024 : null);
   final compressed = img.encodeJpg(resized, quality: 75);
   
-  final tempDir = await getTemporaryDirectory();
   final fileName = 'compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
-  final compressedFile = File('${tempDir.path}/$fileName');
+  final compressedFile = File('$tempDirPath/$fileName');
   await compressedFile.writeAsBytes(compressed);
   
   return compressedFile.path;
@@ -218,7 +220,11 @@ class SyncManager extends ChangeNotifier {
     required double longitude,
     String? overrideNote,
   }) async {
-    final compressedPath = await _compressAndSave(photoPath);
+    final tempDir = await getTemporaryDirectory();
+    final compressedPath = await Isolate.run(() => _compressAndSaveInIsolate({
+      'path': photoPath,
+      'tempDir': tempDir.path,
+    }));
 
     final item = SyncQueueItem(
       id: const Uuid().v4(),
