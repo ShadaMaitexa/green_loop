@@ -25,18 +25,36 @@ class RecyclerState extends ChangeNotifier {
 
   // ── Dashboard ─────────────────────────────────────────────────────────────
 
-  Future<void> fetchDashboard() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-    try {
-      _dashboardData = await repository.getDashboardData();
-    } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+  /// Computes dashboard stats from the already-loaded [_history].
+  /// Call this AFTER [fetchHistory] completes — no extra API call is made.
+  void computeDashboard() {
+    final now = DateTime.now();
+    double totalWeight = 0;
+    double totalSpent = 0;
+    int certsThisMonth = 0;
+
+    for (final p in _history) {
+      totalWeight += p.weightKg;
+      totalSpent += p.totalAmount;
+      if (p.certificateUrl != null &&
+          p.date.year == now.year &&
+          p.date.month == now.month) {
+        certsThisMonth++;
+      }
     }
+
+    _dashboardData = RecyclerDashboardData(
+      totalWeightPurchased: totalWeight,
+      totalSpent: totalSpent,
+      certificatesIssuedThisMonth: certsThisMonth,
+    );
+    notifyListeners();
+  }
+
+  /// Legacy alias — kept for call-sites that still use fetchDashboard().
+  /// Computes locally; does NOT make a network request.
+  Future<void> fetchDashboard() async {
+    computeDashboard();
   }
 
   // ── Materials ─────────────────────────────────────────────────────────────
@@ -110,6 +128,11 @@ class RecyclerState extends ChangeNotifier {
         materialId: materialId,
         wardId: wardId,
       );
+      // Recompute dashboard stats whenever history changes.
+      // Only recompute for unfiltered fetches so stats reflect the full dataset.
+      if (date == null && materialId == null && wardId == null) {
+        computeDashboard();
+      }
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     } finally {
@@ -125,7 +148,7 @@ class RecyclerState extends ChangeNotifier {
     try {
       final success = await repository.recordPurchase(purchase);
       if (success) {
-        await fetchDashboard();
+        // Re-fetch history so the new purchase appears, then recompute stats.
         await fetchHistory();
         return true;
       }

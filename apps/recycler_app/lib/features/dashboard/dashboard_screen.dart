@@ -27,14 +27,14 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
 
   Future<void> _initData() async {
     final s = context.read<RecyclerState>();
+    // fetchHistory() automatically recomputes the dashboard when it completes.
+    // Run all fetches in parallel to minimise load time.
     await Future.wait([
-      s.fetchHistory(),   // dashboard stats are derived from history
+      s.fetchHistory(),
       s.fetchMaterials(),
       s.fetchWards(),
       s.fetchCertificates(),
     ]);
-    // Compute dashboard from loaded history
-    await s.fetchDashboard();
 
     // Show API error if any
     if (mounted && s.error != null) {
@@ -57,10 +57,11 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: RefreshIndicator(
-        onRefresh: () async {
-          await state.fetchDashboard();
-          await state.fetchHistory();
-        },
+        onRefresh: () => Future.wait([
+          state.fetchHistory(),
+          state.fetchMaterials(),
+          state.fetchCertificates(),
+        ]),
         child: CustomScrollView(
           slivers: [
             // ── Gradient Header SliverAppBar ─────────────────────────────
@@ -73,12 +74,11 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                     gradient: LinearGradient(
                       colors: [
                         theme.colorScheme.primary,
-                        Color.fromARGB(
-                          theme.colorScheme.primary.alpha,
-                          theme.colorScheme.primary.red,
-                          (theme.colorScheme.primary.green * 1.3).clamp(0, 255).toInt(),
-                          theme.colorScheme.primary.blue,
-                        ),
+                        Color.lerp(
+                          theme.colorScheme.primary,
+                          theme.colorScheme.tertiary,
+                          0.35,
+                        ) ?? theme.colorScheme.primary,
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -191,10 +191,7 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const NewPurchaseScreen()),
-        ).then((_) {
-          state.fetchDashboard();
-          state.fetchHistory();
-        }),
+        ).then((_) => state.fetchHistory()),
         label: const Text('New Purchase'),
         icon: const Icon(Icons.add_shopping_cart_rounded),
       ),

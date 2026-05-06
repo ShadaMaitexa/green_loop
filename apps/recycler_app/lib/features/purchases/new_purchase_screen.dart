@@ -75,7 +75,7 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
               const SizedBox(height: GLSpacing.xxl),
               GLButton(
                 text: 'Save Purchase Record',
-                onPressed: state.isLoading ? null : _savePurchase,
+                onPressed: state.isLoading ? null : () => _savePurchase(),
               ),
             ],
           ),
@@ -113,27 +113,44 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
     );
   }
 
-  void _savePurchase() {
-    if (_formKey.currentState!.validate() && _selectedMaterial != null && _selectedWard != null) {
-      final purchase = RecyclerPurchase(
-        materialTypeId: _selectedMaterial!.id,
-        materialName: _selectedMaterial!.name,
-        weightKg: double.parse(_weightController.text),
-        totalAmount: double.parse(_amountController.text),
-        sourceWardId: _selectedWard!.id,
-        sourceWardName: _selectedWard!.nameEn,
-        date: DateTime.now(),
+  Future<void> _savePurchase() async {
+    if (!_formKey.currentState!.validate() ||
+        _selectedMaterial == null ||
+        _selectedWard == null) {
+      return;
+    }
+
+    final purchase = RecyclerPurchase(
+      materialTypeId: _selectedMaterial!.id,
+      materialName: _selectedMaterial!.name,
+      weightKg: double.parse(_weightController.text),
+      totalAmount: double.parse(_amountController.text),
+      sourceWardId: _selectedWard!.id,
+      sourceWardName: _selectedWard!.nameEn,
+      date: DateTime.now(),
+    );
+
+    final state = context.read<RecyclerState>();
+    final success = await state.addPurchase(purchase);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Purchase record saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
-      
-      context.read<RecyclerState>().addPurchase(purchase).then((success) {
-        if (!mounted) return;
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Purchase record saved successfully!')),
-          );
-          Navigator.pop(context);
-        }
-      });
+      Navigator.pop(context);
+    } else {
+      final error = state.error ?? 'Failed to save purchase. Please try again.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
     }
   }
 }
