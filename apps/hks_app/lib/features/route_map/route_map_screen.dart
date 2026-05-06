@@ -581,7 +581,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
 
     return Center(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: GLBreakpoints.mobile),
+        constraints: const BoxConstraints(maxWidth: 800),
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: route.pickups.length,

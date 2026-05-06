@@ -103,15 +103,20 @@ class _HksIssueListScreenState extends State<HksIssueListScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _fetchIssues,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _issues.length,
-        itemBuilder: (context, index) {
-          final issue = _issues[index];
-          return _buildIssueCard(issue);
-        },
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: RefreshIndicator(
+          onRefresh: _fetchIssues,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _issues.length,
+            itemBuilder: (context, index) {
+              final issue = _issues[index];
+              return _buildIssueCard(issue);
+            },
+          ),
+        ),
       ),
     );
   }

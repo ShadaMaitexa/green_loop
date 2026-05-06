@@ -140,134 +140,139 @@ class _HksIssueReportingScreenState extends State<HksIssueReportingScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Report Field Issue')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(GLSpacing.xl),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Issue Type', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: GLSpacing.xs),
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                decoration: InputDecoration(
-                  labelText: 'Select Category',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(GLRadius.md)),
-                  prefixIcon: const Icon(Icons.report_problem_outlined),
-                ),
-                items: _issueTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                onChanged: (val) => setState(() => _selectedType = val),
-              ),
-              const SizedBox(height: GLSpacing.lg),
-              
-              GLTextField(
-                label: 'Description',
-                hint: 'Provide more context about the issue...',
-                controller: _descriptionController,
-                maxLines: 4,
-                validator: (val) => (val == null || val.isEmpty) ? 'Description required' : null,
-              ),
-              const SizedBox(height: GLSpacing.xl),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(GLSpacing.xl),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Evidence Photo *', style: Theme.of(context).textTheme.titleMedium),
-                  if (_imageFile == null)
-                    const Text('Required', style: TextStyle(color: Colors.red, fontSize: 12)),
+                  Text('Issue Type', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: GLSpacing.xs),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedType,
+                    decoration: InputDecoration(
+                      labelText: 'Select Category',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(GLRadius.md)),
+                      prefixIcon: const Icon(Icons.report_problem_outlined),
+                    ),
+                    items: _issueTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                    onChanged: (val) => setState(() => _selectedType = val),
+                  ),
+                  const SizedBox(height: GLSpacing.lg),
+                  
+                  GLTextField(
+                    label: 'Description',
+                    hint: 'Provide more context about the issue...',
+                    controller: _descriptionController,
+                    maxLines: 4,
+                    validator: (val) => (val == null || val.isEmpty) ? 'Description required' : null,
+                  ),
+                  const SizedBox(height: GLSpacing.xl),
+                  
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Evidence Photo *', style: Theme.of(context).textTheme.titleMedium),
+                      if (_imageFile == null)
+                        const Text('Required', style: TextStyle(color: Colors.red, fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: GLSpacing.md),
+                  GestureDetector(
+                    onTap: () => _pickImage(ImageSource.camera),
+                    child: Container(
+                      height: 180,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(GLRadius.md),
+                        border: Border.all(color: _imageFile == null ? colorScheme.outlineVariant : Colors.green),
+                      ),
+                      child: _imageFile != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(GLRadius.md),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.file(File(_imageFile!.path), fit: BoxFit.cover),
+                                  Positioned(
+                                    top: 8, right: 8,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close, color: Colors.black),
+                                        onPressed: () => setState(() => _imageFile = null),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.camera_alt_outlined, size: 40, color: colorScheme.primary),
+                                  const SizedBox(height: GLSpacing.sm),
+                                  const Text('Tap to Capture Photo'),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: GLSpacing.xl),
+                  
+                  Text('Location Details *', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: GLSpacing.md),
+                  Container(
+                    padding: const EdgeInsets.all(GLSpacing.md),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      border: Border.all(color: colorScheme.outlineVariant),
+                      borderRadius: BorderRadius.circular(GLRadius.md),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _latitude != null ? Icons.location_on : Icons.location_off,
+                          color: _latitude != null ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(width: GLSpacing.md),
+                        Expanded(
+                          child: Text(
+                            _latitude != null 
+                              ? 'GPS Locked: ${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)}'
+                              : 'Detecting Location...',
+                            style: TextStyle(
+                              color: _latitude != null ? Colors.black87 : Colors.grey,
+                              fontWeight: _latitude != null ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                        if (_isDetectingLocation)
+                          const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        else
+                          IconButton(icon: const Icon(Icons.refresh), onPressed: _detectLocation),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: GLSpacing.xxl),
+                  
+                  SizedBox(
+                    width: double.infinity,
+                    child: GLButton(
+                      text: 'Submit Report',
+                      icon: Icons.send_rounded,
+                      isLoading: _isSubmitting,
+                      onPressed: _handleSubmit,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: GLSpacing.md),
-              GestureDetector(
-                onTap: () => _pickImage(ImageSource.camera),
-                child: Container(
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(GLRadius.md),
-                    border: Border.all(color: _imageFile == null ? colorScheme.outlineVariant : Colors.green),
-                  ),
-                  child: _imageFile != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(GLRadius.md),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.file(File(_imageFile!.path), fit: BoxFit.cover),
-                              Positioned(
-                                top: 8, right: 8,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.close, color: Colors.black),
-                                    onPressed: () => setState(() => _imageFile = null),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.camera_alt_outlined, size: 40, color: colorScheme.primary),
-                              const SizedBox(height: GLSpacing.sm),
-                              const Text('Tap to Capture Photo'),
-                            ],
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: GLSpacing.xl),
-              
-              Text('Location Details *', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: GLSpacing.md),
-              Container(
-                padding: const EdgeInsets.all(GLSpacing.md),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  border: Border.all(color: colorScheme.outlineVariant),
-                  borderRadius: BorderRadius.circular(GLRadius.md),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _latitude != null ? Icons.location_on : Icons.location_off,
-                      color: _latitude != null ? Colors.green : Colors.red,
-                    ),
-                    const SizedBox(width: GLSpacing.md),
-                    Expanded(
-                      child: Text(
-                        _latitude != null 
-                          ? 'GPS Locked: ${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)}'
-                          : 'Detecting Location...',
-                        style: TextStyle(
-                          color: _latitude != null ? Colors.black87 : Colors.grey,
-                          fontWeight: _latitude != null ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    if (_isDetectingLocation)
-                      const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    else
-                      IconButton(icon: const Icon(Icons.refresh), onPressed: _detectLocation),
-                  ],
-                ),
-              ),
-              const SizedBox(height: GLSpacing.xxl),
-              
-              SizedBox(
-                width: double.infinity,
-                child: GLButton(
-                  text: 'Submit Report',
-                  icon: Icons.send_rounded,
-                  isLoading: _isSubmitting,
-                  onPressed: _handleSubmit,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

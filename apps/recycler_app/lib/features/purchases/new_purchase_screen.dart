@@ -48,38 +48,43 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Record New Purchase')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(GLSpacing.xl),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildMaterialDropdown(state.materials),
-              const SizedBox(height: GLSpacing.lg),
-              _buildWardDropdown(state.wards),
-              const SizedBox(height: GLSpacing.lg),
-              GLTextField(
-                label: 'Weight (Kg)',
-                controller: _weightController,
-                keyboardType: TextInputType.number,
-                validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(GLSpacing.xl),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildMaterialDropdown(state.materials),
+                  const SizedBox(height: GLSpacing.lg),
+                  _buildWardDropdown(state.wards),
+                  const SizedBox(height: GLSpacing.lg),
+                  GLTextField(
+                    label: 'Weight (Kg)',
+                    controller: _weightController,
+                    keyboardType: TextInputType.number,
+                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: GLSpacing.lg),
+                  GLTextField(
+                    label: 'Total Amount (₹)',
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    readOnly: true,
+                    prefixText: '₹ ',
+                    helperText: 'Auto-calculated based on material price',
+                  ),
+                  const SizedBox(height: GLSpacing.xxl),
+                  GLButton(
+                    text: 'Save Purchase Record',
+                    onPressed: state.isLoading ? null : () => _savePurchase(),
+                  ),
+                ],
               ),
-              const SizedBox(height: GLSpacing.lg),
-              GLTextField(
-                label: 'Total Amount (₹)',
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                readOnly: true,
-                prefixText: '₹ ',
-                helperText: 'Auto-calculated based on material price',
-              ),
-              const SizedBox(height: GLSpacing.xxl),
-              GLButton(
-                text: 'Save Purchase Record',
-                onPressed: state.isLoading ? null : () => _savePurchase(),
-              ),
-            ],
+            ),
           ),
         ),
       ),

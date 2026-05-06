@@ -73,34 +73,39 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Active filter chips
-          if (_hasFilters)
-            _buildActiveFilterBar(theme),
-          Expanded(
-            child: state.isLoading && state.history.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () => _applyFilters(state),
-                    child: state.history.isEmpty
-                        ? _buildEmptyState(context)
-                        : ListView.builder(
-                            padding: const EdgeInsets.all(GLSpacing.lg),
-                            itemCount: state.history.length,
-                            itemBuilder: (context, index) {
-                              return _PurchaseCard(
-                                purchase: state.history[index],
-                                onTap: () => _showPurchaseDetails(
-                                  context,
-                                  state.history[index],
-                                ),
-                              );
-                            },
-                          ),
-                  ),
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Column(
+            children: [
+              // Active filter chips
+              if (_hasFilters)
+                _buildActiveFilterBar(theme),
+              Expanded(
+                child: state.isLoading && state.history.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : RefreshIndicator(
+                        onRefresh: () => _applyFilters(state),
+                        child: state.history.isEmpty
+                            ? _buildEmptyState(context)
+                            : ListView.builder(
+                                padding: const EdgeInsets.all(GLSpacing.lg),
+                                itemCount: state.history.length,
+                                itemBuilder: (context, index) {
+                                  return _PurchaseCard(
+                                    purchase: state.history[index],
+                                    onTap: () => _showPurchaseDetails(
+                                      context,
+                                      state.history[index],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

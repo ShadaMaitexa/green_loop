@@ -36,24 +36,29 @@ class _MaterialsScreenState extends State<MaterialsScreen> {
           ),
         ],
       ),
-      body: state.isLoading && state.materials.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () => state.fetchMaterials(),
-              child: state.materials.isEmpty
-                  ? _buildEmptyState(context)
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(GLSpacing.lg),
-                      itemCount: state.materials.length,
-                      itemBuilder: (context, index) {
-                        final material = state.materials[index];
-                        return _MaterialCard(
-                          material: material,
-                          onEdit: () => _showMaterialDialog(context, state, existing: material),
-                        );
-                      },
-                    ),
-            ),
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: state.isLoading && state.materials.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: () => state.fetchMaterials(),
+                  child: state.materials.isEmpty
+                      ? _buildEmptyState(context)
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(GLSpacing.lg),
+                          itemCount: state.materials.length,
+                          itemBuilder: (context, index) {
+                            final material = state.materials[index];
+                            return _MaterialCard(
+                              material: material,
+                              onEdit: () => _showMaterialDialog(context, state, existing: material),
+                            );
+                          },
+                        ),
+                ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showMaterialDialog(context, state),
         icon: const Icon(Icons.add_rounded),

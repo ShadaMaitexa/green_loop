@@ -56,8 +56,11 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
           state.fetchMaterials(),
           state.fetchCertificates(),
         ]),
-        child: CustomScrollView(
-          slivers: [
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: CustomScrollView(
+              slivers: [
             SliverAppBar(
               expandedHeight: 200,
               pinned: true,
@@ -142,17 +145,14 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
               padding: const EdgeInsets.all(GLSpacing.lg),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // ── Stats Grid ────────────────────────────────────────────
-                  _buildSectionLabel(context, 'Overview'),
-                  const SizedBox(height: GLSpacing.md),
-                  _buildStatsGrid(dash, state, context),
+                  _buildDashboardHeader(dash, state, context),
 
                   const SizedBox(height: GLSpacing.xxl),
 
                   // ── Quick Actions ─────────────────────────────────────────
                   _buildSectionLabel(context, 'Quick Actions'),
                   const SizedBox(height: GLSpacing.md),
-                  _buildActionsRow(context),
+                  _buildActionsLayout(context),
 
                   const SizedBox(height: GLSpacing.xxl),
 
@@ -177,9 +177,9 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                 ]),
               ),
             ),
-          ],
+        ]  ),
         ),
-      ),
+        )),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(
           context,
@@ -199,88 +199,102 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
             ?.copyWith(fontWeight: FontWeight.bold));
   }
 
-  Widget _buildStatsGrid(
-      dynamic dash, RecyclerState state, BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 2,
-      crossAxisSpacing: GLSpacing.md,
-      mainAxisSpacing: GLSpacing.md,
-      childAspectRatio: 1.45,
-      physics: const NeverScrollableScrollPhysics(),
+  Widget _buildDashboardHeader(dynamic dash, RecyclerState state, BuildContext context) {
+    final isMobile = GLResponsive.isMobile(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _StatCard(
-          label: 'Total Weight',
-          value: '${(dash?.totalWeightPurchased ?? 0).toStringAsFixed(1)} Kg',
-          icon: Icons.scale_rounded,
-          iconColor: Colors.blue.shade600,
-          bgColor: Colors.blue.shade50,
-        ),
-        _StatCard(
-          label: 'Total Spent',
-          value: '₹${(dash?.totalSpent ?? 0).toStringAsFixed(0)}',
-          icon: Icons.payments_rounded,
-          iconColor: Colors.teal.shade600,
-          bgColor: Colors.teal.shade50,
-        ),
-        _StatCard(
-          label: 'Certs This Month',
-          value: '${dash?.certificatesIssuedThisMonth ?? 0}',
-          icon: Icons.verified_rounded,
-          iconColor: Colors.amber.shade700,
-          bgColor: Colors.amber.shade50,
-        ),
-        _StatCard(
-          label: 'Materials',
-          value: '${state.materials.length}',
-          icon: Icons.category_rounded,
-          iconColor: Colors.purple.shade600,
-          bgColor: Colors.purple.shade50,
+        _buildSectionLabel(context, 'Overview'),
+        const SizedBox(height: GLSpacing.md),
+        GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: isMobile ? 2 : 4,
+          crossAxisSpacing: GLSpacing.md,
+          mainAxisSpacing: GLSpacing.md,
+          childAspectRatio: isMobile ? 1.45 : 1.2,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            _StatCard(
+              label: 'Total Weight',
+              value: '${(dash?.totalWeightPurchased ?? 0).toStringAsFixed(1)} Kg',
+              icon: Icons.scale_rounded,
+              iconColor: Colors.blue.shade600,
+              bgColor: Colors.blue.shade50,
+            ),
+            _StatCard(
+              label: 'Total Spent',
+              value: '₹${(dash?.totalSpent ?? 0).toStringAsFixed(0)}',
+              icon: Icons.payments_rounded,
+              iconColor: Colors.teal.shade600,
+              bgColor: Colors.teal.shade50,
+            ),
+            _StatCard(
+              label: 'Certs This Month',
+              value: '${dash?.certificatesIssuedThisMonth ?? 0}',
+              icon: Icons.verified_rounded,
+              iconColor: Colors.amber.shade700,
+              bgColor: Colors.amber.shade50,
+            ),
+            _StatCard(
+              label: 'Materials',
+              value: '${state.materials.length}',
+              icon: Icons.category_rounded,
+              iconColor: Colors.purple.shade600,
+              bgColor: Colors.purple.shade50,
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildActionsRow(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _ActionCard(
-            label: 'Materials',
-            icon: Icons.inventory_2_rounded,
-            description: 'View & edit',
-            color: Colors.blue,
-            onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const MaterialsScreen())),
-          ),
-        ),
-        const SizedBox(width: GLSpacing.md),
-        Expanded(
-          child: _ActionCard(
-            label: 'History',
-            icon: Icons.receipt_long_rounded,
-            description: 'Filter & download',
-            color: Colors.teal,
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const PurchaseHistoryScreen())),
-          ),
-        ),
-        const SizedBox(width: GLSpacing.md),
-        Expanded(
-          child: _ActionCard(
-            label: 'Certificates',
-            icon: Icons.workspace_premium_rounded,
-            description: 'PoR PDFs',
-            color: Colors.amber.shade700,
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const CertificatesScreen())),
-          ),
-        ),
-      ],
+  Widget _buildActionsLayout(BuildContext context) {
+    final isMobile = GLResponsive.isMobile(context);
+    
+    final actions = [
+      _ActionCard(
+        label: 'Materials',
+        icon: Icons.inventory_2_rounded,
+        description: 'View & edit',
+        color: Colors.blue,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const MaterialsScreen())),
+      ),
+      _ActionCard(
+        label: 'History',
+        icon: Icons.receipt_long_rounded,
+        description: 'Filter & download',
+        color: Colors.teal,
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const PurchaseHistoryScreen())),
+      ),
+      _ActionCard(
+        label: 'Certificates',
+        icon: Icons.workspace_premium_rounded,
+        description: 'PoR PDFs',
+        color: Colors.amber.shade700,
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const CertificatesScreen())),
+      ),
+    ];
+
+    if (isMobile) {
+      return Row(
+        children: actions.map((a) => Expanded(child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: a,
+        ))).toList(),
+      );
+    }
+
+    return Wrap(
+      spacing: GLSpacing.lg,
+      runSpacing: GLSpacing.lg,
+      children: actions.map((a) => SizedBox(width: 180, child: a)).toList(),
     );
   }
 
