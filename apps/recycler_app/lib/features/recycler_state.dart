@@ -107,13 +107,32 @@ class RecyclerState extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteMaterial(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await repository.deleteMaterial(id.toString());
+      await fetchMaterials();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // ── Wards ─────────────────────────────────────────────────────────────────
 
   Future<void> fetchWards() async {
     try {
       _wards = await repository.getWards();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Error fetching wards: $e');
+    }
   }
 
   // ── Purchases / History ───────────────────────────────────────────────────
@@ -123,11 +142,16 @@ class RecyclerState extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _history = await repository.getPurchaseHistory(
+      final list = await repository.getPurchaseHistory(
         date: date,
         materialId: materialId,
         wardId: wardId,
       );
+      
+      // Sort history by date descending (latest first)
+      list.sort((a, b) => b.date.compareTo(a.date));
+      _history = list;
+      
       // Recompute dashboard stats whenever history changes.
       // Only recompute for unfiltered fetches so stats reflect the full dataset.
       if (date == null && materialId == null && wardId == null) {
@@ -162,6 +186,23 @@ class RecyclerState extends ChangeNotifier {
     }
   }
 
+  Future<bool> deletePurchase(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await repository.deletePurchase(id.toString());
+      await fetchHistory();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // ── Certificates ──────────────────────────────────────────────────────────
 
   Future<void> fetchCertificates() async {
@@ -169,9 +210,34 @@ class RecyclerState extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _certificates = await repository.getCertificates();
+      final list = await repository.getCertificates();
+      // Sort certificates by date requested descending
+      list.sort((a, b) {
+        if (a.dateRequested == null && b.dateRequested == null) return 0;
+        if (a.dateRequested == null) return 1;
+        if (b.dateRequested == null) return -1;
+        return b.dateRequested!.compareTo(a.dateRequested!);
+      });
+      _certificates = list;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteCertificate(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await repository.deleteCertificate(id.toString());
+      await fetchCertificates();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();

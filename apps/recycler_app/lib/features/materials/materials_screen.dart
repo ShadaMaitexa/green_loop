@@ -188,9 +188,53 @@ class _MaterialsScreenState extends State<MaterialsScreen> {
                   }
                 },
               ),
+              if (existing != null) ...[
+                const SizedBox(height: GLSpacing.md),
+                GLButton(
+                  text: 'Delete Material',
+                  variant: GLButtonVariant.ghost,
+                  textColor: Colors.red,
+                  isLoading: state.isLoading,
+                  onPressed: () => _confirmDeleteMaterial(context, state, existing),
+                ),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _confirmDeleteMaterial(
+      BuildContext context, RecyclerState state, MaterialType material) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Material?'),
+        content: Text('Are you sure you want to remove "${material.name}"? '
+            'This will not affect existing purchase records.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(context); // Close bottom sheet
+              final success = await state.deleteMaterial(material.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(success
+                      ? 'Material deleted'
+                      : 'Failed to delete material'),
+                  backgroundColor: success ? Colors.green : Colors.red,
+                ));
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

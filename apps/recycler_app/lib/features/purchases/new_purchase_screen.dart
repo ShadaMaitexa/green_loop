@@ -30,6 +30,8 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
       final weight = double.tryParse(_weightController.text) ?? 0.0;
       final total = weight * _selectedMaterial!.currentPricePerKg;
       _amountController.text = total.toStringAsFixed(2);
+    } else {
+      _amountController.clear();
     }
   }
 
@@ -86,7 +88,10 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
 
   Widget _buildMaterialDropdown(List<MaterialType> materials) {
     return DropdownButtonFormField<MaterialType>(
-      decoration: const InputDecoration(labelText: 'Material Type'),
+      decoration: InputDecoration(
+        labelText: 'Material Type',
+        hintText: materials.isEmpty ? 'No materials added yet' : 'Select material',
+      ),
       initialValue: _selectedMaterial,
       items: materials.map((m) => DropdownMenuItem(
         value: m,
@@ -102,11 +107,14 @@ class _NewPurchaseScreenState extends State<NewPurchaseScreen> {
 
   Widget _buildWardDropdown(List<Ward> wards) {
     return DropdownButtonFormField<Ward>(
-      decoration: const InputDecoration(labelText: 'Source Ward'),
+      decoration: InputDecoration(
+        labelText: 'Source Ward',
+        hintText: wards.isEmpty ? 'Loading wards...' : 'Select ward',
+      ),
       initialValue: _selectedWard,
       items: wards.map((w) => DropdownMenuItem(
         value: w,
-        child: Text('${w.id} - ${w.nameEn}'),
+        child: Text('Ward ${w.id} - ${w.nameEn}'),
       )).toList(),
       onChanged: (val) => setState(() => _selectedWard = val),
       validator: (v) => v == null ? 'Required' : null,

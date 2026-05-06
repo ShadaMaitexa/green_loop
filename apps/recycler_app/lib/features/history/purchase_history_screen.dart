@@ -317,7 +317,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                   const DropdownMenuItem(value: null, child: Text('All wards')),
                   ...state.wards.map((w) => DropdownMenuItem(
                         value: w,
-                        child: Text('Ward ${w.id} – ${w.nameEn}'),
+                        child: Text('Ward ${w.id} - ${w.nameEn}'),
                       )),
                 ],
                 onChanged: (v) => setSheetState(() => tempWard = v),
@@ -351,7 +351,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(GLRadius.xl)),
       ),
-      builder: (_) => Padding(
+      builder: (ctx) => Padding(
         padding: const EdgeInsets.all(GLSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -372,27 +372,25 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: GLSpacing.lg),
             _DetailRow(label: 'Material', value: purchase.materialName ?? 'Unknown'),
-            _DetailRow(
-                label: 'Weight', value: '${purchase.weightKg.toStringAsFixed(2)} Kg'),
+            _DetailRow(label: 'Weight', value: '${purchase.weightKg.toStringAsFixed(2)} Kg'),
             _DetailRow(
                 label: 'Date',
                 value: DateFormat('MMM dd, yyyy  HH:mm').format(purchase.date)),
             _DetailRow(label: 'Source Ward', value: purchase.sourceWardName ?? 'Unknown'),
             _DetailRow(
-                label: 'Total Amount',
-                value: '₹${purchase.totalAmount.toStringAsFixed(2)}'),
+                label: 'Total Paid',
+                value: '₹${purchase.totalAmount.toStringAsFixed(2)}',
+                isBold: true),
             const SizedBox(height: GLSpacing.xl),
+            
             if (purchase.certificateUrl != null) ...[
-              const Divider(),
-              const SizedBox(height: GLSpacing.md),
               Row(
                 children: [
                   Expanded(
                     child: GLButton(
-                      text: 'Download PoR',
-                      icon: Icons.download_rounded,
-                      onPressed: () =>
-                          _openCertificate(context, purchase.certificateUrl!),
+                      text: 'View Certificate',
+                      icon: Icons.description_rounded,
+                      onPressed: () => _openCertificate(context, purchase.certificateUrl!),
                     ),
                   ),
                   const SizedBox(width: GLSpacing.md),
@@ -400,32 +398,69 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                     text: 'Share',
                     icon: Icons.share_rounded,
                     variant: GLButtonVariant.outline,
-                    onPressed: () =>
-                        _shareCertificate(purchase.certificateUrl!),
+                    onPressed: () => _shareCertificate(purchase.certificateUrl!),
                   ),
                 ],
               ),
             ] else
-              Container(
-                padding: const EdgeInsets.all(GLSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  border: Border.all(color: Colors.amber.shade300),
-                  borderRadius: BorderRadius.circular(GLRadius.md),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.hourglass_empty_rounded,
-                        color: Colors.amber.shade700, size: 20),
-                    const SizedBox(width: GLSpacing.sm),
-                    Text('Certificate not yet issued',
-                        style: TextStyle(color: Colors.amber.shade800)),
-                  ],
-                ),
+              GLButton(
+                text: 'Request PoR Certificate',
+                variant: GLButtonVariant.outline,
+                icon: Icons.verified_user_rounded,
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  final state = context.read<RecyclerState>();
+                  final success = await state.requestCertificate({
+                    'purchase': purchase.id,
+                  });
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(success ? 'Certificate requested!' : 'Request failed'),
+                      backgroundColor: success ? Colors.green : Colors.red,
+                    ));
+                  }
+                },
               ),
+            
+            const SizedBox(height: GLSpacing.md),
+            GLButton(
+              text: 'Delete Record',
+              variant: GLButtonVariant.ghost,
+              textColor: Colors.red,
+              onPressed: () {
+                Navigator.pop(ctx);
+                _confirmDeletePurchase(context, purchase);
+              },
+            ),
             const SizedBox(height: GLSpacing.md),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmDeletePurchase(BuildContext context, RecyclerPurchase purchase) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Purchase Record?'),
+        content: const Text('This action cannot be undone. Are you sure?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final success = await context.read<RecyclerState>().deletePurchase(purchase.id!);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(success ? 'Record deleted' : 'Deletion failed'),
+                  backgroundColor: success ? Colors.green : Colors.red,
+                ));
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -536,7 +571,8 @@ class _PurchaseCard extends StatelessWidget {
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
-  const _DetailRow({required this.label, required this.value});
+  final bool isBold;
+  const _DetailRow({required this.label, required this.value, this.isBold = false});
 
   @override
   Widget build(BuildContext context) {
@@ -551,7 +587,7 @@ class _DetailRow extends StatelessWidget {
                   .bodyMedium
                   ?.copyWith(color: Theme.of(context).colorScheme.outline)),
           Text(value,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+              style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
         ],
       ),
     );
