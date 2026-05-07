@@ -50,6 +50,14 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NewPurchaseScreen()),
+        ).then((_) => state.fetchHistory()),
+        label: const Text('New Purchase'),
+        icon: const Icon(Icons.add_shopping_cart_rounded),
+      ),
       body: RefreshIndicator(
         onRefresh: () => Future.wait([
           state.fetchHistory(),
@@ -60,86 +68,108 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-            SliverAppBar(
-              expandedHeight: 200,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        Color.lerp(
-                          theme.colorScheme.primary,
-                          theme.colorScheme.tertiary,
-                          0.35,
-                        ) ?? theme.colorScheme.primary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                SliverAppBar(
+                  expandedHeight: 200,
+                  pinned: true,
+                  backgroundColor: theme.colorScheme.primary,
+                  elevation: 0,
+                  title: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+                      final t = settings != null
+                          ? (1.0 - (settings.currentExtent - settings.minExtent) / (settings.maxExtent - settings.minExtent)).clamp(0.0, 1.0)
+                          : 0.0;
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: t > 0.5 ? 1.0 : 0.0,
+                        child: Text(
+                          'Dashboard',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          GLSpacing.xl, GLSpacing.xl, GLSpacing.xl, GLSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary,
+                            Color.lerp(
+                              theme.colorScheme.primary,
+                              theme.colorScheme.tertiary,
+                              0.35,
+                            ) ??
+                                theme.colorScheme.primary,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(GLSpacing.xl,
+                              GLSpacing.xl, GLSpacing.xl, GLSpacing.lg),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                backgroundColor:
-                                    Colors.white.withValues(alpha: 0.3),
-                                child: const Icon(Icons.recycling_rounded,
-                                    color: Colors.white),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Colors.white.withValues(alpha: 0.3),
+                                    child: const Icon(Icons.recycling_rounded,
+                                        color: Colors.white),
+                                  ),
+                                  const SizedBox(width: GLSpacing.md),
+                                  Text(
+                                    'GreenLoop Recycler',
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: GLSpacing.md),
+                              const Spacer(),
                               Text(
-                                'GreenLoop Recycler',
-                                style: theme.textTheme.titleMedium?.copyWith(
+                                'Welcome back 👋',
+                                style: theme.textTheme.headlineSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const Spacer(),
-                              IconButton(
-                                icon: const Icon(Icons.refresh_rounded,
-                                    color: Colors.white),
-                                onPressed: () => state.fetchDashboard(),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Track your recycling operations below.',
+                                style: theme.textTheme.bodySmall
+                                    ?.copyWith(color: Colors.white70),
                               ),
                             ],
                           ),
-                          const Spacer(),
-                          Text(
-                            'Welcome back 👋',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Track your recycling operations below.',
-                            style: theme.textTheme.bodySmall
-                                ?.copyWith(color: Colors.white70),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                      tooltip: 'Refresh',
+                      onPressed: () => state.fetchDashboard(),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                      tooltip: 'Logout',
+                      onPressed: () => context.read<AuthState>().logout(),
+                    ),
+                  ],
                 ),
-                title: const Text('Dashboard'),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout_rounded, color: Colors.white),
-                  tooltip: 'Logout',
-                  onPressed: () => context.read<AuthState>().logout(),
-                ),
-              ],
-            ),
 
             SliverPadding(
               padding: const EdgeInsets.all(GLSpacing.lg),
@@ -175,18 +205,12 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
                   _buildRecentPurchases(state, context),
                   const SizedBox(height: GLSpacing.xxl),
                 ]),
+                ),
               ),
+              ],
             ),
-        ]  ),
+          ),
         ),
-        )),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const NewPurchaseScreen()),
-        ).then((_) => state.fetchHistory()),
-        label: const Text('New Purchase'),
-        icon: const Icon(Icons.add_shopping_cart_rounded),
       ),
     );
   }
@@ -211,7 +235,7 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
           crossAxisCount: isMobile ? 2 : 4,
           crossAxisSpacing: GLSpacing.md,
           mainAxisSpacing: GLSpacing.md,
-          childAspectRatio: isMobile ? 1.45 : 1.2,
+          childAspectRatio: isMobile ? 1.35 : 1.2,
           physics: const NeverScrollableScrollPhysics(),
           children: [
             _StatCard(
@@ -284,10 +308,14 @@ class _RecyclerDashboardScreenState extends State<RecyclerDashboardScreen> {
 
     if (isMobile) {
       return Row(
-        children: actions.map((a) => Expanded(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: a,
-        ))).toList(),
+        children: actions
+            .map((a) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: GLSpacing.xs),
+                    child: a,
+                  ),
+                ))
+            .toList(),
       );
     }
 
@@ -409,7 +437,9 @@ class _StatCard extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18),
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(label,
                     style: Theme.of(context)
@@ -460,13 +490,19 @@ class _ActionCard extends StatelessWidget {
             const SizedBox(height: GLSpacing.sm),
             Text(label,
                 style: TextStyle(
-                    fontWeight: FontWeight.bold, color: color, fontSize: 12),
+                    fontWeight: FontWeight.bold, color: color, fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center),
             Text(description,
                 style: Theme.of(context)
                     .textTheme
                     .labelSmall
-                    ?.copyWith(color: Theme.of(context).colorScheme.outline),
+                    ?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                        fontSize: 10),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center),
           ],
         ),
