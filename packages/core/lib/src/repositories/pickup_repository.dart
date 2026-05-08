@@ -49,7 +49,7 @@ class PickupRepository {
       return PickupResponse.fromJson(response.data as Map<String, dynamic>);
     } on ConflictException catch (e) {
       // Specifically catch conflict to handle "Suggested Next Date" if provided by backend
-      throw e;
+      rethrow;
     } on ValidationException catch (e) {
       final errorMsg = e.errors != null ? '${e.message} ${e.errors}' : e.message;
       throw Exception(errorMsg);

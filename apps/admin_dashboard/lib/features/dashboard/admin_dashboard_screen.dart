@@ -94,7 +94,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 width: 280,
                 decoration: BoxDecoration(
                   border: Border(
-                    right: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
+                    right: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1)),
                   ),
                 ),
                 child: SidebarDrawer(
@@ -118,7 +118,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             Expanded(
               child: Container(
-                color: theme.scaffoldBackgroundColor.withOpacity(0.95),
+                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.95),
                 child: _buildSectionContent(_sections[_selectedIndex]),
               ),
             ),

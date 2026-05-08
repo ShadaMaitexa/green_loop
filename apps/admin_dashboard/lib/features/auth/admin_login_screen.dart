@@ -60,7 +60,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              colorScheme.secondaryContainer.withOpacity(0.3),
+              colorScheme.secondaryContainer.withValues(alpha: 0.3),
               colorScheme.surface,
             ],
           ),
@@ -76,7 +76,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(GLSpacing.lg),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

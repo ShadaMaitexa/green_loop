@@ -1,7 +1,7 @@
-/// Typed exceptions produced by the GreenLoop API client.
-///
-/// All app code should catch these instead of raw DioException so that
-/// error handling is isolated to one place.
+// Typed exceptions produced by the GreenLoop API client.
+//
+// All app code should catch these instead of raw DioException so that
+// error handling is isolated to one place.
 
 /// Base class — all GreenLoop network errors extend this.
 sealed class ApiException implements Exception {

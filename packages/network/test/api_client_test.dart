@@ -151,7 +151,7 @@ void main() {
       );
     });
 
-    DioException _makeDioError({
+    DioException makeDioError({
       required DioExceptionType type,
       int? statusCode,
       dynamic data,
@@ -170,9 +170,9 @@ void main() {
     }
 
     test('connection timeout → NetworkException', () {
-      // _makeDioError is a helper to create DioExceptions for verifying exception types.
+      // makeDioError is a helper to create DioExceptions for verifying exception types.
       // The mapping itself is exercised by the exception hierarchy tests above.
-      _makeDioError(type: DioExceptionType.connectionTimeout);
+      makeDioError(type: DioExceptionType.connectionTimeout);
       expect(() => throw const NetworkException(), throwsA(isA<NetworkException>()));
     });
 

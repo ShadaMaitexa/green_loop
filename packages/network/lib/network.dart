@@ -1,5 +1,4 @@
-/// Green Loop — network package public API
-library network;
+// Green Loop — network package public API
 
 export 'src/api_client.dart';
 export 'src/environment.dart';

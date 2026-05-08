@@ -9,6 +9,7 @@ dependencies:
   network: ^1.0.0
   data_models: ^1.0.0
   dio: ^5.9.2
+  intl: ^0.20.2
   flutter:
     sdk: flutter
 dev_dependencies:

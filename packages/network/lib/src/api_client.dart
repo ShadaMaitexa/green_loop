@@ -76,8 +76,8 @@ class ApiClient {
 
     // Order matters: token → refresh logic → logging → cache
     dio.interceptors.addAll([
-      AuthInterceptor(this.tokenStorage),
-      RefreshTokenInterceptor(dio: dio, tokenStorage: this.tokenStorage),
+      AuthInterceptor(tokenStorage),
+      RefreshTokenInterceptor(dio: dio, tokenStorage: tokenStorage),
       LoggingInterceptor(debug: environment.isDebug),
       DioCacheInterceptor(options: cacheOptions),
     ]);

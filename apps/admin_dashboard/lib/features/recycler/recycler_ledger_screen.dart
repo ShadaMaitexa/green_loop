@@ -94,9 +94,9 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: GLSpacing.sm),
                   elevation: 0,
-                  color: Colors.orange.withOpacity(0.05),
+                  color: Colors.orange.withValues(alpha: 0.05),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.orange.withOpacity(0.2)),
+                    side: BorderSide(color: Colors.orange.withValues(alpha: 0.2)),
                     borderRadius: BorderRadius.circular(GLSpacing.md),
                   ),
                   child: Padding(
@@ -174,9 +174,9 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
                 final color = _getMaterialColor(m.name);
                 return Card(
                   elevation: 0,
-                  color: color.withOpacity(0.05),
+                  color: color.withValues(alpha: 0.05),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: color.withOpacity(0.2)),
+                    side: BorderSide(color: color.withValues(alpha: 0.2)),
                     borderRadius: BorderRadius.circular(GLSpacing.md),
                   ),
                   child: InkWell(
@@ -261,7 +261,7 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(GLSpacing.md),
-          side: BorderSide(color: Colors.grey.withOpacity(0.1)),
+          side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(GLSpacing.lg),
@@ -270,7 +270,7 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
                 child: Icon(icon, color: color, size: 20),
               ),
               const SizedBox(height: 12),
@@ -290,7 +290,7 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: materialColor.withOpacity(0.1), shape: BoxShape.circle),
+        decoration: BoxDecoration(color: materialColor.withValues(alpha: 0.1), shape: BoxShape.circle),
         child: Icon(_getMaterialIcon(p.materialName ?? ""), color: materialColor, size: 20),
       ),
       title: Row(

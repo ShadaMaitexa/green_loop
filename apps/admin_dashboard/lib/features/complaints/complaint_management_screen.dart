@@ -133,7 +133,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
       elevation: isEscalated ? 4 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(GLSpacing.md),
-        side: isEscalated ? BorderSide(color: Colors.red.withOpacity(0.3), width: 1.5) : BorderSide.none,
+        side: isEscalated ? BorderSide(color: Colors.red.withValues(alpha: 0.3), width: 1.5) : BorderSide.none,
       ),
       child: Padding(
         padding: const EdgeInsets.all(GLSpacing.lg),
@@ -188,7 +188,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
                     size: GLButtonSize.small,
                     onPressed: () => state.advanceStatus(complaint),
                     icon: Icons.arrow_forward_rounded,
-                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    backgroundColor: Colors.blue.withValues(alpha: 0.1),
                     textColor: Colors.blue,
                   ),
               ],
@@ -213,7 +213,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
     final color = priority.flutterColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(4), border: Border.all(color: color.withOpacity(0.5))),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4), border: Border.all(color: color.withValues(alpha: 0.5))),
       child: Text(priority.label.toUpperCase(), style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
@@ -222,7 +222,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
     final color = status.color;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -295,7 +295,7 @@ class _ComplaintManagementScreenState extends State<ComplaintManagementScreen> w
               point: LatLng(cluster['latitude'], cluster['longitude']),
               radius: cluster['density'] * 50.0,
               useRadiusInMeter: true,
-              color: Colors.red.withOpacity(0.3 + (cluster['weight'] * 0.4)),
+              color: Colors.red.withValues(alpha: 0.3 + (cluster['weight'] * 0.4)),
               borderStrokeWidth: 0,
             );
           }).toList(),

@@ -41,7 +41,7 @@ class SidebarDrawer extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: GLSpacing.xs),
                   child: ListTile(
                     selected: isSelected,
-                    selectedTileColor: theme.colorScheme.primaryContainer.withOpacity(0.5),
+                    selectedTileColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(GLSpacing.sm),
                     ),

@@ -179,7 +179,7 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
                       color: theme.colorScheme.primary,
                       barWidth: 4,
                       dotData: const FlDotData(show: true),
-                      belowBarData: BarAreaData(show: true, color: theme.colorScheme.primary.withOpacity(0.1)),
+                      belowBarData: BarAreaData(show: true, color: theme.colorScheme.primary.withValues(alpha: 0.1)),
                     ),
                   ],
                 ),
@@ -274,7 +274,7 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: npsStats.score >= 0 ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    color: npsStats.score >= 0 ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -312,7 +312,7 @@ class _DashboardOverviewScreenState extends State<DashboardOverviewScreen> {
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: _ratingColor(feedback.rating).withOpacity(0.2),
+                      backgroundColor: _ratingColor(feedback.rating).withValues(alpha: 0.2),
                       child: Text('${feedback.rating}', style: TextStyle(color: _ratingColor(feedback.rating), fontWeight: FontWeight.bold)),
                     ),
                     title: Text(feedback.comment?.isNotEmpty == true ? feedback.comment! : 'No comment provided'),

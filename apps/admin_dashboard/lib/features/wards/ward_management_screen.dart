@@ -47,7 +47,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
               width: 350,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
-                border: Border(right: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+                border: Border(right: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1))),
               ),
               child: _buildWardSidebar(context, state),
             ),
@@ -101,7 +101,7 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
                     final isSelected = state.selectedWard?.id == ward.id;
                     return ListTile(
                       selected: isSelected,
-                      selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+                      selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
                       title: Text(ward.nameEn, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(ward.nameMl, style: const TextStyle(fontSize: 12)),
                       trailing: Row(
@@ -144,10 +144,9 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
         final isSelected = state.selectedWard?.id == ward.id;
         polygons.add(Polygon(
           points: ward.boundary!.map((c) => LatLng(c[0], c[1])).toList(),
-          color: (isSelected ? Colors.blue : Colors.green).withOpacity(0.2),
+          color: (isSelected ? Colors.blue : Colors.green).withValues(alpha: 0.2),
           borderColor: isSelected ? Colors.blue : Colors.green,
           borderStrokeWidth: 2,
-          isFilled: true,
         ));
       }
     }
@@ -156,10 +155,9 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
     if (state.pendingPolygon.isNotEmpty) {
       polygons.add(Polygon(
         points: state.pendingPolygon.map((c) => LatLng(c[0], c[1])).toList(),
-        color: Colors.orange.withOpacity(0.3),
+        color: Colors.orange.withValues(alpha: 0.3),
         borderColor: Colors.orange,
         borderStrokeWidth: 3,
-        isFilled: true,
       ));
     }
 

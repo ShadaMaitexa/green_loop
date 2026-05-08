@@ -1,4 +1,3 @@
-library ui_kit;
 
 // Theme Definitions
 export 'src/theme/colors.dart';

@@ -113,12 +113,12 @@ class _CardAndInputShowcase extends StatelessWidget {
             'Elevated Card',
             style: Theme.of(context).textTheme.labelLarge,
           ),
+          footer: GLButton(text: 'Submit Request', onPressed: () {}),
           child: const GLTextField(
             label: 'Waste Type',
             hint: 'E.g., Plastic',
             prefixIcon: Icon(Icons.delete_outline),
           ),
-          footer: GLButton(text: 'Submit Request', onPressed: () {}),
         ),
         const SizedBox(height: GLSpacing.xl),
         GLCard(
@@ -150,7 +150,7 @@ class _BadgeShowcase extends StatelessWidget {
       children: const [
         GLStatusBadge(status: PickupStatus.pending),
         GLStatusBadge(status: PickupStatus.assigned),
-        GLStatusBadge(status: PickupStatus.in_progress),
+        GLStatusBadge(status: PickupStatus.inProgress),
         GLStatusBadge(status: PickupStatus.completed),
         GLStatusBadge(status: PickupStatus.cancelled),
       ],

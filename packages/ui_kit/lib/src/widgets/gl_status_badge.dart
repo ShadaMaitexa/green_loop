@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 
-enum PickupStatus { pending, assigned, in_progress, completed, cancelled }
+enum PickupStatus { pending, assigned, inProgress, completed, cancelled }
 
 /// A unified badge for displaying status text with corresponding semantic colors.
 ///
@@ -54,7 +54,7 @@ class GLStatusBadge extends StatelessWidget {
           bg = Colors.grey;
           labelText = 'Pending';
           break;
-        case PickupStatus.in_progress:
+        case PickupStatus.inProgress:
           bg = GLColors.info;
           labelText = 'In Progress';
           break;

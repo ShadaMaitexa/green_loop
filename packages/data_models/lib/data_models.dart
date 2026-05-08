@@ -1,4 +1,3 @@
-library data_models;
 
 export 'src/ward.dart';
 export 'src/monitoring.dart';

@@ -124,7 +124,7 @@ class _PilotReadinessScreenState extends State<PilotReadinessScreen> {
                 Container(
                   padding: const EdgeInsets.all(GLSpacing.sm),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(GLRadius.md),
                   ),
                   child: Icon(icon, color: color),
@@ -154,9 +154,9 @@ class _PilotReadinessScreenState extends State<PilotReadinessScreen> {
     return Container(
       padding: const EdgeInsets.all(GLSpacing.xl),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(GLRadius.xl),
-        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
+        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [

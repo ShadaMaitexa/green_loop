@@ -120,7 +120,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     Icon(
                       Icons.analytics_rounded,
                       size: 64,
-                      color: theme.colorScheme.outline.withOpacity(0.5),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: GLSpacing.md),
                     Text(

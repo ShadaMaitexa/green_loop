@@ -88,9 +88,8 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       return Polygon(
         points: ward.polygon.map((p) => LatLng(p[0], p[1])).toList(),
         borderStrokeWidth: 2,
-        borderColor: Colors.blue.withOpacity(0.5),
-        color: Colors.blue.withOpacity(0.1),
-        isFilled: true,
+        borderColor: Colors.blue.withValues(alpha: 0.5),
+        color: Colors.blue.withValues(alpha: 0.1),
       );
     }).toList();
   }

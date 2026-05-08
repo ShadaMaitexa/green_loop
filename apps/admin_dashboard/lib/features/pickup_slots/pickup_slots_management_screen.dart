@@ -176,7 +176,7 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                   'is_active': isActive,
                   'wards': selectedWards,
                 });
-                if (success) Navigator.pop(context);
+                if (success && mounted) Navigator.pop(context);
               },
             ),
           ],

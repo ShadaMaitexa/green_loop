@@ -30,6 +30,7 @@ class _RewardSettingsScreenState extends State<RewardSettingsScreen> {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RewardSettingsState>().fetchAll().then((_) {
+        if (!mounted) return;
         final config = context.read<RewardSettingsState>().config;
         if (config != null) {
           _updateControllers(config);
@@ -174,7 +175,7 @@ class _RewardSettingsScreenState extends State<RewardSettingsScreen> {
         streakWeeksRequired: int.parse(_streakWeeksController.text),
       );
       context.read<RewardSettingsState>().updateConfig(newConfig).then((success) {
-        if (success) {
+        if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Configuration updated successfully!')),
           );
@@ -213,7 +214,7 @@ class _RewardSettingsScreenState extends State<RewardSettingsScreen> {
                 pointCost: int.parse(pointController.text),
               );
               context.read<RewardSettingsState>().addReward(newReward).then((_) {
-                Navigator.pop(context);
+                if (mounted) Navigator.pop(context);
               });
             },
             child: const Text('Add'),

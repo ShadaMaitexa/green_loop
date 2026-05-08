@@ -108,7 +108,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         const SizedBox(width: GLSpacing.md),
         Expanded(
           child: DropdownButtonFormField<UserRole>(
-            value: state.filterRole,
+            initialValue: state.filterRole,
             decoration: const InputDecoration(
               labelText: 'Role',
               contentPadding: EdgeInsets.symmetric(horizontal: GLSpacing.md),
@@ -225,7 +225,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getRoleColor(role).withOpacity(0.1),
+        color: _getRoleColor(role).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -329,7 +329,7 @@ class _AddUserDialogState extends State<_AddUserDialog> {
               ),
               const SizedBox(height: GLSpacing.md),
               DropdownButtonFormField<UserRole>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: const InputDecoration(
                   labelText: 'Role',
                   border: OutlineInputBorder(),
@@ -347,7 +347,7 @@ class _AddUserDialogState extends State<_AddUserDialog> {
               ),
               const SizedBox(height: GLSpacing.md),
               DropdownButtonFormField<int>(
-                value: _selectedWardId,
+                initialValue: _selectedWardId,
                 decoration: const InputDecoration(
                   labelText: 'Assign Ward',
                   border: OutlineInputBorder(),
