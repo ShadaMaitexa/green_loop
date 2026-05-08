@@ -370,6 +370,7 @@ class _AddUserDialogState extends State<_AddUserDialog> {
           isLoading: context.watch<UserManagementState>().isLoading,
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
+              final navigator = Navigator.of(context);
               final success = await context.read<UserManagementState>().createUser({
                 'name': _nameController.text,
                 'username': _usernameController.text,
@@ -378,7 +379,7 @@ class _AddUserDialogState extends State<_AddUserDialog> {
                 'role': _selectedRole.toJson(),
                 'ward': _selectedWardId,
               });
-              if (success && mounted && context.mounted) Navigator.pop(context);
+              if (success && mounted) navigator.pop();
             }
           },
         ),

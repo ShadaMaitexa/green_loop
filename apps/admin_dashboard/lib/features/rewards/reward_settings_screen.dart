@@ -206,16 +206,16 @@ class _RewardSettingsScreenState extends State<RewardSettingsScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              final navigator = Navigator.of(context);
               final newReward = Reward(
                 id: DateTime.now().millisecondsSinceEpoch.toString(), // Temporary
                 name: nameController.text,
                 description: descController.text,
                 pointCost: int.parse(pointController.text),
               );
-              context.read<RewardSettingsState>().addReward(newReward).then((_) {
-                if (mounted) Navigator.pop(context);
-              });
+              await context.read<RewardSettingsState>().addReward(newReward);
+              if (mounted) navigator.pop();
             },
             child: const Text('Add'),
           ),

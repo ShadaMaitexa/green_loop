@@ -130,9 +130,10 @@ class _RecyclerLedgerScreenState extends State<RecyclerLedgerScreen> {
                         GLButton(
                           text: 'Verify & Approve',
                           onPressed: () async {
+                            final messenger = ScaffoldMessenger.of(context);
                             final success = await context.read<RecyclerState>().verifyCertificate(cert.id);
                             if (success && mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Certificate verified and status updated to VERIFIED!')));
+                              messenger.showSnackBar(const SnackBar(content: Text('Certificate verified and status updated to VERIFIED!')));
                             }
                           },
                         ),

@@ -275,11 +275,12 @@ class _WardManagementScreenState extends State<WardManagementScreen> {
           GLButton(
             text: 'Save Ward',
             onPressed: () async {
+              final navigator = Navigator.of(context);
               final success = await state.saveWard({
                 'name': nameController.text,
                 'number': int.tryParse(numberController.text) ?? 0,
               });
-              if (success && mounted && context.mounted) Navigator.pop(context);
+              if (success && mounted) navigator.pop();
             },
           ),
         ],

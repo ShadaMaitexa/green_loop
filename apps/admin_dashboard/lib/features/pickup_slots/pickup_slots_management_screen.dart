@@ -75,8 +75,12 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                onPressed: () {
-                                  context.read<PickupSlotsState>().deleteSlot(slot.id); 
+                                onPressed: () async {
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  final success = await context.read<PickupSlotsState>().deleteSlot(slot.id);
+                                  if (success && mounted) {
+                                    messenger.showSnackBar(const SnackBar(content: Text('Slot deleted successfully')));
+                                  }
                                 },
                               ),
                             );
@@ -169,6 +173,7 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                   return;
                 }
                 
+                final navigator = Navigator.of(context);
                 final success = await context.read<PickupSlotsState>().createSlot({
                   'label': labelController.text,
                   'time_range': timeRangeController.text,
@@ -176,7 +181,7 @@ class _PickupSlotsManagementScreenState extends State<PickupSlotsManagementScree
                   'is_active': isActive,
                   'wards': selectedWards,
                 });
-                if (success && mounted) Navigator.pop(context);
+                if (success && mounted) navigator.pop();
               },
             ),
           ],
