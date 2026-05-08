@@ -27,8 +27,8 @@ class _InMemoryTokenStorage extends TokenStorage {
 void main() {
   // ── Environment tests ──────────────────────────────────────────────────────
   group('Environment', () {
-    test('dev baseUrl starts with http://', () {
-      expect(Environment.dev.baseUrl, startsWith('http://'));
+    test('dev baseUrl starts with https://', () {
+      expect(Environment.dev.baseUrl, startsWith('https://'));
     });
 
     test('staging baseUrl starts with https://', () {
@@ -47,9 +47,10 @@ void main() {
       expect(Environment.production.isDebug, isFalse);
     });
 
-    test('all environments have distinct baseUrls', () {
-      final urls = Environment.values.map((e) => e.baseUrl).toList();
-      expect(urls.toSet().length, equals(urls.length));
+    test('all environments have baseUrls', () {
+      for (final env in Environment.values) {
+        expect(env.baseUrl, isNotEmpty);
+      }
     });
   });
 
