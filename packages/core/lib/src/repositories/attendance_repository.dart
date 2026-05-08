@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:network/network.dart';
 import 'package:data_models/data_models.dart';
 
@@ -22,30 +25,30 @@ class AttendanceRepository {
     }
   }
 
-  /// Submits worker check-in with selfie URL, GPS, and individual PPE status.
+  /// Submits worker check-in with selfie file, GPS, and individual PPE status.
   Future<AttendanceRecord> checkIn({
-    required String selfieUrl,
+    required File selfieFile,
     required double latitude,
     required double longitude,
     required Map<String, bool> ppeStatus,
   }) async {
     try {
-      final response = await _apiClient.post(_attendancePath, data: {
-        'type': 'Feature',
-        'geometry': {
+      final formData = FormData.fromMap({
+        'has_gloves': (ppeStatus['gloves'] ?? false).toString(),
+        'has_mask': (ppeStatus['mask'] ?? false).toString(),
+        'has_vest': (ppeStatus['vest'] ?? false).toString(),
+        'has_boots': (ppeStatus['boots'] ?? false).toString(),
+        'check_in_location': jsonEncode({
           'type': 'Point',
-          'coordinates': [longitude, latitude], // GeoJSON [lng, lat]
-        },
-        'properties': {
-          'ppe_photo_url': selfieUrl,
-          'has_gloves': ppeStatus['gloves'] ?? false,
-          'has_mask': ppeStatus['mask'] ?? false,
-          'has_vest': ppeStatus['vest'] ?? false,
-          'has_boots': ppeStatus['boots'] ?? false,
-          'status': 'PRESENT',
-          'check_in_time': DateTime.now().toIso8601String(),
-        },
+          'coordinates': [longitude, latitude],
+        }),
+        'ppe_selfie': await MultipartFile.fromFile(
+          selfieFile.path,
+          filename: 'selfie_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        ),
       });
+
+      final response = await _apiClient.postForm(_attendancePath, formData: formData);
       return AttendanceRecord.fromJson(response.data as Map<String, dynamic>);
     } on ApiException catch (e) {
       if (e.statusCode == 409) {

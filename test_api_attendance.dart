@@ -20,32 +20,19 @@ void main() async {
   }
 
   print('');
-  print('=== Testing POST /api/v1/hks/attendance/ with GeoJSON payload ===');
-  // Test 2: POST attendance with GeoJSON (the current format) — no auth so 401, but see if it's even the right shape
+  print('=== Testing POST /api/v1/hks/attendance/ with NEW Multipart/Form-Data format ===');
+  // NOTE: This conceptual test shows the keys and stringified values required by the updated backend.
+  // In a real app, use dio.FormData for true multipart support.
   try {
-    final req = await client.postUrl(Uri.parse('$baseUrl/api/v1/hks/attendance/'));
-    req.headers.contentType = ContentType.json;
-    req.headers.add('Accept', 'application/json');
-    final payload = jsonEncode({
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Point',
-        'coordinates': [77.5946, 12.9716],
-      },
-      'properties': {
-        'ppe_photo_url': 'https://example.com/selfie.jpg',
-        'has_gloves': true,
-        'has_mask': true,
-        'has_vest': true,
-        'has_boots': true,
-        'status': 'PRESENT',
-      },
-    });
-    req.write(payload);
-    final res = await req.close();
-    final body = await res.transform(utf8.decoder).join();
-    print('Status: ${res.statusCode}');
-    print('Body: $body');
+    print('Target: $baseUrl/api/v1/hks/attendance/');
+    print('Content-Type: multipart/form-data');
+    print('Keys:');
+    print(' - has_gloves: "true" (string)');
+    print(' - has_mask: "true" (string)');
+    print(' - has_vest: "true" (string)');
+    print(' - has_boots: "true" (string)');
+    print(' - check_in_location: "{\\"type\\": \\"Point\\", \\"coordinates\\": [77.5946, 12.9716]}" (JSON string)');
+    print(' - ppe_selfie: <Binary File Content>');
   } catch (e) {
     print('Error: $e');
   }

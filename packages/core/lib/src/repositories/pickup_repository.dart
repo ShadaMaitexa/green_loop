@@ -47,7 +47,7 @@ class PickupRepository {
         data: request.toJson(),
       );
       return PickupResponse.fromJson(response.data as Map<String, dynamic>);
-    } on ConflictException catch (e) {
+    } on ConflictException {
       // Specifically catch conflict to handle "Suggested Next Date" if provided by backend
       rethrow;
     } on ValidationException catch (e) {
